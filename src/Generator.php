@@ -145,8 +145,9 @@ class Generator
         } else if ($type == self::CREATE_INTERFACE) {
             $this->createInterface();
         } else if (($type == self::CREATE_EMPTY) && file_exists($file)) {
-            $this->body = str_replace('<?php', '', file_get_contents($file));
-            $this->body = trim(str_replace('?>', '', $this->body)) . PHP_EOL . PHP_EOL;
+            $body = str_replace('<?php', '', file_get_contents($file));
+            $body = trim(str_replace('?>', '', $body)) . PHP_EOL;
+            $this->setBody($body);
         }
     }
 
@@ -183,15 +184,25 @@ class Generator
     }
 
     /**
-     * Set the code close flag
+     * Set the code close tag flag
      *
      * @param  boolean $close
      * @return Generator
      */
-    public function setClose($close = false)
+    public function setCloseTag($close = false)
     {
         $this->close = (boolean)$close;
         return $this;
+    }
+
+    /**
+     * Get the code close tag flag
+     *
+     * @return boolean
+     */
+    public function hasCloseTag()
+    {
+        return $this->close;
     }
 
     /**
