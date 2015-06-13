@@ -99,7 +99,7 @@ class CodeTest extends \PHPUnit_Framework_TestCase
         $code->save(null, true);
         $this->assertTrue(file_exists(__DIR__ . '/foo.php'));
         $this->assertContains("echo 'Hello World!';", file_get_contents(__DIR__ . '/foo.php'));
-        
+
         unlink(__DIR__ . '/foo.php');
     }
 
