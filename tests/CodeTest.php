@@ -9,12 +9,12 @@ class CodeTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $code = new Code\Generator(__DIR__ . '/tmp/hello.php');
+        $code = new Code\Generator(__DIR__ . '/TestAsset/hello.php');
         $code->appendToBody("echo 'Hello Back!';");
         $this->assertInstanceOf('Pop\Code\Generator', $code);
         $this->assertContains("echo 'Hello World!';", $code->getBody());
         $this->assertContains("echo 'Hello Back!';", $code->getBody());
-        $this->assertEquals(__DIR__ . '/tmp/hello.php', $code->getFullpath());
+        $this->assertEquals(__DIR__ . '/TestAsset/hello.php', $code->getFullpath());
     }
 
     public function testCreateClass()
@@ -59,7 +59,7 @@ class CodeTest extends \PHPUnit_Framework_TestCase
 
     public function testRead()
     {
-        $code = new Code\Generator(__DIR__ . '/tmp/hello.php');
+        $code = new Code\Generator(__DIR__ . '/TestAsset/hello.php');
         $this->assertContains("echo 'Hello World!';", $code->read());
         $this->assertEquals('Hello World!', $code->read(12, 12));
     }

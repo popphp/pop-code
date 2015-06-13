@@ -31,10 +31,16 @@ class Reflection extends \ReflectionClass
 {
 
     /**
-     * Code to reflect
+     * Class string to reflect
      * @var string
      */
-    protected $code = null;
+    protected $classString = null;
+
+    /**
+     * Object instance to reflect
+     * @var Object
+     */
+    protected $objectInstance = null;
 
     /**
      * Code generator object
@@ -47,28 +53,63 @@ class Reflection extends \ReflectionClass
      *
      * Instantiate the code reflection object
      *
-     * @param  string  $code
+     * @param  mixed $class
      * @return Reflection
      */
-    public function __construct($code)
+    public function __construct($class)
     {
-        $this->code = $code;
-        parent::__construct($code);
+        if (is_string($class)) {
+            $this->classString = $class;
+        } else {
+            $this->objectInstance = $class;
+            $this->classString    = get_class($class);
+        }
+        parent::__construct($class);
         $this->buildGenerator();
     }
 
     /**
-     * Get the code string
+     * Get the class string
      *
      * @return string
      */
-    public function code()
+    public function getClassString()
     {
-        return $this->code;
+        return $this->classString;
     }
 
     /**
-     * Get the code generator
+     * Get the object instance
+     *
+     * @return string
+     */
+    public function getObjectInstance()
+    {
+        return $this->objectInstance;
+    }
+
+    /**
+     * Determine if the argument passed was a class string
+     *
+     * @return boolean
+     */
+    public function isClassString()
+    {
+        return (null === $this->objectInstance);
+    }
+
+    /**
+     * Determine if the argument passed was an object instance
+     *
+     * @return boolean
+     */
+    public function isObjectInstance()
+    {
+        return (null !== $this->objectInstance);
+    }
+
+    /**
+     * Get the generator
      *
      * @return Generator
      */
