@@ -81,7 +81,7 @@ class FunctionGenerator implements GeneratorInterface
      */
     public function __construct($name, $func = null)
     {
-        $this->name = $name;
+        $this->setName($name);
         if (null !== $func) {
             $this->parseFunction($func);
         }

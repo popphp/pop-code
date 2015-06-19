@@ -81,8 +81,8 @@ class InterfaceGenerator implements GeneratorInterface
      */
     public function __construct($name, $parent = null)
     {
-        $this->name   = $name;
-        $this->parent = $parent;
+        $this->setName($name);
+        $this->setParent($parent);
     }
 
     /**

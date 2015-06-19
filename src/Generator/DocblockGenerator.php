@@ -63,8 +63,8 @@ class DocblockGenerator implements GeneratorInterface
      */
     public function __construct($desc = null, $indent = null)
     {
-        $this->desc   = $desc;
-        $this->indent = $indent;
+        $this->setDesc($desc);
+        $this->setIndent($indent);
     }
 
     /**

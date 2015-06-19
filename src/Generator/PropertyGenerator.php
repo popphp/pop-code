@@ -89,10 +89,10 @@ class PropertyGenerator implements GeneratorInterface
      */
     public function __construct($name, $type, $value = null, $visibility = 'public')
     {
-        $this->type       = $type;
-        $this->name       = $name;
-        $this->value      = $value;
-        $this->visibility = $visibility;
+        $this->setName($name);
+        $this->setType($type);
+        $this->setValue($value);
+        $this->setVisibility($visibility);
     }
 
     /**

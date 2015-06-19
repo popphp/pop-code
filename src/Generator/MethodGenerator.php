@@ -106,9 +106,9 @@ class MethodGenerator implements GeneratorInterface
      */
     public function __construct($name, $visibility = 'public', $static = false)
     {
-        $this->name       = $name;
-        $this->visibility = $visibility;
-        $this->static     = (boolean)$static;
+        $this->setName($name);
+        $this->setVisibility($visibility);
+        $this->setStatic($static);
     }
 
     /**

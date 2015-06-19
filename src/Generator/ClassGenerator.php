@@ -101,10 +101,14 @@ class ClassGenerator implements GeneratorInterface
      */
     public function __construct($name, $parent = null, $interface = null, $abstract = false)
     {
-        $this->name      = $name;
-        $this->parent    = $parent;
-        $this->interface = $interface;
-        $this->abstract  = (boolean)$abstract;
+        $this->setName($name);
+        if (null !== $parent) {
+            $this->setParent($parent);
+        }
+        if (null !== $interface) {
+            $this->setInterface($interface);
+        }
+        $this->setAbstract($abstract);
     }
 
     /**

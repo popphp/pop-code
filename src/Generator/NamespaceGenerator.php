@@ -69,7 +69,7 @@ class NamespaceGenerator implements GeneratorInterface
 
     public function __construct($namespace)
     {
-        $this->namespace = $namespace;
+        $this->setNamespace($namespace);
     }
 
     /**
