@@ -47,10 +47,9 @@ $class->save();
 echo $class;
 ```
 
-Echoing the $class object out will result in:
+##### Echoing the $class object out will result in:
 
 ```php
-<?php
 <?php
 /**
  * @namespace 
@@ -77,3 +76,68 @@ class MyClass
 
 }
 ```
+
+### Parse an existing class and add a method to it
+
+In this example, we use the class that we created above. The reflection object provides
+you with a code generator object like the one above so that you can add or remove things
+from the parsed code.
+
+```php
+use Pop\Code\Generator;
+use Pop\Code\Reflection;
+
+$class = new Reflection('MyApp\MyClass');
+
+$method = new Generator\MethodGenerator('hasFoo', 'public');
+$method->addArgument('foo')
+       ->setBody('return (null !== $this->foo);')
+       ->setDesc('This is the method to see if foo is set.');
+
+// Access the generator and it's code object to add the method to it
+$reflect->generator()->code()->addMethod($method);
+
+// Echo out the code
+echo $reflect->generator();
+```
+
+##### Echoing the code object above out will result in:
+
+```php
+<?php
+/**
+ * @namespace 
+ */
+namespace MyApp;
+
+class MyClass implements 
+{
+
+    /**
+     * 
+     * @var   string
+     */
+    protected $foo = 'bar';
+
+
+    /**
+     */
+    public function setFoo($foo)
+    {
+        $this->foo = $foo;
+    }
+
+
+    /**
+     * This is the method to see if foo is set.
+     */
+    public function hasFoo($foo)
+    {
+        return (null !== $this->foo);
+
+    }
+
+}
+```
+
+As you can see, the new method was appended to the class.
