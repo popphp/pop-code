@@ -47,7 +47,7 @@ $class->save();
 echo $class;
 ```
 
-##### Echoing the $class object out will result in:
+##### The newly created class will look like:
 
 ```php
 <?php
@@ -89,19 +89,20 @@ use Pop\Code\Reflection;
 
 $class = new Reflection('MyApp\MyClass');
 
+// Create the new method that you want to add to the existing class
 $method = new Generator\MethodGenerator('hasFoo', 'public');
 $method->addArgument('foo')
        ->setBody('return (null !== $this->foo);')
        ->setDesc('This is the method to see if foo is set.');
 
-// Access the generator and it's code object to add the method to it
+// Access the generator and it's code object to add the new method to it
 $reflect->generator()->code()->addMethod($method);
 
 // Echo out the code
 echo $reflect->generator();
 ```
 
-##### Echoing the code object above out will result in:
+##### The modified class will look like:
 
 ```php
 <?php
