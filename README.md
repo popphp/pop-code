@@ -1,17 +1,19 @@
-Pop Code
+pop-code
 ========
 
 [![Build Status](https://travis-ci.org/popphp/pop-code.svg?branch=master)](https://travis-ci.org/popphp/pop-code)
 
 OVERVIEW
 --------
-Pop Code is a component of the Pop PHP Framework 2. It provides the ability to dynamically generate
-PHP code on the fly as well as parse and modify existing PHP code.
+`pop-code` provides the ability to dynamically generate PHP code on the fly
+as well as parse and modify existing PHP code.
+
+`pop-code` is a component of the [Pop PHP Framework](http://www.popphp.org/).
 
 INSTALL
 -------
 
-Install `Pop Code` using Composer.
+Install `pop-code` using Composer.
 
     composer require popphp/pop-code
 
