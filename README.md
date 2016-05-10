@@ -2,7 +2,7 @@ pop-code
 ========
 
 [![Build Status](https://travis-ci.org/popphp/pop-code.svg?branch=master)](https://travis-ci.org/popphp/pop-code)
-[![Coverage Status](http://www.popphp.org/cc/coverage.php?comp=pop-code)](http://www.popphp.org/cc/pop-code/)
+[![Coverage Status](http://cc.popphp.org/coverage.php?comp=pop-code)](http://cc.popphp.org/pop-code/)
 
 OVERVIEW
 --------
@@ -55,7 +55,7 @@ echo $class;
 ```php
 <?php
 /**
- * @namespace 
+ * @namespace
  */
 namespace MyApp;
 
@@ -110,15 +110,15 @@ echo $reflect->generator();
 ```php
 <?php
 /**
- * @namespace 
+ * @namespace
  */
 namespace MyApp;
 
-class MyClass implements 
+class MyClass implements
 {
 
     /**
-     * 
+     *
      * @var   string
      */
     protected $foo = 'bar';
