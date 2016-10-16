@@ -17,11 +17,11 @@ namespace Pop\Code\Generator;
  * Class generator code class
  *
  * @category   Pop
- * @package    Pop_Code
+ * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2016 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    2.1.0
+ * @version    3.0.0
  */
 class ClassGenerator implements GeneratorInterface
 {
@@ -95,7 +95,6 @@ class ClassGenerator implements GeneratorInterface
      * @param  string  $parent
      * @param  string  $interface
      * @param  boolean $abstract
-     * @return ClassGenerator
      */
     public function __construct($name, $parent = null, $interface = null, $abstract = false)
     {

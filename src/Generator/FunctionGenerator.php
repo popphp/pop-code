@@ -17,11 +17,11 @@ namespace Pop\Code\Generator;
  * Function generator code class
  *
  * @category   Pop
- * @package    Pop_Code
+ * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2016 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    2.1.0
+ * @version    3.0.0
  */
 class FunctionGenerator implements GeneratorInterface
 {
@@ -75,7 +75,6 @@ class FunctionGenerator implements GeneratorInterface
      *
      * @param  string $name
      * @param  mixed  $func
-     * @return FunctionGenerator
      */
     public function __construct($name, $func = null)
     {
@@ -228,7 +227,7 @@ class FunctionGenerator implements GeneratorInterface
      * Set the docblock generator object
      *
      * @param  DocblockGenerator $docblock
-     * @return ClassGenerator
+     * @return FunctionGenerator
      */
     public function setDocblock(DocblockGenerator $docblock)
     {

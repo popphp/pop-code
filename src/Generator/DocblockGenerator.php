@@ -17,11 +17,11 @@ namespace Pop\Code\Generator;
  * Docblock generator code class
  *
  * @category   Pop
- * @package    Pop_Code
+ * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2016 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    2.1.0
+ * @version    3.0.0
  */
 class DocblockGenerator implements GeneratorInterface
 {
@@ -57,7 +57,6 @@ class DocblockGenerator implements GeneratorInterface
      *
      * @param  string $desc
      * @param  string $indent
-     * @return DocblockGenerator
      */
     public function __construct($desc = null, $indent = null)
     {

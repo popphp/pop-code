@@ -80,7 +80,7 @@ class DocblockTest extends \PHPUnit_Framework_TestCase
 
     public function testParseException()
     {
-        $this->setExpectedException('Pop\Code\Generator\Exception');
+        $this->expectException('Pop\Code\Generator\Exception');
         $doc = Generator\DocblockGenerator::parse('bad docblock');
     }
 

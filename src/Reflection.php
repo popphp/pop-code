@@ -19,11 +19,11 @@ use Pop\Code\Generator;
  * Reflection code class
  *
  * @category   Pop
- * @package    Pop_Code
+ * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2016 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    2.1.0
+ * @version    3.0.0
  */
 class Reflection extends \ReflectionClass
 {
@@ -52,7 +52,6 @@ class Reflection extends \ReflectionClass
      * Instantiate the code reflection object
      *
      * @param  mixed $class
-     * @return Reflection
      */
     public function __construct($class)
     {

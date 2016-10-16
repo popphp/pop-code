@@ -17,11 +17,11 @@ namespace Pop\Code\Generator;
  * Interface generator code class
  *
  * @category   Pop
- * @package    Pop_Code
+ * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2016 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    2.1.0
+ * @version    3.0.0
  */
 class InterfaceGenerator implements GeneratorInterface
 {
@@ -75,7 +75,6 @@ class InterfaceGenerator implements GeneratorInterface
      *
      * @param  string  $name
      * @param  string  $parent
-     * @return InterfaceGenerator
      */
     public function __construct($name, $parent = null)
     {
@@ -153,7 +152,7 @@ class InterfaceGenerator implements GeneratorInterface
      * Set the namespace generator object
      *
      * @param  NamespaceGenerator $namespace
-     * @return ClassGenerator
+     * @return InterfaceGenerator
      */
     public function setNamespace(NamespaceGenerator $namespace)
     {
@@ -175,7 +174,7 @@ class InterfaceGenerator implements GeneratorInterface
      * Set the docblock generator object
      *
      * @param  DocblockGenerator $docblock
-     * @return ClassGenerator
+     * @return InterfaceGenerator
      */
     public function setDocblock(DocblockGenerator $docblock)
     {
@@ -197,7 +196,7 @@ class InterfaceGenerator implements GeneratorInterface
      * Add a class method
      *
      * @param  MethodGenerator $method
-     * @return ClassGenerator
+     * @return InterfaceGenerator
      */
     public function addMethod(MethodGenerator $method)
     {
@@ -221,7 +220,7 @@ class InterfaceGenerator implements GeneratorInterface
      * Remove a method property
      *
      * @param  mixed $method
-     * @return ClassGenerator
+     * @return InterfaceGenerator
      */
     public function removeMethod($method)
     {
