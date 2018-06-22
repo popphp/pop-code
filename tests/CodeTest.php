@@ -36,6 +36,15 @@ class CodeTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($code->hasCloseTag());
     }
 
+    public function testEnv()
+    {
+        $code = new Code\Generator('foo.php');
+        $code->setEnv('#!/usr/bin/php');
+        $this->assertEquals('#!/usr/bin/php', $code->getEnv());
+        $this->assertTrue($code->hasEnv());
+        $this->assertContains('#!/usr/bin/php', $code->render(true));
+    }
+
     public function testSetAndGetIndent()
     {
         $code = new Code\Generator('foo.php');

@@ -111,6 +111,12 @@ class Generator
     protected $close = false;
 
     /**
+     * Environment setting
+     * @var string
+     */
+    protected $env = null;
+
+    /**
      * Array of allowed file types.
      * @var array
      */
@@ -193,13 +199,45 @@ class Generator
     }
 
     /**
-     * Get the code close tag flag
+     * Determine if the code close tag flag is set
      *
      * @return boolean
      */
     public function hasCloseTag()
     {
         return $this->close;
+    }
+
+    /**
+     * Set the environment
+     *
+     * @param  string $env
+     * @return Generator
+     */
+    public function setEnv($env = null)
+    {
+        $this->env = $env;
+        return $this;
+    }
+
+    /**
+     * Get the environment
+     *
+     * @return string
+     */
+    public function getEnv()
+    {
+        return $this->env;
+    }
+
+    /**
+     * Determine if the environment is set
+     *
+     * @return boolean
+     */
+    public function hasEnv()
+    {
+        return (null !== $this->env);
     }
 
     /**
@@ -362,7 +400,13 @@ class Generator
      */
     public function render($ret = false)
     {
-        $this->output = '<?php' . PHP_EOL;
+        $this->output = '';
+
+        if (null !== $this->env) {
+            $this->output .= $this->env . PHP_EOL;
+        }
+
+        $this->output .= '<?php' . PHP_EOL;
         $this->output .= (null !== $this->docblock) ? $this->docblock->render(true) . PHP_EOL : null;
 
         if (null !== $this->namespace) {
