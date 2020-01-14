@@ -49,6 +49,12 @@ class Generator extends Generator\AbstractGenerator
     protected $close = false;
 
     /**
+     * Code filename
+     * @var string
+     */
+    protected $filename = null;
+
+    /**
      * Constructor
      *
      * Instantiate the code generator object
@@ -72,6 +78,16 @@ class Generator extends Generator\AbstractGenerator
     {
         $this->code = $code;
         return $this;
+    }
+
+    /**
+     * Has code generator object
+     *
+     * @return boolean
+     */
+    public function hasCode()
+    {
+        return (null !== $this->code);
     }
 
     /**
@@ -107,6 +123,16 @@ class Generator extends Generator\AbstractGenerator
     }
 
     /**
+     * Determine if the code close tag flag is set
+     *
+     * @return boolean
+     */
+    public function hasCloseTag()
+    {
+        return $this->close;
+    }
+
+    /**
      * Set the environment
      *
      * @param  string $env
@@ -139,13 +165,35 @@ class Generator extends Generator\AbstractGenerator
     }
 
     /**
-     * Determine if the code close tag flag is set
+     * Set the filename
+     *
+     * @param  string $filename
+     * @return Generator
+     */
+    public function setFilename($filename)
+    {
+        $this->filename = $filename;
+        return $this;
+    }
+
+    /**
+     * Has filename
      *
      * @return boolean
      */
-    public function hasCloseTag()
+    public function hasFilename()
     {
-        return $this->close;
+        return (null !== $this->filename);
+    }
+
+    /**
+     * Get filename
+     *
+     * @return string
+     */
+    public function getFilename()
+    {
+        return $this->filename;
     }
 
     /**
@@ -215,11 +263,19 @@ class Generator extends Generator\AbstractGenerator
     /**
      * Write to file
      *
-     * @param  string  $filename
+     * @param  string $filename
+     * @throws Exception
      * @return void
      */
-    public function writeToFile($filename)
+    public function writeToFile($filename = null)
     {
+        if ((null !== $this->filename) && (null === $filename)) {
+            $filename = $this->filename;
+        }
+        if (empty($filename)) {
+            throw new Exception('Error: The filename has not been set.');
+        }
+
         file_put_contents($filename, $this->render());
     }
 
@@ -231,8 +287,15 @@ class Generator extends Generator\AbstractGenerator
      * @param  array   $headers
      * @return void
      */
-    public function outputToHttp($filename = 'code.php', $forceDownload = false, array $headers = [])
+    public function outputToHttp($filename = null, $forceDownload = false, array $headers = [])
     {
+        if ((null !== $this->filename) && (null === $filename)) {
+            $filename = $this->filename;
+        }
+        if (empty($filename)) {
+            $filename = 'code.php';
+        }
+
         $headers['Content-Type']        = 'text/plain';
         $headers['Content-Disposition'] = (($forceDownload) ? 'attachment; ' : null) . 'filename=' . $filename;
 

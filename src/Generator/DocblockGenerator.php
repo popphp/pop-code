@@ -91,7 +91,7 @@ class DocblockGenerator extends AbstractGenerator
      * @param  string $desc
      * @return DocblockGenerator
      */
-    public function setTag($name, $desc = null)
+    public function addTag($name, $desc = null)
     {
         $this->tags[$name] = $desc;
         return $this;
@@ -103,7 +103,7 @@ class DocblockGenerator extends AbstractGenerator
      * @param  array $tags
      * @return DocblockGenerator
      */
-    public function setTags(array $tags)
+    public function addTags(array $tags)
     {
         foreach ($tags as $name => $desc) {
             $this->tags[$name] = $desc;
@@ -141,7 +141,7 @@ class DocblockGenerator extends AbstractGenerator
      * @param  string $desc
      * @return DocblockGenerator
      */
-    public function setParam($type = null, $var = null, $desc = null)
+    public function addParam($type = null, $var = null, $desc = null)
     {
         $this->tags['param'][] = ['type' => $type, 'var' => $var, 'desc' => $desc];
         return $this;
@@ -153,7 +153,7 @@ class DocblockGenerator extends AbstractGenerator
      * @param  array $params
      * @return DocblockGenerator
      */
-    public function setParams(array $params)
+    public function addParams(array $params)
     {
         $params = (isset($params[0]) && is_array($params[0])) ? $params : [$params];
         foreach ($params as $param) {
@@ -215,98 +215,6 @@ class DocblockGenerator extends AbstractGenerator
     public function hasReturn()
     {
         return (isset($this->tags['return']));
-    }
-
-    /**
-     * Static method to parse a docblock string and return a new
-     * docblock generator object.
-     *
-     * @param  string $docblock
-     * @param  int    $forceIndent
-     * @throws Exception
-     * @return DocblockGenerator
-     */
-    public static function parse($docblock, $forceIndent = null)
-    {
-        if ((strpos($docblock, '/*') === false) || (strpos($docblock, '*/') === false)) {
-            throw new Exception('The docblock is not in the correct format.');
-        }
-
-        $desc          = null;
-        $formattedDesc = null;
-        $indent        = null;
-        $tags          = null;
-
-        // Parse the description, if any
-        if (strpos($docblock, '@') !== false) {
-            $desc    = substr($docblock, 0, strpos($docblock, '@'));
-            $desc    = str_replace('/*', '', $desc);
-            $desc    = str_replace('*/', '', $desc);
-            $desc    = str_replace(PHP_EOL . ' * ', ' ', $desc);
-            $desc    = trim(str_replace('*', '', $desc));
-            $descAry = explode("\n", $desc);
-
-            $formattedDesc = null;
-            foreach ($descAry as $line) {
-                $formattedDesc .= ' ' . trim($line);
-            }
-
-            $formattedDesc = trim($formattedDesc);
-        }
-
-        // Get the indentation, if any, and create docblock object
-        $indent      = (empty($forceIndent)) ? strlen(substr($docblock, 0, strpos($docblock, '/'))) : $forceIndent;
-        $newDocblock = new self($formattedDesc, $indent);
-
-        // Get the tags, if any
-        if (strpos($docblock, '@') !== false) {
-            $tags    = substr($docblock, strpos($docblock, '@'));
-            $tags    = substr($tags, 0, strpos($tags, '*/'));
-            $tags    = str_replace('*', '', $tags);
-            $tagsAry = explode("\n", $tags);
-
-            foreach ($tagsAry as $key => $value) {
-                $value = trim(str_replace('@', '', $value));
-                // Param tags
-                if (stripos($value, 'param') !== false) {
-                    $paramTag  = trim(str_replace('param', '', $value));
-                    $paramType = trim(substr($paramTag, 0, strpos($paramTag, ' ')));
-                    $varName   = null;
-                    $paramDesc = null;
-                    if (strpos($paramTag, ' ') !== false) {
-                        $varName = trim(substr($paramTag, strpos($paramTag, ' ')));
-                        if (strpos($varName, ' ') !== false) {
-                            $paramDesc = trim(substr($varName, strpos($varName, ' ')));
-                        }
-                    } else {
-                        $paramType = $paramTag;
-                    }
-                    $newDocblock->setParam($paramType, $varName, $paramDesc);
-                    // Else, return tags
-                } else if (stripos($value, 'return') !== false) {
-                    $returnTag = trim(str_replace('return', '', $value));
-                    if (strpos($returnTag, ' ') !== false) {
-                        $returnType = substr($returnTag, 0, strpos($returnTag, ' '));
-                        $returnDesc = trim(str_replace($returnType, '', $returnTag));
-                    } else {
-                        $returnType = $returnTag;
-                        $returnDesc = null;
-                    }
-                    $newDocblock->setReturn($returnType, $returnDesc);
-                    // Else, all other tags
-                } else {
-                    $tagName = trim(substr($value, 0, strpos($value, ' ')));
-                    $tagDesc = trim(str_replace($tagName, '', $value));
-                    if (!empty($tagName) && !empty($tagDesc)) {
-                        $newDocblock->setTag($tagName, $tagDesc);
-                    } else {
-                        unset($tagsAry[$key]);
-                    }
-                }
-            }
-        }
-
-        return $newDocblock;
     }
 
     /**

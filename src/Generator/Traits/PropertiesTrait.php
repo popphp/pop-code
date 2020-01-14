@@ -35,6 +35,21 @@ trait PropertiesTrait
     protected $properties = [];
 
     /**
+     * Add class properties
+     *
+     * @param  array $properties
+     * @return PropertiesTrait
+     */
+    public function addProperties(array $properties)
+    {
+        foreach ($properties as $property) {
+            $this->addProperty($property);
+        }
+
+        return $this;
+    }
+
+    /**
      * Add a class property
      *
      * @param  PropertyGenerator $property

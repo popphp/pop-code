@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class TraitGenerator extends AbstractClassGenerator
 {
 
-    use Traits\PropertiesTrait;
+    use Traits\UseTrait, Traits\PropertiesTrait;
 
     /**
      * Constructor
@@ -51,11 +51,41 @@ class TraitGenerator extends AbstractClassGenerator
         $this->output .= 'trait ' . $this->name;
 
         $this->output .= PHP_EOL . '{';
+
+        if ($this->hasUses()) {
+            $this->output .= PHP_EOL;
+            foreach ($this->uses as $ns => $as) {
+                $this->output .= $this->printIndent() . 'use ';
+                $this->output .= $ns;
+                if (null !== $as) {
+                    $this->output .= ' as ' . $as;
+                }
+                $this->output .= ';' . PHP_EOL;
+            }
+        }
+
+        $this->output .= $this->formatConstants() . PHP_EOL;
         $this->output .= $this->formatProperties() . PHP_EOL;
         $this->output .= $this->formatMethods() . PHP_EOL;
         $this->output .= '}' . PHP_EOL;
 
         return $this->output;
+    }
+
+    /**
+     * Format the constants
+     *
+     * @return string
+     */
+    protected function formatConstants()
+    {
+        $constants = null;
+
+        foreach ($this->constants as $constant) {
+            $constants .= PHP_EOL . $constant->render();
+        }
+
+        return $constants;
     }
 
     /**

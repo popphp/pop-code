@@ -14,7 +14,7 @@
 namespace Pop\Code\Generator;
 
 /**
- * Property generator class
+ * Constant generator class
  *
  * @category   Pop
  * @package    Pop\Code
@@ -23,19 +23,19 @@ namespace Pop\Code\Generator;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    4.0.0
  */
-class PropertyGenerator extends AbstractClassElementGenerator
+class ConstantGenerator extends AbstractClassElementGenerator
 {
 
     use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
-     * Property type
+     * Constant type
      * @var string
      */
     protected $type = null;
 
     /**
-     * Property value
+     * Constant value
      * @var mixed
      */
     protected $value = null;
@@ -43,28 +43,24 @@ class PropertyGenerator extends AbstractClassElementGenerator
     /**
      * Constructor
      *
-     * Instantiate the property generator object
+     * Instantiate the constant generator object
      *
      * @param  string  $name
      * @param  string  $type
      * @param  mixed   $value
-     * @param  string  $visibility
-     * @param  boolean $static
      */
-    public function __construct($name, $type = null, $value = null, $visibility = 'public', $static = false)
+    public function __construct($name, $type, $value = null)
     {
         $this->setName($name);
         $this->setType($type);
         $this->setValue($value);
-        $this->setVisibility($visibility);
-        $this->setAsStatic($static);
     }
 
     /**
      * Set the property type
      *
      * @param  string $type
-     * @return PropertyGenerator
+     * @return ConstantGenerator
      */
     public function setType($type)
     {
@@ -83,20 +79,10 @@ class PropertyGenerator extends AbstractClassElementGenerator
     }
 
     /**
-     * Has property type
-     *
-     * @return boolean
-     */
-    public function hasType()
-    {
-        return (null !== $this->type);
-    }
-
-    /**
      * Set the property value
      *
      * @param  mixed $value
-     * @return PropertyGenerator
+     * @return ConstantGenerator
      */
     public function setValue($value = null)
     {
@@ -137,7 +123,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
 
         $this->docblock->addTag('var', $this->type);
         $this->output = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' $' . $this->name;
+        $this->output .= $this->printIndent() . 'const ' . $this->name;
 
         if (null !== $this->value) {
             if ($this->type == 'array') {

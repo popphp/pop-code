@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class ClassGenerator extends AbstractClassGenerator
 {
 
-    use Traits\PropertiesTrait, Traits\AbstractFinalTrait;
+    use Traits\UseTrait, Traits\PropertiesTrait, Traits\AbstractFinalTrait;
 
     /**
      * Parent class that is extended
@@ -35,10 +35,10 @@ class ClassGenerator extends AbstractClassGenerator
     protected $parent = null;
 
     /**
-     * Interface that is implemented
-     * @var string
+     * Interfaces that are implemented
+     * @var array
      */
-    protected $interface = null;
+    protected $interfaces = [];
 
     /**
      * Constructor
@@ -47,18 +47,27 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @param  string  $name
      * @param  string  $parent
-     * @param  string  $interface
+     * @param  mixed   $interface
      * @param  boolean $abstract
      */
     public function __construct($name, $parent = null, $interface = null, $abstract = false)
     {
         $this->setName($name);
+
         if (null !== $parent) {
             $this->setParent($parent);
         }
+
         if (null !== $interface) {
-            $this->setInterface($interface);
+            if (is_array($interface)) {
+                $this->addInterfaces($interface);
+            } else if (strpos($interface, ',') !== false) {
+                $this->addInterfaces(array_map('trim', explode(',', $interface)));
+            } else {
+                $this->addInterface($interface);
+            }
         }
+
         $this->setAsAbstract($abstract);
     }
 
@@ -95,35 +104,80 @@ class ClassGenerator extends AbstractClassGenerator
     }
 
     /**
-     * Set the class interface
+     * Add a class interface
      *
      * @param  string $interface
      * @return ClassGenerator
      */
-    public function setInterface($interface = null)
+    public function addInterface($interface)
     {
-        $this->interface = $interface;
+        if (!in_array($interface, $this->interfaces)) {
+            $this->interfaces[] = $interface;
+        }
+
         return $this;
     }
 
     /**
-     * Get the class interface
+     * Add a class interface
      *
-     * @return string
+     * @param  array $interfaces
+     * @return ClassGenerator
      */
-    public function getInterface()
+    public function addInterfaces(array $interfaces)
     {
-        return $this->interface;
+        foreach ($interfaces as $interface) {
+            $this->addInterface($interface);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the class interfaces
+     *
+     * @return array
+     */
+    public function getInterfaces()
+    {
+        return $this->interfaces;
+    }
+
+    /**
+     * Has class interfaces
+     *
+     * @return boolean
+     */
+    public function hasInterfaces()
+    {
+        return (!empty($this->interfaces));
     }
 
     /**
      * Has class interface
      *
+     * @param  string $interface
      * @return boolean
      */
-    public function hasInterface()
+    public function hasInterface($interface)
     {
-        return (null !== $this->interface);
+        return (in_array($interface, $this->interfaces));
+    }
+
+    /**
+     * Remove class interface
+     *
+     * @param  string $interface
+     * @return ClassGenerator
+     */
+    public function removeInterface($interface)
+    {
+        if (in_array($interface, $this->interfaces)) {
+            $key = array_search($interface, $this->interfaces);
+            unset($this->interfaces[$key]);
+        }
+
+        return $this;
     }
 
     /**
@@ -148,16 +202,46 @@ class ClassGenerator extends AbstractClassGenerator
         if (null !== $this->parent) {
             $this->output .= ' extends ' . $this->parent;
         }
-        if (null !== $this->interface) {
-            $this->output .= ' implements ' . $this->interface;
+        if (!empty($this->interfaces)) {
+            $this->output .= ' implements ' . implode(', ', $this->interfaces);
         }
 
         $this->output .= PHP_EOL . '{';
+
+        if ($this->hasUses()) {
+            $this->output .= PHP_EOL;
+            foreach ($this->uses as $ns => $as) {
+                $this->output .= $this->printIndent() . 'use ';
+                $this->output .= $ns;
+                if (null !== $as) {
+                    $this->output .= ' as ' . $as;
+                }
+                $this->output .= ';' . PHP_EOL;
+            }
+        }
+
+        $this->output .= $this->formatConstants() . PHP_EOL;
         $this->output .= $this->formatProperties() . PHP_EOL;
         $this->output .= $this->formatMethods() . PHP_EOL;
         $this->output .= '}' . PHP_EOL;
 
         return $this->output;
+    }
+
+    /**
+     * Format the constants
+     *
+     * @return string
+     */
+    protected function formatConstants()
+    {
+        $constants = null;
+
+        foreach ($this->constants as $constant) {
+            $constants .= PHP_EOL . $constant->render();
+        }
+
+        return $constants;
     }
 
     /**

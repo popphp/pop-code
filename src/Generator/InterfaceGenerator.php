@@ -94,10 +94,27 @@ class InterfaceGenerator extends AbstractClassGenerator
         }
 
         $this->output .= PHP_EOL . '{' . PHP_EOL;
+        $this->output .= $this->formatConstants() . PHP_EOL;
         $this->output .= $this->formatMethods() . PHP_EOL;
         $this->output .= '}' . PHP_EOL;
 
         return $this->output;
+    }
+
+    /**
+     * Format the constants
+     *
+     * @return string
+     */
+    protected function formatConstants()
+    {
+        $constants = null;
+
+        foreach ($this->constants as $constant) {
+            $constants .= PHP_EOL . $constant->render();
+        }
+
+        return $constants;
     }
 
     /**

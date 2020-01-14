@@ -11,10 +11,10 @@
 /**
  * @namespace
  */
-namespace Pop\Code;
+namespace Pop\Code\Reflection;
 
 /**
- * Reflection code class
+ * Constant reflection code class
  *
  * @category   Pop
  * @package    Pop\Code
@@ -23,43 +23,7 @@ namespace Pop\Code;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    4.0.0
  */
-class Reflection
+class ConstantReflection extends AbstractReflection
 {
-
-    /**
-     * Create code generator from class
-     *
-     * @param  mixed $class
-     * @return Generator
-     */
-    public static function createFromClass($class)
-    {
-
-    }
-
-    /**
-     * Create code generator from interface
-     *
-     * @param  mixed $interface
-     * @return Generator
-     */
-    public static function createFromInterface($interface)
-    {
-
-    }
-
-    /**
-     * Build the code generator
-     *
-     * @return Generator
-     */
-    /*
-    public function buildGenerator()
-    {
-        $generator = new Generator();
-
-        return $generator;
-    }
-    */
 
 }

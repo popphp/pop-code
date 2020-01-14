@@ -26,13 +26,7 @@ namespace Pop\Code\Generator;
 class NamespaceGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait;
-
-    /**
-     * Array of namespaces to use
-     * @var array
-     */
-    protected $use = [];
+    use Traits\NameTrait, Traits\DocblockTrait, Traits\UseTrait;
 
     /**
      * Constructor
@@ -40,51 +34,14 @@ class NamespaceGenerator extends AbstractGenerator
      * Instantiate the namespace generator object
      *
      * @param  string $namespace
+     * @param  int    $indent
      */
-    public function __construct($namespace)
+    public function __construct($namespace = null, $indent = 0)
     {
-        $this->setName($namespace);
-    }
-
-    /**
-     * Set a namespace to use
-     *
-     * @param  string $use
-     * @param  string $as
-     * @return NamespaceGenerator
-     */
-    public function setUse($use, $as = null)
-    {
-        $this->use[$use] = $as;
-        return $this;
-    }
-
-    /**
-     * Set namespaces to use
-     *
-     * @param  array $uses
-     * @return NamespaceGenerator
-     */
-    public function setUses(array $uses)
-    {
-        foreach ($uses as $use) {
-            if (is_array($use)) {
-                $this->use[$use[0]] = (isset($use[1])) ? $use[1] : null;
-            } else {
-                $this->use[$use] = null;
-            }
+        if (null !== $namespace) {
+            $this->setName($namespace);
         }
-        return $this;
-    }
-
-    /**
-     * Get use
-     *
-     * @return array
-     */
-    public function getUse()
-    {
-        return $this->use;
+        $this->setIndent($indent);
     }
 
     /**
@@ -95,14 +52,17 @@ class NamespaceGenerator extends AbstractGenerator
     public function render()
     {
         $this->docblock = new DocblockGenerator(null, $this->indent);
-        $this->docblock->setTag('namespace');
+        $this->docblock->addTag('namespace');
 
         $this->output  = $this->docblock->render();
-        $this->output .= $this->printIndent() . 'namespace ' . $this->name . ';' . PHP_EOL;
 
-        if (count($this->use) > 0) {
+        if (!empty($name)) {
+            $this->output .= $this->printIndent() . 'namespace ' . $this->name . ';' . PHP_EOL;
+        }
+
+        if ($this->hasUses()) {
             $this->output .= PHP_EOL;
-            foreach ($this->use as $ns => $as) {
+            foreach ($this->uses as $ns => $as) {
                 $this->output .= $this->printIndent() . 'use ';
                 $this->output .= $ns;
                 if (null !== $as) {

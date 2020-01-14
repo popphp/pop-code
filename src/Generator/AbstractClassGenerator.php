@@ -29,10 +29,115 @@ abstract class AbstractClassGenerator extends AbstractGenerator
     use Traits\NameTrait, Traits\NamespaceTrait, Traits\DocblockTrait;
 
     /**
+     * Array of constant generator objects
+     * @var array
+     */
+    protected $constants = [];
+
+    /**
      * Array of method generator objects
      * @var array
      */
     protected $methods = [];
+
+    /**
+     * Add constants
+     *
+     * @param  array $constants
+     * @return AbstractClassGenerator
+     */
+    public function addConstants(array $constants)
+    {
+        foreach ($constants as $constant) {
+            $this->addConstant($constant);
+        }
+        return $this;
+    }
+
+    /**
+     * Add a constant
+     *
+     * @param  ConstantGenerator $constant
+     * @return AbstractClassGenerator
+     */
+    public function addConstant(ConstantGenerator $constant)
+    {
+        $this->constants[$constant->getName()] = $constant;
+        return $this;
+    }
+
+    /**
+     * Get a constant
+     *
+     * @param  mixed $constant
+     * @return ConstantGenerator
+     */
+    public function getConstant($constant)
+    {
+        $c = ($constant instanceof ConstantGenerator) ? $constant->getName() : $constant;
+        return (isset($this->constants[$c])) ? $this->constants[$c] : null;
+    }
+
+    /**
+     * Has a constant
+     *
+     * @param  mixed $constant
+     * @return boolean
+     */
+    public function hasConstant($constant)
+    {
+        $c = ($constant instanceof ConstantGenerator) ? $constant->getName() : $constant;
+        return (isset($this->constants[$c]));
+    }
+
+    /**
+     * Has constants
+     *
+     * @return boolean
+     */
+    public function hasConstants()
+    {
+        return (!empty($this->constants));
+    }
+
+    /**
+     * Get all constants
+     *
+     * @return array
+     */
+    public function getConstants()
+    {
+        return $this->constants;
+    }
+
+    /**
+     * Remove a constant
+     *
+     * @param  mixed $constant
+     * @return AbstractClassGenerator
+     */
+    public function removeConstant($constant)
+    {
+        $c = ($constant instanceof ConstantGenerator) ? $constant->getName() : $constant;
+        if (isset($this->constants[$c])) {
+            unset($this->constants[$c]);
+        }
+        return $this;
+    }
+
+    /**
+     * Add methods
+     *
+     * @param  array $methods
+     * @return AbstractClassGenerator
+     */
+    public function addMethods(array $methods)
+    {
+        foreach ($methods as $method) {
+            $this->addMethod($method);
+        }
+        return $this;
+    }
 
     /**
      * Add a method
@@ -68,6 +173,16 @@ abstract class AbstractClassGenerator extends AbstractGenerator
     {
         $m = ($method instanceof MethodGenerator) ? $method->getName() : $method;
         return (isset($this->methods[$m]));
+    }
+
+    /**
+     * Has methods
+     *
+     * @return boolean
+     */
+    public function hasMethods()
+    {
+        return (!empty($this->methods));
     }
 
     /**

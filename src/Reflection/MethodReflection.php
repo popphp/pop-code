@@ -11,10 +11,12 @@
 /**
  * @namespace
  */
-namespace Pop\Code;
+namespace Pop\Code\Reflection;
+
+use Pop\Code\Generator;
 
 /**
- * Reflection code class
+ * Method reflection code class
  *
  * @category   Pop
  * @package    Pop\Code
@@ -23,43 +25,19 @@ namespace Pop\Code;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    4.0.0
  */
-class Reflection
+class MethodReflection extends AbstractReflection
 {
 
     /**
-     * Create code generator from class
+     * Method to import code
      *
-     * @param  mixed $class
-     * @return Generator
+     * @param  mixed  $code
+     * @param  string $name
+     * @return Generator\MethodGenerator
      */
-    public static function createFromClass($class)
+    public static function import($code, $name = null)
     {
 
     }
-
-    /**
-     * Create code generator from interface
-     *
-     * @param  mixed $interface
-     * @return Generator
-     */
-    public static function createFromInterface($interface)
-    {
-
-    }
-
-    /**
-     * Build the code generator
-     *
-     * @return Generator
-     */
-    /*
-    public function buildGenerator()
-    {
-        $generator = new Generator();
-
-        return $generator;
-    }
-    */
 
 }

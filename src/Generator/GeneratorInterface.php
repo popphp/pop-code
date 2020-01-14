@@ -14,7 +14,7 @@
 namespace Pop\Code\Generator;
 
 /**
- * Abstract generator class
+ * Generator interface
  *
  * @category   Pop
  * @package    Pop\Code

@@ -41,19 +41,85 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     protected $static = false;
 
     /**
-     * Set the property visibility
+     * Set the visibility
      *
      * @param  string $visibility
      * @return AbstractClassElementGenerator
      */
     public function setVisibility($visibility = 'public')
     {
+        $visibility = strtolower($visibility);
+
+        if (!in_array($visibility, ['public', 'protected', 'private'])) {
+            throw new Exception("Error: The visibility '" . $visibility . "' is not allowed.");
+        }
+
         $this->visibility = $visibility;
         return $this;
     }
 
     /**
-     * Get the property visibility
+     * Set the visibility to public
+     *
+     * @return AbstractClassElementGenerator
+     */
+    public function setAsPublic()
+    {
+        return $this->setVisibility('public');
+    }
+
+    /**
+     * Set the visibility to protected
+     *
+     * @return AbstractClassElementGenerator
+     */
+    public function setAsProtected()
+    {
+        return $this->setVisibility('protected');
+    }
+
+    /**
+     * Set the visibility to public
+     *
+     * @return AbstractClassElementGenerator
+     */
+    public function setAsPrivate()
+    {
+        return $this->setVisibility('private');
+    }
+
+    /**
+     * Is visibility public
+     *
+     * @return boolean
+     */
+    public function isPublic()
+    {
+        return ($this->visibility == 'public');
+    }
+
+    /**
+     * Set the visibility to protected
+     *
+     * @return boolean
+     */
+    public function isProtected()
+    {
+        return ($this->visibility == 'protected');
+    }
+
+    /**
+     * Set the visibility to private
+     *
+     * @return boolean
+     */
+    public function isPrivate()
+    {
+        return ($this->visibility == 'private');
+    }
+
+    /**
+     * Get the visibility
      *
      * @return string
      */
@@ -63,7 +129,7 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     }
 
     /**
-     * Set the property static flag
+     * Set the static flag
      *
      * @param  boolean $static
      * @return AbstractClassElementGenerator
@@ -75,7 +141,7 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     }
 
     /**
-     * Get the property static flag
+     * Get the static flag
      *
      * @return boolean
      */
