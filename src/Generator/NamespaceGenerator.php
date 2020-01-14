@@ -14,23 +14,19 @@
 namespace Pop\Code\Generator;
 
 /**
- * Namespace generator code class
+ * Namespace generator class
  *
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2020 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    3.2.0
+ * @version    4.0.0
  */
-class NamespaceGenerator implements GeneratorInterface
+class NamespaceGenerator extends AbstractGenerator
 {
 
-    /**
-     * Namespace
-     * @var string
-     */
-    protected $namespace = null;
+    use NameTrait, DocblockTrait;
 
     /**
      * Array of namespaces to use
@@ -39,57 +35,15 @@ class NamespaceGenerator implements GeneratorInterface
     protected $use = [];
 
     /**
-     * Docblock generator object
-     * @var DocblockGenerator
-     */
-    protected $docblock = null;
-
-    /**
-     * Namespace indent
-     * @var string
-     */
-    protected $indent = null;
-
-    /**
-     * Namespace output
-     * @var string
-     */
-    protected $output = null;
-
-    /**
      * Constructor
      *
-     * Instantiate the property generator object
+     * Instantiate the namespace generator object
      *
      * @param  string $namespace
-     * @return NamespaceGenerator
      */
-
     public function __construct($namespace)
     {
-        $this->setNamespace($namespace);
-    }
-
-    /**
-     * Set the namespace
-     *
-     * @param  string $namespace
-     * @return NamespaceGenerator
-     */
-    public function setNamespace($namespace)
-    {
-        $this->namespace = $namespace;
-        return $this;
-    }
-
-    /**
-     * Get the namespace
-     *
-     * @return string
-     */
-    public function getNamespace()
-    {
-        return $this->namespace;
+        $this->setName($namespace);
     }
 
     /**
@@ -124,22 +78,33 @@ class NamespaceGenerator implements GeneratorInterface
     }
 
     /**
+     * Get use
+     *
+     * @return array
+     */
+    public function getUse()
+    {
+        return $this->use;
+    }
+
+    /**
      * Render namespace
      *
-     * @param  boolean $ret
-     * @return mixed
+     * @return string
      */
-    public function render($ret = false)
+    public function render()
     {
-        $this->docblock = new DocblockGenerator(null, $this->indent);
+        $this->docblock = new DocblockGenerator();
+        $this->docblock->setIndent($this->indent);
         $this->docblock->setTag('namespace');
-        $this->output = $this->docblock->render(true);
-        $this->output .= $this->indent . 'namespace ' . $this->namespace . ';' . PHP_EOL;
+
+        $this->output  = $this->docblock->render();
+        $this->output .= $this->printIndent() . 'namespace ' . $this->name . ';' . PHP_EOL;
 
         if (count($this->use) > 0) {
             $this->output .= PHP_EOL;
             foreach ($this->use as $ns => $as) {
-                $this->output .= $this->indent . 'use ';
+                $this->output .= $this->printIndent() . 'use ';
                 $this->output .= $ns;
                 if (null !== $as) {
                     $this->output .= ' as ' . $as;
@@ -148,11 +113,7 @@ class NamespaceGenerator implements GeneratorInterface
             }
         }
 
-        if ($ret) {
-            return $this->output;
-        } else {
-            echo $this->output;
-        }
+        return $this->output;
     }
 
     /**
@@ -162,7 +123,7 @@ class NamespaceGenerator implements GeneratorInterface
      */
     public function __toString()
     {
-        return $this->render(true);
+        return $this->render();
     }
 
 }

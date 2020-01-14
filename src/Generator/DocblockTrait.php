@@ -14,7 +14,7 @@
 namespace Pop\Code\Generator;
 
 /**
- * Abstract generator class
+ * Docblock trait
  *
  * @category   Pop
  * @package    Pop\Code
@@ -23,29 +23,35 @@ namespace Pop\Code\Generator;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    4.0.0
  */
-interface GeneratorInterface
+trait DocblockTrait
 {
 
     /**
-     * Set the indent
-     *
-     * @param  int $indent
-     * @return GeneratorInterface
+     * Docblock generator object
+     * @var DocblockGenerator
      */
-    public function setIndent($indent);
+    protected $docblock = null;
 
     /**
-     * Get the indent
+     * Set the docblock generator object
      *
-     * @return int
+     * @param  DocblockGenerator $docblock
+     * @return DocblockTrait
      */
-    public function getIndent();
+    public function setDocblock(DocblockGenerator $docblock)
+    {
+        $this->docblock = $docblock;
+        return $this;
+    }
 
     /**
-     * Render method
+     * Access the docblock generator object
      *
-     * @return string
+     * @return DocblockGenerator
      */
-    public function render();
+    public function getDocblock()
+    {
+        return $this->docblock;
+    }
 
 }

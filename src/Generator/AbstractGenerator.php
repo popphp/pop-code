@@ -23,29 +23,68 @@ namespace Pop\Code\Generator;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    4.0.0
  */
-interface GeneratorInterface
+abstract class AbstractGenerator implements GeneratorInterface
 {
+
+    /**
+     * Code indent spaces
+     * @var int
+     */
+    protected $indent = 4;
+
+    /**
+     * Output string
+     * @var string
+     */
+    protected $output = null;
 
     /**
      * Set the indent
      *
-     * @param  int $indent
-     * @return GeneratorInterface
+     * @param  string $indent
+     * @return AbstractGenerator
      */
-    public function setIndent($indent);
+    public function setIndent($indent)
+    {
+        $this->indent = (int)$indent;
+        return $this;
+    }
 
     /**
      * Get the indent
      *
      * @return int
      */
-    public function getIndent();
+    public function getIndent()
+    {
+        return $this->indent;
+    }
+
+    /**
+     * Print the indent
+     *
+     * @return string
+     */
+    public function printIndent()
+    {
+        return str_repeat(' ', $this->indent);
+    }
+
+    /**
+     * Get the output
+     *
+     * @return string
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
 
     /**
      * Render method
      *
      * @return string
      */
-    public function render();
+    abstract public function render();
 
 }

@@ -14,13 +14,44 @@
 namespace Pop\Code\Generator;
 
 /**
- * Code exception class
+ * Name trait
  *
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2020 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    3.2.0
+ * @version    4.0.0
  */
-class Exception extends \Exception {}
+trait NameTrait
+{
+
+    /**
+     * Name
+     * @var string
+     */
+    protected $name = null;
+
+    /**
+     * Set the name
+     *
+     * @param  string $name
+     * @return NameTrait
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * Get the name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+}

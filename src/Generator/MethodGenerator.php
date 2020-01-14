@@ -14,47 +14,25 @@
 namespace Pop\Code\Generator;
 
 /**
- * Method generator code class
+ * Namespace generator class
  *
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2020 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    3.2.0
+ * @version    4.0.0
  */
-class MethodGenerator implements GeneratorInterface
+class MethodGenerator extends AbstractClassElementGenerator
 {
 
-    /**
-     * Docblock generator object
-     * @var DocblockGenerator
-     */
-    protected $docblock = null;
+    use NameTrait, DocblockTrait;
 
     /**
      * Method arguments
      * @var array
      */
     protected $arguments = [];
-
-    /**
-     * Method name
-     * @var string
-     */
-    protected $name = null;
-
-    /**
-     * Method visibility
-     * @var string
-     */
-    protected $visibility = 'public';
-
-    /**
-     * Method static flag
-     * @var boolean
-     */
-    protected $static = false;
 
     /**
      * Method abstract flag
@@ -69,28 +47,10 @@ class MethodGenerator implements GeneratorInterface
     protected $final = false;
 
     /**
-     * Method interface flag
-     * @var boolean
-     */
-    protected $interface = false;
-
-    /**
      * Method body
      * @var string
      */
     protected $body = null;
-
-    /**
-     * Method indent
-     * @var string
-     */
-    protected $indent = '    ';
-
-    /**
-     * Method output
-     * @var string
-     */
-    protected $output = null;
 
     /**
      * Constructor
@@ -106,28 +66,6 @@ class MethodGenerator implements GeneratorInterface
         $this->setName($name);
         $this->setVisibility($visibility);
         $this->setStatic($static);
-    }
-
-    /**
-     * Set the method static flag
-     *
-     * @param  boolean $static
-     * @return MethodGenerator
-     */
-    public function setStatic($static = false)
-    {
-        $this->static = (boolean)$static;
-        return $this;
-    }
-
-    /**
-     * Get the method static flag
-     *
-     * @return boolean
-     */
-    public function isStatic()
-    {
-        return $this->static;
     }
 
     /**
@@ -172,189 +110,6 @@ class MethodGenerator implements GeneratorInterface
     public function isFinal()
     {
         return $this->final;
-    }
-
-    /**
-     * Set the method interface flag
-     *
-     * @param  boolean $interface
-     * @return MethodGenerator
-     */
-    public function setInterface($interface = false)
-    {
-        $this->interface = (boolean)$interface;
-        return $this;
-    }
-
-    /**
-     * Get the method interface flag
-     *
-     * @return boolean
-     */
-    public function isInterface()
-    {
-        return $this->interface;
-    }
-
-    /**
-     * Set the method description
-     *
-     * @param  string $desc
-     * @return MethodGenerator
-     */
-    public function setDesc($desc = null)
-    {
-        if (null !== $this->docblock) {
-            $this->docblock->setDesc($desc);
-        } else {
-            $this->docblock = new DocblockGenerator($desc, $this->indent);
-        }
-        return $this;
-    }
-
-    /**
-     * Get the method description
-     *
-     * @return string
-     */
-    public function getDesc()
-    {
-        $desc = null;
-        if (null !== $this->docblock) {
-            $desc = $this->docblock->getDesc();
-        }
-        return $desc;
-    }
-
-    /**
-     * Set the method indent
-     *
-     * @param  string $indent
-     * @return MethodGenerator
-     */
-    public function setIndent($indent = null)
-    {
-        $this->indent = $indent;
-        return $this;
-    }
-
-    /**
-     * Get the method indent
-     *
-     * @return string
-     */
-    public function getIndent()
-    {
-        return $this->indent;
-    }
-
-    /**
-     * Set the method name
-     *
-     * @param  string $name
-     * @return MethodGenerator
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * Get the method name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set the method body
-     *
-     * @param  string $body
-     * @param  boolean $newline
-     * @return MethodGenerator
-     */
-    public function setBody($body, $newline = true)
-    {
-        $this->body = $this->indent . '    ' .  str_replace(PHP_EOL, PHP_EOL . $this->indent . '    ', $body);
-        if ($newline) {
-            $this->body .= PHP_EOL;
-        }
-        return $this;
-    }
-
-    /**
-     * Append to the method body
-     *
-     * @param  string  $body
-     * @param  boolean $newline
-     * @return MethodGenerator
-     */
-    public function appendToBody($body, $newline = true)
-    {
-        $body = str_replace(PHP_EOL, PHP_EOL . $this->indent . '    ', $body);
-        $this->body .= $this->indent . '    ' . $body;
-        if ($newline) {
-            $this->body .= PHP_EOL;
-        }
-        return $this;
-    }
-
-    /**
-     * Get the method body
-     *
-     * @return string
-     */
-    public function getBody()
-    {
-        return $this->body;
-    }
-
-    /**
-     * Set the docblock generator object
-     *
-     * @param  DocblockGenerator $docblock
-     * @return MethodGenerator
-     */
-    public function setDocblock(DocblockGenerator $docblock)
-    {
-        $this->docblock = $docblock;
-        return $this;
-    }
-
-    /**
-     * Access the docblock generator object
-     *
-     * @return DocblockGenerator
-     */
-    public function getDocblock()
-    {
-        return $this->docblock;
-    }
-
-    /**
-     * Set the method visibility
-     *
-     * @param  string $visibility
-     * @return MethodGenerator
-     */
-    public function setVisibility($visibility = 'public')
-    {
-        $this->visibility = $visibility;
-        return $this;
-    }
-
-    /**
-     * Get the method visibility
-     *
-     * @return string
-     */
-    public function getVisibility()
-    {
-        return $this->visibility;
     }
 
     /**
@@ -477,23 +232,67 @@ class MethodGenerator implements GeneratorInterface
     }
 
     /**
+     * Set the method body
+     *
+     * @param  string $body
+     * @param  boolean $newline
+     * @return MethodGenerator
+     */
+    public function setBody($body, $newline = true)
+    {
+        $this->body = $this->indent . '    ' .  str_replace(PHP_EOL, PHP_EOL . $this->indent . '    ', $body);
+        if ($newline) {
+            $this->body .= PHP_EOL;
+        }
+        return $this;
+    }
+
+    /**
+     * Append to the method body
+     *
+     * @param  string  $body
+     * @param  boolean $newline
+     * @return MethodGenerator
+     */
+    public function appendToBody($body, $newline = true)
+    {
+        $body = str_replace(PHP_EOL, PHP_EOL . $this->indent . '    ', $body);
+        $this->body .= $this->indent . '    ' . $body;
+        if ($newline) {
+            $this->body .= PHP_EOL;
+        }
+        return $this;
+    }
+
+    /**
+     * Get the method body
+     *
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+
+
+    /**
      * Render method
      *
-     * @param  boolean $ret
-     * @return mixed
+     * @return string
      */
-    public function render($ret = false)
+    public function render()
     {
         $final    = ($this->final) ? 'final ' : null;
         $abstract = ($this->abstract) ? 'abstract ' : null;
         $static   = ($this->static) ? ' static' : null;
         $args     = $this->formatArguments();
 
-        $this->output = PHP_EOL . ((null !== $this->docblock) ? $this->docblock->render(true) : null);
+        $this->output = PHP_EOL . ((null !== $this->docblock) ? $this->docblock->render() : null);
         $this->output .= $this->indent . $final . $abstract . $this->visibility .
-           $static . ' function ' . $this->name . '(' . $args . ')';
+            $static . ' function ' . $this->name . '(' . $args . ')';
 
-        if ((!$this->abstract) && (!$this->interface)) {
+        if (!empty($this->body)) {
             $this->output .= PHP_EOL . $this->indent . '{' . PHP_EOL;
             $this->output .= $this->body. PHP_EOL;
             $this->output .= $this->indent . '}';
@@ -503,11 +302,7 @@ class MethodGenerator implements GeneratorInterface
 
         $this->output .= PHP_EOL;
 
-        if ($ret) {
-            return $this->output;
-        } else {
-            echo $this->output;
-        }
+        return $this->output;
     }
 
     /**
@@ -540,7 +335,7 @@ class MethodGenerator implements GeneratorInterface
      */
     public function __toString()
     {
-        return $this->render(true);
+        return $this->render();
     }
 
 }
