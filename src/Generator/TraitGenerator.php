@@ -14,7 +14,7 @@
 namespace Pop\Code\Generator;
 
 /**
- * Class generator code class
+ * Trait generator code class
  *
  * @category   Pop
  * @package    Pop\Code
@@ -23,7 +23,7 @@ namespace Pop\Code\Generator;
  * @license    http://www.popphp.org/license     New BSD License
  * @version    3.2.0
  */
-class ClassGenerator implements GeneratorInterface
+class TraitGenerator implements GeneratorInterface
 {
 
     /**
@@ -39,28 +39,10 @@ class ClassGenerator implements GeneratorInterface
     protected $namespace = null;
 
     /**
-     * Class name
+     * Trait name
      * @var string
      */
     protected $name = null;
-
-    /**
-     * Parent class that is extended
-     * @var string
-     */
-    protected $parent = null;
-
-    /**
-     * Interface that is implemented
-     * @var string
-     */
-    protected $interface = null;
-
-    /**
-     * Class abstract flag
-     * @var boolean
-     */
-    protected $abstract = false;
 
     /**
      * Array of property generator objects
@@ -75,7 +57,7 @@ class ClassGenerator implements GeneratorInterface
     protected $methods = [];
 
     /**
-     * Class indent
+     * Trait indent
      * @var string
      */
     protected $indent = null;
@@ -89,52 +71,20 @@ class ClassGenerator implements GeneratorInterface
     /**
      * Constructor
      *
-     * Instantiate the class generator object
+     * Instantiate the trait generator object
      *
      * @param  string  $name
-     * @param  string  $parent
-     * @param  string  $interface
-     * @param  boolean $abstract
      */
-    public function __construct($name, $parent = null, $interface = null, $abstract = false)
+    public function __construct($name)
     {
         $this->setName($name);
-        if (null !== $parent) {
-            $this->setParent($parent);
-        }
-        if (null !== $interface) {
-            $this->setInterface($interface);
-        }
-        $this->setAbstract($abstract);
     }
 
     /**
-     * Set the class abstract flag
-     *
-     * @param  boolean $abstract
-     * @return ClassGenerator
-     */
-    public function setAbstract($abstract = false)
-    {
-        $this->abstract = (boolean)$abstract;
-        return $this;
-    }
-
-    /**
-     * Get the class abstract flag
-     *
-     * @return boolean
-     */
-    public function isAbstract()
-    {
-        return $this->abstract;
-    }
-
-    /**
-     * Set the class indent
+     * Set the trait indent
      *
      * @param  string $indent
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function setIndent($indent = null)
     {
@@ -143,7 +93,7 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Get the class indent
+     * Get the trait indent
      *
      * @return string
      */
@@ -153,10 +103,10 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Set the class name
+     * Set the trait name
      *
      * @param  string $name
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function setName($name)
     {
@@ -165,7 +115,7 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Get the class name
+     * Get the trait name
      *
      * @return string
      */
@@ -175,54 +125,10 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Set the class parent
-     *
-     * @param  string $parent
-     * @return ClassGenerator
-     */
-    public function setParent($parent = null)
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
-    /**
-     * Get the class parent
-     *
-     * @return string
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * Set the class interface
-     *
-     * @param  string $interface
-     * @return ClassGenerator
-     */
-    public function setInterface($interface = null)
-    {
-        $this->interface = $interface;
-        return $this;
-    }
-
-    /**
-     * Get the class interface
-     *
-     * @return string
-     */
-    public function getInterface()
-    {
-        return $this->interface;
-    }
-
-    /**
      * Set the namespace generator object
      *
      * @param  NamespaceGenerator $namespace
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function setNamespace(NamespaceGenerator $namespace)
     {
@@ -244,7 +150,7 @@ class ClassGenerator implements GeneratorInterface
      * Set the docblock generator object
      *
      * @param  DocblockGenerator $docblock
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function setDocblock(DocblockGenerator $docblock)
     {
@@ -263,10 +169,10 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Add a class property
+     * Add a trait property
      *
      * @param  PropertyGenerator $property
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function addProperty(PropertyGenerator $property)
     {
@@ -275,7 +181,7 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Get a class property
+     * Get a trait property
      *
      * @param  mixed $property
      * @return PropertyGenerator
@@ -297,10 +203,10 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Remove a class property
+     * Remove a trait property
      *
      * @param  mixed $property
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function removeProperty($property)
     {
@@ -312,10 +218,10 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Add a class method
+     * Add a trait method
      *
      * @param  MethodGenerator $method
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function addMethod(MethodGenerator $method)
     {
@@ -349,7 +255,7 @@ class ClassGenerator implements GeneratorInterface
      * Remove a method property
      *
      * @param  mixed $method
-     * @return ClassGenerator
+     * @return TraitGenerator
      */
     public function removeMethod($method)
     {
@@ -361,24 +267,16 @@ class ClassGenerator implements GeneratorInterface
     }
 
     /**
-     * Render class
+     * Render trait
      *
      * @param  boolean $ret
      * @return mixed
      */
     public function render($ret = false)
     {
-        $abstract = ($this->abstract) ? 'abstract ' : null;
         $this->output = (null !== $this->namespace) ? $this->namespace->render(true) . PHP_EOL : null;
         $this->output .= (null !== $this->docblock) ? $this->docblock->render(true) : null;
-        $this->output .= $abstract . 'class ' . $this->name;
-
-        if (null !== $this->parent) {
-            $this->output .= ' extends ' . $this->parent;
-        }
-        if (null !== $this->interface) {
-            $this->output .= ' implements ' . $this->interface;
-        }
+        $this->output .= 'trait ' . $this->name;
 
         $this->output .= PHP_EOL . '{';
         $this->output .= $this->formatProperties() . PHP_EOL;

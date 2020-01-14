@@ -21,7 +21,7 @@ namespace Pop\Code;
  * @author     Nick Sagona, III <dev@nolainteractive.com>
  * @copyright  Copyright (c) 2009-2020 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.2
+ * @version    3.2.0
  */
 class Generator
 {
@@ -43,6 +43,12 @@ class Generator
      * @var int
      */
     const CREATE_INTERFACE = 'CREATE_INTERFACE';
+
+    /**
+     * Constant to create a trait
+     * @var int
+     */
+    const CREATE_TRAIT = 'CREATE_TRAIT';
 
     /**
      * Full path and name of the file, i.e. '/some/dir/file.ext'
@@ -122,7 +128,6 @@ class Generator
      */
     protected $allowed = [
         'php'   => 'text/plain',
-        'php3'  => 'text/plain',
         'phtml' => 'text/plain'
     ];
 
@@ -147,6 +152,8 @@ class Generator
             $this->createClass();
         } else if ($type == self::CREATE_INTERFACE) {
             $this->createInterface();
+        } else if ($type == self::CREATE_TRAIT) {
+            $this->createTrait();
         } else if (($type == self::CREATE_EMPTY) && file_exists($file)) {
             $body = str_replace('<?php', '', file_get_contents($file));
             $body = trim(str_replace('?>', '', $body)) . PHP_EOL;
@@ -159,6 +166,17 @@ class Generator
      *
      * @return Generator
      */
+    public function createClass()
+    {
+        $this->code = new Generator\ClassGenerator($this->filename);
+        return $this;
+    }
+
+    /**
+     * Create an interface generator object
+     *
+     * @return Generator
+     */
     public function createInterface()
     {
         $this->code = new Generator\InterfaceGenerator($this->filename);
@@ -166,13 +184,13 @@ class Generator
     }
 
     /**
-     * Create a class generator object
+     * Create a trait generator object
      *
      * @return Generator
      */
-    public function createClass()
+    public function createTrait()
     {
-        $this->code = new Generator\ClassGenerator($this->filename);
+        $this->code = new Generator\TraitGenerator($this->filename);
         return $this;
     }
 
@@ -243,12 +261,12 @@ class Generator
     /**
      * Set the code indent
      *
-     * @param  string $indent
+     * @param  string|int $indent
      * @return Generator
      */
     public function setIndent($indent = null)
     {
-        $this->indent = $indent;
+        $this->indent = (is_numeric($indent)) ? str_repeat(' ', $indent) : $indent;
         return $this;
     }
 
@@ -321,6 +339,33 @@ class Generator
         }
 
         return $this;
+    }
+
+    /**
+     * Set the code body from a configuration array
+     *
+     * @param  array   $config
+     * @param  int     $indent
+     * @param  boolean $newline
+     * @return Generator
+     */
+    public function setBodyFromConfig(array $config, $indent = 4, $newline = true)
+    {
+        $body = var_export($config, true);
+
+        if ((null !== $indent) && (($indent % 2) == 0)) {
+            $multiplier     = $indent / 2;
+            $replacePattern = str_repeat('$1', $multiplier) . '$2';
+        } else {
+            $replacePattern = '$1$1$2';
+        }
+
+        $body    = preg_replace("/^([ ]*)(.*)/m", $replacePattern, $body);
+        $bodyAry = preg_split("/\r\n|\n|\r/", $body);
+        $bodyAry = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [null, ']$1', ' => ['], $bodyAry);
+        $body    = implode(PHP_EOL, array_filter(["["] + $bodyAry));
+
+        return $this->setBody('return ' . $body . ';', $newline);
     }
 
     /**
