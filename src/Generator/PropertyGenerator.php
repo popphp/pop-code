@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class PropertyGenerator extends AbstractClassElementGenerator
 {
 
-    use NameTrait, DocblockTrait;
+    use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
      * Property type
@@ -59,7 +59,6 @@ class PropertyGenerator extends AbstractClassElementGenerator
         $this->setVisibility($visibility);
         $this->setAsStatic($static);
     }
-
 
     /**
      * Set the property type

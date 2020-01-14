@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class NamespaceGenerator extends AbstractGenerator
 {
 
-    use NameTrait, DocblockTrait;
+    use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
      * Array of namespaces to use

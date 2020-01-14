@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class FunctionGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait, Traits\FunctionTrait;
+    use Traits\NameTrait, Traits\DocblockTrait, Traits\FunctionTrait, Traits\BodyTrait;
 
     /**
      * Function interface flag

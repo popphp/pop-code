@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class TraitGenerator extends AbstractClassGenerator
 {
 
-    use PropertiesTrait;
+    use Traits\PropertiesTrait;
 
     /**
      * Constructor

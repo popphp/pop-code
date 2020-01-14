@@ -26,51 +26,13 @@ namespace Pop\Code\Generator;
 abstract class AbstractClassGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait;
-
-    /**
-     * Namespace generator object
-     * @var NamespaceGenerator
-     */
-    protected $namespace = null;
+    use Traits\NameTrait, Traits\NamespaceTrait, Traits\DocblockTrait;
 
     /**
      * Array of method generator objects
      * @var array
      */
     protected $methods = [];
-
-    /**
-     * Set the namespace generator object
-     *
-     * @param  NamespaceGenerator $namespace
-     * @return AbstractClassGenerator
-     */
-    public function setNamespace(NamespaceGenerator $namespace)
-    {
-        $this->namespace = $namespace;
-        return $this;
-    }
-
-    /**
-     * Access the namespace generator object
-     *
-     * @return NamespaceGenerator
-     */
-    public function getNamespace()
-    {
-        return $this->namespace;
-    }
-
-    /**
-     * Has a namespace generator object
-     *
-     * @return boolean
-     */
-    public function hasNamespace()
-    {
-        return (null !== $this->namespace);
-    }
 
     /**
      * Add a method

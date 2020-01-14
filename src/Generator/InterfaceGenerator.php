@@ -78,8 +78,6 @@ class InterfaceGenerator extends AbstractClassGenerator
         return (null !== $this->parent);
     }
 
-
-
     /**
      * Render interface
      *

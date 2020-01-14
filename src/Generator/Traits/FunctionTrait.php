@@ -16,7 +16,7 @@ namespace Pop\Code\Generator\Traits;
 use Pop\Code\Generator\DocblockGenerator;
 
 /**
- * Name trait
+ * Function trait
  *
  * @category   Pop
  * @package    Pop\Code
@@ -35,17 +35,11 @@ trait FunctionTrait
     protected $arguments = [];
 
     /**
-     * Function body
-     * @var string
-     */
-    protected $body = null;
-
-    /**
-     * Add a method argument
+     * Add an argument
      *
-     * @param string  $name
-     * @param mixed   $value
-     * @param string  $type
+     * @param  string  $name
+     * @param  mixed   $value
+     * @param  string  $type
      * @return FunctionTrait
      */
     public function addArgument($name, $value = null, $type = null)
@@ -74,9 +68,9 @@ trait FunctionTrait
     }
 
     /**
-     * Add method arguments
+     * Add arguments
      *
-     * @param array $args
+     * @param  array $args
      * @return FunctionTrait
      */
     public function addArguments(array $args)
@@ -90,7 +84,7 @@ trait FunctionTrait
     }
 
     /**
-     * Has a method argument
+     * Has an argument
      *
      * @param  string $name
      * @return boolean
@@ -101,7 +95,7 @@ trait FunctionTrait
     }
 
     /**
-     * Get a method argument
+     * Get an argument
      *
      * @param  string $name
      * @return array
@@ -112,7 +106,7 @@ trait FunctionTrait
     }
 
     /**
-     * Get the method arguments
+     * Get the arguments
      *
      * @return array
      */
@@ -122,11 +116,11 @@ trait FunctionTrait
     }
 
     /**
-     * Add a method argument (alias method for convenience)
+     * Add an argument (alias method for convenience)
      *
-     * @param string  $name
-     * @param mixed   $value
-     * @param string  $type
+     * @param  string  $name
+     * @param  mixed   $value
+     * @param  string  $type
      * @return FunctionTrait
      */
     public function addParameter($name, $value = null, $type = null)
@@ -136,7 +130,7 @@ trait FunctionTrait
     }
 
     /**
-     * Add method arguments (alias method for convenience)
+     * Add arguments (alias method for convenience)
      *
      * @param array $args
      * @return FunctionTrait
@@ -148,7 +142,7 @@ trait FunctionTrait
     }
 
     /**
-     * Has a method argument (alias method for convenience)
+     * Has an argument (alias method for convenience)
      *
      * @param  string $name
      * @return boolean
@@ -159,7 +153,7 @@ trait FunctionTrait
     }
 
     /**
-     * Get a method argument (alias method for convenience)
+     * Get an argument (alias method for convenience)
      *
      * @param  string $name
      * @return array
@@ -170,66 +164,13 @@ trait FunctionTrait
     }
 
     /**
-     * Get the method arguments (alias method for convenience)
+     * Get the arguments (alias method for convenience)
      *
      * @return array
      */
     public function getParameters()
     {
         return $this->getArguments();
-    }
-
-    /**
-     * Set the function body
-     *
-     * @param  string $body
-     * @param  boolean $newline
-     * @return FunctionTrait
-     */
-    public function setBody($body, $newline = true)
-    {
-        $this->body = $this->printIndent() . '    ' .  str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '    ', $body);
-        if ($newline) {
-            $this->body .= PHP_EOL;
-        }
-        return $this;
-    }
-
-    /**
-     * Append to the function body
-     *
-     * @param  string  $body
-     * @param  boolean $newline
-     * @return FunctionTrait
-     */
-    public function appendToBody($body, $newline = true)
-    {
-        $body = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '    ', $body);
-        $this->body .= $this->printIndent() . '    ' . $body;
-        if ($newline) {
-            $this->body .= PHP_EOL;
-        }
-        return $this;
-    }
-
-    /**
-     * Get the function body
-     *
-     * @return string
-     */
-    public function getBody()
-    {
-        return $this->body;
-    }
-
-    /**
-     * Has method body
-     *
-     * @return boolean
-     */
-    public function hasBody()
-    {
-        return (null !== $this->body);
     }
 
     /**
