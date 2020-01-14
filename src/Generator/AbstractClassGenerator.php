@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 abstract class AbstractClassGenerator extends AbstractGenerator
 {
 
-    use NameTrait, DocblockTrait;
+    use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
      * Namespace generator object
@@ -63,6 +63,16 @@ abstract class AbstractClassGenerator extends AbstractGenerator
     }
 
     /**
+     * Has a namespace generator object
+     *
+     * @return boolean
+     */
+    public function hasNamespace()
+    {
+        return (null !== $this->namespace);
+    }
+
+    /**
      * Add a method
      *
      * @param  MethodGenerator $method
@@ -84,6 +94,18 @@ abstract class AbstractClassGenerator extends AbstractGenerator
     {
         $m = ($method instanceof MethodGenerator) ? $method->getName() : $method;
         return (isset($this->methods[$m])) ? $this->methods[$m] : null;
+    }
+
+    /**
+     * Has a method
+     *
+     * @param  mixed $method
+     * @return boolean
+     */
+    public function hasMethod($method)
+    {
+        $m = ($method instanceof MethodGenerator) ? $method->getName() : $method;
+        return (isset($this->methods[$m]));
     }
 
     /**
@@ -110,4 +132,5 @@ abstract class AbstractClassGenerator extends AbstractGenerator
         }
         return $this;
     }
+
 }

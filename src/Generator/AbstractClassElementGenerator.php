@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 abstract class AbstractClassElementGenerator extends AbstractGenerator
 {
 
-    use NameTrait, DocblockTrait;
+    use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
      * Visibility
@@ -68,7 +68,7 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
      * @param  boolean $static
      * @return AbstractClassElementGenerator
      */
-    public function setStatic($static = false)
+    public function setAsStatic($static = true)
     {
         $this->static = (boolean)$static;
         return $this;

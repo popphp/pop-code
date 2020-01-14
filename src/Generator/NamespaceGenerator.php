@@ -94,8 +94,7 @@ class NamespaceGenerator extends AbstractGenerator
      */
     public function render()
     {
-        $this->docblock = new DocblockGenerator();
-        $this->docblock->setIndent($this->indent);
+        $this->docblock = new DocblockGenerator(null, $this->indent);
         $this->docblock->setTag('namespace');
 
         $this->output  = $this->docblock->render();

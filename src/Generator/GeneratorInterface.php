@@ -42,6 +42,41 @@ interface GeneratorInterface
     public function getIndent();
 
     /**
+     * Has indent
+     *
+     * @return boolean
+     */
+    public function hasIndent();
+
+    /**
+     * Print the indent
+     *
+     * @return string
+     */
+    public function printIndent();
+
+    /**
+     * Get the output
+     *
+     * @return string
+     */
+    public function getOutput();
+
+    /**
+     * Has output
+     *
+     * @return boolean
+     */
+    public function hasOutput();
+
+    /**
+     * Is rendered (alias to hasOutput())
+     *
+     * @return boolean
+     */
+    public function isRendered();
+
+    /**
      * Render method
      *
      * @return string

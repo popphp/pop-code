@@ -61,6 +61,16 @@ abstract class AbstractGenerator implements GeneratorInterface
     }
 
     /**
+     * Has indent
+     *
+     * @return boolean
+     */
+    public function hasIndent()
+    {
+        return (!empty($this->indent));
+    }
+
+    /**
      * Print the indent
      *
      * @return string
@@ -78,6 +88,26 @@ abstract class AbstractGenerator implements GeneratorInterface
     public function getOutput()
     {
         return $this->output;
+    }
+
+    /**
+     * Has output
+     *
+     * @return boolean
+     */
+    public function hasOutput()
+    {
+        return (null !== $this->output);
+    }
+
+    /**
+     * Is rendered (alias to hasOutput())
+     *
+     * @return boolean
+     */
+    public function isRendered()
+    {
+        return (null !== $this->output);
     }
 
     /**
