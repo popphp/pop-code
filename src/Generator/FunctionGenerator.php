@@ -41,6 +41,12 @@ class FunctionGenerator extends AbstractGenerator
     protected $body = null;
 
     /**
+     * Function indent
+     * @var int
+     */
+    protected $indent = 0;
+
+    /**
      * Constructor
      *
      * Instantiate the function generator object

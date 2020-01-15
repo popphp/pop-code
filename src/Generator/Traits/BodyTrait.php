@@ -66,6 +66,31 @@ trait BodyTrait
     }
 
     /**
+     * Append to the function body
+     *
+     * @param  int $indent
+     * @return BodyTrait
+     */
+    public function indentBody($indent)
+    {
+        $indent = (int)$indent;
+
+        if ($indent > 0) {
+            $this->body = str_repeat(' ', $indent) . str_replace(PHP_EOL, PHP_EOL . str_repeat(' ', $indent), $this->body);
+        } else if ($indent < 0) {
+            $indent    = abs($indent);
+            $bodyLines = explode(PHP_EOL, $this->body);
+            foreach ($bodyLines as $i => $bodyLine) {
+                if (substr($bodyLine, 0, $indent) == str_repeat(' ', $indent)) {
+                    $bodyLines[$i] = substr($bodyLine, $indent);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Get the function body
      *
      * @return string

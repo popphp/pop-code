@@ -57,6 +57,16 @@ trait DocblockTrait
     }
 
     /**
+     * Has docblock generator object
+     *
+     * @return boolean
+     */
+    public function hasDocblock()
+    {
+        return (null !== $this->docblock);
+    }
+
+    /**
      * Set the docblock description
      *
      * @param  string $desc

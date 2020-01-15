@@ -35,7 +35,7 @@ class Generator extends Generator\AbstractGenerator
      * Code generator objects
      * @var array
      */
-    protected $code = null;
+    protected $code = [];
 
     /**
      * Namespaces for the code generator objects
@@ -92,7 +92,13 @@ class Generator extends Generator\AbstractGenerator
     {
         foreach ($codeObjects as $namespace => $codeObject) {
             if (!is_numeric($namespace)) {
-                $this->addCodeObject($codeObject, $namespace);
+                if (is_array($codeObject)) {
+                    foreach ($codeObject as $code) {
+                        $this->addCodeObject($code, $namespace);
+                    }
+                } else {
+                    $this->addCodeObject($codeObject, $namespace);
+                }
             } else {
                 $this->addCodeObject($codeObject);
             }
@@ -112,7 +118,8 @@ class Generator extends Generator\AbstractGenerator
         $this->code[] = $codeObject;
 
         if (null !== $namespace) {
-            $this->namespaces[key($this->code)] = $namespace;
+            $key = count($this->code) - 1;
+            $this->namespaces[$key] = $namespace;
         }
         return $this;
     }
@@ -246,21 +253,40 @@ class Generator extends Generator\AbstractGenerator
             $this->output .= $this->env . PHP_EOL;
         }
 
-        $this->output .= '<?php' . PHP_EOL;
-        $this->output .= (null !== $this->docblock) ? $this->docblock->render() . PHP_EOL : null;
+        $this->output    .= '<?php' . PHP_EOL;
+        $this->output    .= (null !== $this->docblock) ? $this->docblock->render() . PHP_EOL : PHP_EOL;
+        $currentNamespace = null;
+        $inNamespace      = false;
 
         foreach ($this->code as $key => $code) {
-            $inNamespace = false;
-            if (isset($this->namespaces[$key])) {
-                $this->output .= 'namespace ' . $this->namespaces[$key] . ' {' . PHP_EOL;
-                $inNamespace   = true;
+            if (isset($this->namespaces[$key]) && ($currentNamespace != $this->namespaces[$key])) {
+                if (null !== $currentNamespace) {
+                    $this->output .= '}' . PHP_EOL . PHP_EOL;
+                }
+                $namespace        = ($this->namespaces[$key] != '*') ? $this->namespaces[$key] . ' ' : null;
+                $this->output    .= 'namespace ' . $namespace . '{' . PHP_EOL;
+                $currentNamespace = $this->namespaces[$key];
+                $inNamespace      = true;
+            } else if (!isset($this->namespaces[$key]) && (null !== $currentNamespace)) {
+                $this->output .= '}' . PHP_EOL . PHP_EOL;
+                $inNamespace   = false;
+            }
+
+            if (null !== $currentNamespace) {
+                $code->setIndent($code->getIndent() + $this->indent);
+                if ($code->hasDocblock()) {
+                    $code->getDocblock()->setIndent($code->getDocblock()->getIndent() + $this->indent);
+                }
+                if (in_array('Pop\Code\Generator\Traits\BodyTrait', class_uses($code))) {
+                    $code->indentBody($this->indent);
+                }
             }
 
             $this->output .= $code;
+        }
 
-            if ($inNamespace) {
-                $this->output .= '}' . PHP_EOL;
-            }
+        if ($inNamespace) {
+            $this->output .= '}' . PHP_EOL . PHP_EOL;
         }
 
         if ($this->close) {
