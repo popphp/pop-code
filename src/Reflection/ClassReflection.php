@@ -29,14 +29,14 @@ class ClassReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a class
+     * Method to parse a class
      *
      * @param  mixed  $code
      * @param  string $name
      * @throws Exception
      * @return Generator\ClassGenerator
      */
-    public static function import($code, $name = null)
+    public static function parse($code, $name = null)
     {
         $reflection     = new \ReflectionClass($code);
         $reflectionName = $reflection->getShortName();
@@ -59,13 +59,13 @@ class ClassReflection extends AbstractReflection
 
         // Detect and set namespace
         if (($reflection->inNamespace()) && (null !== $fileContents)) {
-            $class->setNamespace(NamespaceReflection::import($fileContents, $reflection->getNamespaceName()));
+            $class->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
         // Detect and set the class doc block
         $classDocBlock = $reflection->getDocComment();
         if (!empty($classDocBlock) && (strpos($classDocBlock, '/*') !== false)) {
-            $class->setDocblock(DocblockReflection::import($classDocBlock));
+            $class->setDocblock(DocblockReflection::parse($classDocBlock));
         }
 
         if ($reflection->isAbstract()) {
@@ -135,7 +135,7 @@ class ClassReflection extends AbstractReflection
         $properties = $reflection->getDefaultProperties();
         if (count($properties) > 0) {
             foreach ($properties as $name => $value) {
-                $class->addProperty(PropertyReflection::import($reflection->getProperty($name), $name, $value));
+                $class->addProperty(PropertyReflection::parse($reflection->getProperty($name), $name, $value));
             }
         }
 
@@ -143,7 +143,7 @@ class ClassReflection extends AbstractReflection
         $methods = $reflection->getMethods();
         if (count($methods) > 0) {
             foreach ($methods as $method) {
-                $class->addMethod(MethodReflection::import($method, $method->name));
+                $class->addMethod(MethodReflection::parse($method, $method->name));
             }
         }
 

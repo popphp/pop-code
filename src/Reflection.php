@@ -27,39 +27,100 @@ class Reflection
 {
 
     /**
-     * Create code generator from class
+     * Create class
      *
-     * @param  mixed $class
-     * @return Generator
+     * @param  mixed  $class
+     * @param  string $name
+     * @return Generator\ClassGenerator
      */
-    public static function createFromClass($class)
+    public static function createClass($class, $name = null)
     {
-
+        return Reflection\ClassReflection::parse($class, $name);
     }
 
     /**
-     * Create code generator from interface
+     * Create trait
      *
-     * @param  mixed $interface
-     * @return Generator
+     * @param  mixed  $trait
+     * @param  string $name
+     * @return Generator\TraitGenerator
      */
-    public static function createFromInterface($interface)
+    public static function createTrait($trait, $name = null)
     {
-
+        return Reflection\TraitReflection::parse($trait, $name);
     }
 
     /**
-     * Build the code generator
+     * Create interface
      *
-     * @return Generator
+     * @param  mixed  $interface
+     * @param  string $name
+     * @return Generator\InterfaceGenerator
      */
-    /*
-    public function buildGenerator()
+    public static function createInterface($interface, $name = null)
     {
-        $generator = new Generator();
-
-        return $generator;
+        return Reflection\InterfaceReflection::parse($interface, $name);
     }
-    */
+
+    /**
+     * Create namespace
+     *
+     * @param  mixed  $namespace
+     * @param  string $name
+     * @return Generator\NamespaceGenerator
+     */
+    public static function createNamespace($namespace, $name = null)
+    {
+        return Reflection\NamespaceReflection::parse($namespace, $name);
+    }
+
+    /**
+     * Create docblock
+     *
+     * @param  mixed  $docblock
+     * @param  int    $forceIndent
+     * @return Generator\DocblockGenerator
+     */
+    public static function createDocblock($docblock, $forceIndent = null)
+    {
+        return Reflection\DocblockReflection::parse($docblock, $forceIndent);
+    }
+
+    /**
+     * Create function
+     *
+     * @param  mixed  $function
+     * @param  string $name
+     * @return Generator\FunctionGenerator
+     */
+    public static function createFunction($function, $name = null)
+    {
+        return Reflection\FunctionReflection::parse($function, $name);
+    }
+
+    /**
+     * Create method
+     *
+     * @param  mixed  $method
+     * @param  string $name
+     * @return Generator\MethodGenerator
+     */
+    public static function createMethod($method, $name = null)
+    {
+        return Reflection\MethodReflection::parse($method, $name);
+    }
+
+    /**
+     * Create property
+     *
+     * @param  mixed  $property
+     * @param  string $name
+     * @param  mixed  $value
+     * @return Generator\PropertyGenerator
+     */
+    public static function createProperty($property, $name = null, $value = null)
+    {
+        return Reflection\PropertyReflection::parse($property, $name, $value);
+    }
 
 }

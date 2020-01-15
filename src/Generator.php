@@ -13,6 +13,7 @@
  */
 namespace Pop\Code;
 
+use Pop\Code\Generator\GeneratorInterface;
 use Pop\Code\Generator\Traits;
 
 /**
@@ -28,13 +29,19 @@ use Pop\Code\Generator\Traits;
 class Generator extends Generator\AbstractGenerator
 {
 
-    use Traits\NamespaceTrait, Traits\DocblockTrait, Traits\BodyTrait;
+    use Traits\DocblockTrait;
 
     /**
-     * Code generator object
-     * @var Generator\InterfaceGenerator
+     * Code generator objects
+     * @var array
      */
     protected $code = null;
+
+    /**
+     * Namespaces for the code generator objects
+     * @var array
+     */
+    protected $namespaces = [];
 
     /**
      * Environment setting, i.e. #!/usr/bin/php
@@ -59,41 +66,71 @@ class Generator extends Generator\AbstractGenerator
      *
      * Instantiate the code generator object
      *
-     * @param  Generator\GeneratorInterface $code
+     * @param  mixed $code
+     * @throws Exception
      */
-    public function __construct(Generator\GeneratorInterface $code = null)
+    public function __construct($code = null)
     {
         if (null !== $code) {
-            $this->setCode($code);
+            if (is_array($code)) {
+                $this->addCodeObjects($code);
+            } else if ($code instanceof GeneratorInterface) {
+                $this->addCodeObject($code);
+            } else {
+                throw new Exception('Error: The code parameter was not the correct type.');
+            }
         }
     }
 
     /**
-     * Set the code generator object
+     * Add code generator objects
      *
-     * @param  Generator\GeneratorInterface $code
+     * @param  array $codeObjects
      * @return Generator
      */
-    public function setCode(Generator\GeneratorInterface $code)
+    public function addCodeObjects(array $codeObjects)
     {
-        $this->code = $code;
+        foreach ($codeObjects as $namespace => $codeObject) {
+            if (!is_numeric($namespace)) {
+                $this->addCodeObject($codeObject, $namespace);
+            } else {
+                $this->addCodeObject($codeObject);
+            }
+        }
         return $this;
     }
 
     /**
-     * Has code generator object
+     * Add a code generator object
+     *
+     * @param  Generator\GeneratorInterface $codeObject
+     * @param  string                       $namespace
+     * @return Generator
+     */
+    public function addCodeObject(Generator\GeneratorInterface $codeObject, $namespace = null)
+    {
+        $this->code[] = $codeObject;
+
+        if (null !== $namespace) {
+            $this->namespaces[key($this->code)] = $namespace;
+        }
+        return $this;
+    }
+
+    /**
+     * Has code generator objects
      *
      * @return boolean
      */
     public function hasCode()
     {
-        return (null !== $this->code);
+        return (!empty($this->code));
     }
 
     /**
      * Access the code generator object
      *
-     * @return Generator\GeneratorInterface
+     * @return array
      */
     public function getCode()
     {
@@ -101,9 +138,9 @@ class Generator extends Generator\AbstractGenerator
     }
 
     /**
-     * Access the code generator object (alias method)
+     * Access the code generator objects (alias method)
      *
-     * @return Generator\GeneratorInterface
+     * @return array
      */
     public function code()
     {
@@ -197,35 +234,6 @@ class Generator extends Generator\AbstractGenerator
     }
 
     /**
-     * Create config file
-     *
-     * @param  array   $config
-     * @param  int     $indent
-     * @param  boolean $newline
-     * @return Generator
-     */
-    public function createConfig(array $config, $indent = 4, $newline = true)
-    {
-        $body = var_export($config, true);
-
-        if ((null !== $indent) && (($indent % 2) == 0)) {
-            $multiplier     = $indent / 2;
-            $replacePattern = str_repeat('$1', $multiplier) . '$2';
-        } else {
-            $replacePattern = '$1$1$2';
-        }
-
-        $body    = preg_replace("/^([ ]*)(.*)/m", $replacePattern, $body);
-        $bodyAry = preg_split("/\r\n|\n|\r/", $body);
-        $bodyAry = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [null, ']$1', ' => ['], $bodyAry);
-        $body    = implode(PHP_EOL, array_filter(["["] + $bodyAry));
-
-        $this->setBody('return ' . $body . ';', $newline);
-
-        return $this;
-    }
-
-    /**
      * Render method
      *
      * @return string
@@ -241,16 +249,18 @@ class Generator extends Generator\AbstractGenerator
         $this->output .= '<?php' . PHP_EOL;
         $this->output .= (null !== $this->docblock) ? $this->docblock->render() . PHP_EOL : null;
 
-        if (null !== $this->namespace) {
-            $this->output .= $this->namespace->render() . PHP_EOL;
-        }
+        foreach ($this->code as $key => $code) {
+            $inNamespace = false;
+            if (isset($this->namespaces[$key])) {
+                $this->output .= 'namespace ' . $this->namespaces[$key] . ' {' . PHP_EOL;
+                $inNamespace   = true;
+            }
 
-        if (null !== $this->code) {
-            $this->output .= $this->code->render() . PHP_EOL;
-        }
+            $this->output .= $code;
 
-        if (null !== $this->body) {
-            $this->output .= PHP_EOL . $this->body . PHP_EOL . PHP_EOL;
+            if ($inNamespace) {
+                $this->output .= '}' . PHP_EOL;
+            }
         }
 
         if ($this->close) {

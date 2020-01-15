@@ -29,13 +29,13 @@ class MethodReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a method
+     * Method to parse a method
      *
      * @param  mixed  $code
      * @param  string $name
      * @return Generator\MethodGenerator
      */
-    public static function import($code, $name = null)
+    public static function parse($code, $name = null)
     {
         if ($code->isProtected()) {
             $visibility = 'protected';
@@ -48,7 +48,7 @@ class MethodReflection extends AbstractReflection
         $docblock = null;
         $doc      = $code->getDocComment();
         if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
-            $docblock = DocblockReflection::import($doc);
+            $docblock = DocblockReflection::parse($doc);
         }
 
         $method = new Generator\MethodGenerator($code->getName(), $visibility, $code->isStatic());

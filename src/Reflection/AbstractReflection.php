@@ -29,11 +29,11 @@ abstract class AbstractReflection implements ReflectionInterface
 {
 
     /**
-     * Method to import code
+     * Method to parse code
      *
      * @param  mixed $code
      * @return AbstractGenerator
      */
-    abstract public static function import($code);
+    abstract public static function parse($code);
 
 }

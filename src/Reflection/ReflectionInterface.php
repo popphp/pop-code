@@ -29,11 +29,11 @@ interface ReflectionInterface
 {
 
     /**
-     * Method to import code
+     * Method to parse code
      *
      * @param  mixed $code
      * @return AbstractGenerator
      */
-    public static function import($code);
+    public static function parse($code);
 
 }

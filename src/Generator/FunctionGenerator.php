@@ -121,4 +121,5 @@ class FunctionGenerator extends AbstractGenerator
     {
         return $this->render();
     }
+
 }

@@ -29,14 +29,14 @@ class FunctionReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a function or closure
+     * Method to parse a function or closure
      *
      * @param  mixed  $code
      * @param  string $name
      * @throws \ReflectionException
      * @return FunctionGenerator
      */
-    public static function import($code, $name = null)
+    public static function parse($code, $name = null)
     {
         $reflection       = new \ReflectionFunction($code);
         $reflectionName   = $reflection->getName();

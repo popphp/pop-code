@@ -29,14 +29,14 @@ class PropertyReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a property
+     * Method to parse a property
      *
      * @param  mixed  $code
      * @param  string $name
      * @param  mixed  $value
      * @return Generator\PropertyGenerator
      */
-    public static function import($code, $name = null, $value = null)
+    public static function parse($code, $name = null, $value = null)
     {
         if ($code->isProtected()) {
             $visibility = 'protected';
@@ -52,7 +52,7 @@ class PropertyReflection extends AbstractReflection
 
         $doc = $code->getDocComment();
         if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
-            $docblock = DocblockReflection::import($doc);
+            $docblock = DocblockReflection::parse($doc);
             $desc     = $docblock->getDesc();
             $type     = $docblock->getTag('var');
         } else if (null !== $value) {

@@ -29,14 +29,14 @@ class TraitReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a trait
+     * Method to parse a trait
      *
      * @param  mixed  $code
      * @param  string $name
      * @throws Exception
      * @return Generator\TraitGenerator
      */
-    public static function import($code, $name = null)
+    public static function parse($code, $name = null)
     {
         $reflection     = new \ReflectionClass($code);
         $reflectionName = $reflection->getShortName();
@@ -59,13 +59,13 @@ class TraitReflection extends AbstractReflection
 
         // Detect and set namespace
         if (($reflection->inNamespace()) && (null !== $fileContents)) {
-            $trait->setNamespace(NamespaceReflection::import($fileContents, $reflection->getNamespaceName()));
+            $trait->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
         // Detect and set the class doc block
         $traitDocBlock = $reflection->getDocComment();
         if (!empty($traitDocBlock) && (strpos($traitDocBlock, '/*') !== false)) {
-            $trait->setDocblock(DocblockReflection::import($traitDocBlock));
+            $trait->setDocblock(DocblockReflection::parse($traitDocBlock));
         }
 
         // Detect used traits
@@ -101,7 +101,7 @@ class TraitReflection extends AbstractReflection
         $properties = $reflection->getDefaultProperties();
         if (count($properties) > 0) {
             foreach ($properties as $name => $value) {
-                $trait->addProperty(PropertyReflection::import($reflection->getProperty($name), $name, $value));
+                $trait->addProperty(PropertyReflection::parse($reflection->getProperty($name), $name, $value));
             }
         }
 
@@ -109,7 +109,7 @@ class TraitReflection extends AbstractReflection
         $methods = $reflection->getMethods();
         if (count($methods) > 0) {
             foreach ($methods as $method) {
-                $trait->addMethod(MethodReflection::import($method, $method->name));
+                $trait->addMethod(MethodReflection::parse($method, $method->name));
             }
         }
 

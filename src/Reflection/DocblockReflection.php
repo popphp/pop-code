@@ -29,14 +29,14 @@ class DocblockReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a docblock
+     * Method to parse a docblock
      *
      * @param  string $code
      * @param  int    $forceIndent
      * @throws Exception
      * @return DocblockGenerator
      */
-    public static function import($code, $forceIndent = null)
+    public static function parse($code, $forceIndent = null)
     {
         if ((strpos($code, '/*') === false) || (strpos($code, '*/') === false)) {
             throw new Exception('The docblock is not in the correct format.');

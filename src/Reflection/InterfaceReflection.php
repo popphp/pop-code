@@ -29,14 +29,14 @@ class InterfaceReflection extends AbstractReflection
 {
 
     /**
-     * Method to import an interface
+     * Method to parse an interface
      *
      * @param  mixed  $code
      * @param  string $name
      * @throws Exception
      * @return Generator\InterfaceGenerator
      */
-    public static function import($code, $name = null)
+    public static function parse($code, $name = null)
     {
         $reflection     = new \ReflectionClass($code);
         $reflectionName = $reflection->getShortName();
@@ -55,14 +55,14 @@ class InterfaceReflection extends AbstractReflection
         if ($reflection->inNamespace()) {
             $file = $reflection->getFileName();
             if (!empty($file) && file_exists($file)) {
-                $interface->setNamespace(NamespaceReflection::import(file_get_contents($file), $reflection->getNamespaceName()));
+                $interface->setNamespace(NamespaceReflection::parse(file_get_contents($file), $reflection->getNamespaceName()));
             }
         }
 
         // Detect and set the class doc block
         $interfaceDocBlock = $reflection->getDocComment();
         if (!empty($interfaceDocBlock) && (strpos($interfaceDocBlock, '/*') !== false)) {
-            $interface->setDocblock(DocblockReflection::import($interfaceDocBlock));
+            $interface->setDocblock(DocblockReflection::parse($interfaceDocBlock));
         }
 
         // Detect parent class
@@ -89,7 +89,7 @@ class InterfaceReflection extends AbstractReflection
         $methods = $reflection->getMethods();
         if (count($methods) > 0) {
             foreach ($methods as $method) {
-                $interface->addMethod(MethodReflection::import($method, $method->name));
+                $interface->addMethod(MethodReflection::parse($method, $method->name));
             }
         }
 

@@ -29,14 +29,14 @@ class NamespaceReflection extends AbstractReflection
 {
 
     /**
-     * Method to import a namespace
+     * Method to parse a namespace
      *
      * @param  string $code
      * @param  string $name
      * @throws Exception
      * @return NamespaceGenerator
      */
-    public static function import($code, $name = null)
+    public static function parse($code, $name = null)
     {
         if (null === $name) {
             $matches = [];
