@@ -206,7 +206,7 @@ class ClassGenerator extends AbstractClassGenerator
             $this->output .= ' implements ' . implode(', ', $this->interfaces);
         }
 
-        $this->output .= PHP_EOL . '{';
+        $this->output .= PHP_EOL . '{' . PHP_EOL;
 
         if ($this->hasUses()) {
             $this->output .= PHP_EOL;
@@ -220,10 +220,17 @@ class ClassGenerator extends AbstractClassGenerator
             }
         }
 
-        $this->output .= $this->formatConstants() . PHP_EOL;
-        $this->output .= $this->formatProperties() . PHP_EOL;
-        $this->output .= $this->formatMethods() . PHP_EOL;
-        $this->output .= '}' . PHP_EOL;
+        if ($this->hasConstants()) {
+            $this->output .= $this->formatConstants();
+        }
+        if ($this->hasProperties()) {
+            $this->output .= $this->formatProperties();
+        }
+        if ($this->hasMethods()) {
+            $this->output .= $this->formatMethods();
+        }
+
+        $this->output .= PHP_EOL . '}' . PHP_EOL;
 
         return $this->output;
     }
@@ -238,7 +245,7 @@ class ClassGenerator extends AbstractClassGenerator
         $constants = null;
 
         foreach ($this->constants as $constant) {
-            $constants .= PHP_EOL . $constant->render();
+            $constants .= $constant->render() . PHP_EOL;
         }
 
         return $constants;
@@ -254,7 +261,7 @@ class ClassGenerator extends AbstractClassGenerator
         $props = null;
 
         foreach ($this->properties as $prop) {
-            $props .= PHP_EOL . $prop->render();
+            $props .= $prop->render() . PHP_EOL;
         }
 
         return $props;
@@ -270,7 +277,7 @@ class ClassGenerator extends AbstractClassGenerator
         $methods = null;
 
         foreach ($this->methods as $method) {
-            $methods .= PHP_EOL . $method->render();
+            $methods .= $method->render() . PHP_EOL;
         }
 
         return $methods;

@@ -74,8 +74,6 @@ class MethodGenerator extends AbstractClassElementGenerator
             $this->output .= ';';
         }
 
-        $this->output .= PHP_EOL;
-
         return $this->output;
     }
 

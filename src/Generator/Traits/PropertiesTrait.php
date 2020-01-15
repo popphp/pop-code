@@ -82,8 +82,9 @@ trait PropertiesTrait
     {
         return $this->properties;
     }
+
     /**
-     * Remove a class property
+     * Has a class property
      *
      * @param  mixed $property
      * @return boolean
@@ -92,6 +93,16 @@ trait PropertiesTrait
     {
         $p = ($property instanceof PropertyGenerator) ? $property->getName() : $property;
         return (isset($this->properties[$p]));
+    }
+
+    /**
+     * Has properties
+     *
+     * @return boolean
+     */
+    public function hasProperties()
+    {
+        return (!empty($this->properties));
     }
 
     /**

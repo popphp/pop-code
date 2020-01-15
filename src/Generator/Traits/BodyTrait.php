@@ -36,32 +36,24 @@ trait BodyTrait
      * Set the function body
      *
      * @param  string $body
-     * @param  boolean $newline
      * @return BodyTrait
      */
-    public function setBody($body, $newline = true)
+    public function setBody($body)
     {
         $this->body = $this->printIndent() . '    ' .  str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '    ', $body);
-        if ($newline) {
-            $this->body .= PHP_EOL;
-        }
         return $this;
     }
 
     /**
      * Append to the function body
      *
-     * @param  string  $body
-     * @param  boolean $newline
+     * @param  string $body
      * @return BodyTrait
      */
-    public function appendToBody($body, $newline = true)
+    public function appendToBody($body)
     {
         $body = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '    ', $body);
-        $this->body .= $this->printIndent() . '    ' . $body;
-        if ($newline) {
-            $this->body .= PHP_EOL;
-        }
+        $this->body .= PHP_EOL . $this->printIndent() . '    ' . $body;
         return $this;
     }
 
