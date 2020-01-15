@@ -29,7 +29,7 @@ class PropertyReflection extends AbstractReflection
 {
 
     /**
-     * Method to import code
+     * Method to import a property
      *
      * @param  mixed  $code
      * @param  string $name
@@ -46,8 +46,9 @@ class PropertyReflection extends AbstractReflection
             $visibility = 'public';
         }
 
-        $desc = null;
-        $type = null;
+        $docblock = null;
+        $desc     = null;
+        $type     = null;
 
         $doc = $code->getDocComment();
         if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
@@ -65,6 +66,9 @@ class PropertyReflection extends AbstractReflection
         }
 
         $property = new Generator\PropertyGenerator($code->getName(), $type, $formattedValue, $visibility, $code->isStatic());
+        if (null !== $docblock) {
+            $property->setDocblock($docblock);
+        }
         $property->setDesc($desc);
 
         return $property;

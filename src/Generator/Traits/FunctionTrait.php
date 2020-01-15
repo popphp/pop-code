@@ -62,7 +62,7 @@ trait FunctionTrait
         if (substr($name, 0, 1) != '$') {
             $name = '$' . $name;
         }
-        $this->docblock->setParam($type, $name);
+        $this->docblock->addParam($type, $name);
 
         return $this;
     }

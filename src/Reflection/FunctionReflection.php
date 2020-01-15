@@ -29,7 +29,7 @@ class FunctionReflection extends AbstractReflection
 {
 
     /**
-     * Method to parse a function or closure
+     * Method to import a function or closure
      *
      * @param  mixed  $code
      * @param  string $name
@@ -86,7 +86,7 @@ class FunctionReflection extends AbstractReflection
                         }, $lines);
                     }
                 }
-                $body  = implode('', $lines);
+                $body = implode('', $lines);
             }
 
             if (!empty($body)) {

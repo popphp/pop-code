@@ -29,8 +29,7 @@ class DocblockReflection extends AbstractReflection
 {
 
     /**
-     * Static method to parse a docblock string and return a new
-     * docblock generator object.
+     * Method to import a docblock
      *
      * @param  string $code
      * @param  int    $forceIndent
@@ -92,7 +91,7 @@ class DocblockReflection extends AbstractReflection
                     } else {
                         $paramType = $paramTag;
                     }
-                    $docblock->setParam($paramType, $varName, $paramDesc);
+                    $docblock->addParam($paramType, $varName, $paramDesc);
                 // Else, return tags
                 } else if (stripos($value, 'return') !== false) {
                     $returnTag = trim(str_replace('return', '', $value));

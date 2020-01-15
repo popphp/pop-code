@@ -29,7 +29,7 @@ class NamespaceReflection extends AbstractReflection
 {
 
     /**
-     * Method to import code
+     * Method to import a namespace
      *
      * @param  string $code
      * @param  string $name

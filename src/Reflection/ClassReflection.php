@@ -14,8 +14,6 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
-use Pop\Code\Reflection;
-use Pop\Code\Generator\InterfaceGenerator as IGen;
 
 /**
  * Class reflection code class
@@ -31,29 +29,37 @@ class ClassReflection extends AbstractReflection
 {
 
     /**
-     * Method to parse a function or closure
+     * Method to import a class
      *
      * @param  mixed  $code
      * @param  string $name
+     * @throws Exception
      * @return Generator\ClassGenerator
      */
     public static function import($code, $name = null)
     {
         $reflection     = new \ReflectionClass($code);
         $reflectionName = $reflection->getShortName();
+        $reflectionFile = $reflection->getFileName();
+        $fileContents   = null;
+
+        if (!empty($reflectionFile) && file_exists($reflectionFile)) {
+            $fileContents = file_get_contents($reflectionFile);
+        }
 
         if ((null === $name) && !empty($reflectionName)) {
             $name = $reflectionName;
         }
 
+        if (($reflection->isInterface()) || ($reflection->isTrait())) {
+            throw new Exception('Error: The code must be a class, not an interface or trait.');
+        }
+
         $class = new Generator\ClassGenerator($name);
 
         // Detect and set namespace
-        if ($reflection->inNamespace()) {
-            $file = $reflection->getFileName();
-            if (!empty($file) && file_exists($file)) {
-                $class->setNamespace(NamespaceReflection::import(file_get_contents($file), $reflection->getNamespaceName()));
-            }
+        if (($reflection->inNamespace()) && (null !== $fileContents)) {
+            $class->setNamespace(NamespaceReflection::import($fileContents, $reflection->getNamespaceName()));
         }
 
         // Detect and set the class doc block
@@ -96,6 +102,27 @@ class ClassReflection extends AbstractReflection
             $class->addInterfaces($interfacesAry);
         }
 
+        // Detect used traits
+        if (null !== $fileContents) {
+            $uses = [];
+            preg_match_all('/[ ]+use(.*);$/m', $fileContents, $uses);
+
+            if (isset($uses[1])) {
+                foreach ($uses[1] as $u) {
+                    $useAry = array_map('trim', explode(',', trim($u)));
+                    foreach ($useAry as $useValue) {
+                        if (strpos($useValue, ' as ') !== false) {
+                            [$use, $as] = explode(' as ', $useValue);
+                        } else {
+                            $use = $useValue;
+                            $as  = null;
+                        }
+                        $class->addUse($use, $as);
+                    }
+                }
+            }
+        }
+
         // Detect constants
         $constants = $reflection->getConstants();
         if (count($constants) > 0) {
@@ -106,7 +133,6 @@ class ClassReflection extends AbstractReflection
 
         // Detect properties
         $properties = $reflection->getDefaultProperties();
-
         if (count($properties) > 0) {
             foreach ($properties as $name => $value) {
                 $class->addProperty(PropertyReflection::import($reflection->getProperty($name), $name, $value));
@@ -115,11 +141,9 @@ class ClassReflection extends AbstractReflection
 
         // Detect methods
         $methods = $reflection->getMethods();
-
         if (count($methods) > 0) {
-            foreach ($methods as $value) {
-                $methodExport = \ReflectionMethod::export($value->class, $value->name, true);
-                $class->addMethod(MethodReflection::import($methodExport, $value->name));
+            foreach ($methods as $method) {
+                $class->addMethod(MethodReflection::import($method, $method->name));
             }
         }
 
