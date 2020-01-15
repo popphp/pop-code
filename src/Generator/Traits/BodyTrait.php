@@ -85,6 +85,7 @@ trait BodyTrait
                     $bodyLines[$i] = substr($bodyLine, $indent);
                 }
             }
+            $this->body = implode(PHP_EOL, $bodyLines);
         }
 
         return $this;
