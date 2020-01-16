@@ -2,15 +2,15 @@
 
 namespace Pop\Code\Test;
 
-use Pop\Code\Reflection;
+use Pop\Code\Generator;
 use PHPUnit\Framework\TestCase;
 
-class ReflectionTest extends TestCase
+class ClassGeneratorTest extends TestCase
 {
 
     public function testConstructor()
     {
-        $class = Reflection::createClass('Pop\Code\Test\TestAsset\Test');
+        $class = new Generator\ClassGenerator('Foo');
         $this->assertInstanceOf('Pop\Code\Generator\ClassGenerator', $class);
     }
 
