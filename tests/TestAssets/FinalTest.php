@@ -7,10 +7,8 @@ namespace Pop\Code\Test\TestAssets;
 /**
  * This is another docblock
  */
-class Test extends AbstractTest
+final class FinalTest
 {
-
-    use TestTrait;
 
     /**
      * @var   string
@@ -32,13 +30,6 @@ class Test extends AbstractTest
      */
     public $otherProp = [];
 
-    protected $testProp1 = 'str';
-
-    /**
-     * @var   string
-     */
-    private $testProp2 = null;
-
     /**
      * @param $baz
      */
@@ -51,23 +42,7 @@ class Test extends AbstractTest
     /**
      * @param $str
      */
-    public function printSomething($str)
-    {
-        echo $str;
-    }
-
-    /**
-     * @param $str
-     */
-    protected function test1($str)
-    {
-        echo $str;
-    }
-
-    /**
-     * @param $str
-     */
-    private function test2($str)
+    final public function printSomething($str)
     {
         echo $str;
     }

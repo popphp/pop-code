@@ -89,14 +89,6 @@ class TraitReflection extends AbstractReflection
             }
         }
 
-        // Detect constants
-        $constants = $reflection->getConstants();
-        if (count($constants) > 0) {
-            foreach ($constants as $key => $value) {
-                $trait->addConstant(new Generator\ConstantGenerator($key, gettype($value), $value));
-            }
-        }
-
         // Detect properties
         $properties = $reflection->getDefaultProperties();
         if (count($properties) > 0) {

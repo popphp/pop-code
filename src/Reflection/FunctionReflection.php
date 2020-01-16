@@ -73,7 +73,7 @@ class FunctionReflection extends AbstractReflection
             $length    = $endLine - $startLine;
             $body      = null;
 
-            if (isset($lines[$startLine]) && isset($lines[$endLine])) {
+            if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
                 $lines = array_slice($lines, ($startLine + 1), ($length - 1));
                 if (isset($lines[0]) && (substr($lines[0], 0, 1) == ' ')) {
                     $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));

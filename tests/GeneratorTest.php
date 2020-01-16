@@ -59,6 +59,61 @@ class GeneratorTest extends TestCase
         $this->assertEquals('file.php', $code->getFilename());
     }
 
+    public function testNamespace1()
+    {
+        $functionBody = <<<FUNC
+echo 'You have submitted your name!' . PHP_EOL;
+echo \$name . PHP_EOL;
+FUNC;
+
+        $function = new Generator\FunctionGenerator('foo');
+        $function->addArgument('name');
+        $function->setBody($functionBody);
+
+        $code = new Generator();
+        $code->addCodeObject($function, 'MyNamespace');
+
+        $this->assertContains('namespace MyNamespace {', $code->render());
+    }
+
+    public function testNamespace2()
+    {
+        $functionBody = <<<FUNC
+echo 'You have submitted your name!' . PHP_EOL;
+echo \$name . PHP_EOL;
+FUNC;
+
+        $function = new Generator\FunctionGenerator('foo');
+        $function->addArgument('name');
+        $function->setBody($functionBody);
+
+        $code = new Generator();
+        $code->addCodeObjects(['MyNamespace' => $function]);
+
+        $this->assertContains('namespace MyNamespace {', $code->render());
+    }
+
+    public function testNamespace3()
+    {
+        $functionBody = <<<FUNC
+echo 'You have submitted your name!' . PHP_EOL;
+echo \$name . PHP_EOL;
+FUNC;
+
+        $function1 = new Generator\FunctionGenerator('foo');
+        $function1->addArgument('name');
+        $function1->setBody($functionBody);
+
+        $function2 = new Generator\FunctionGenerator('bar');
+        $function2->addArgument('name');
+        $function2->setBody($functionBody);
+
+        $code = new Generator();
+        $code->addCodeObjects(['MyNamespace' => [$function1, $function2]]);
+
+        $this->assertContains('namespace MyNamespace {', $code->render());
+    }
+
     public function testWriteToFile1()
     {
         $body = new Generator\BodyGenerator();
@@ -133,10 +188,14 @@ MTHD;
         $class->addUse('SomeTrait');
 
         $code   = new Generator($class);
+        $code->setEnv('#!/usr/bin/php');
+        $code->setCloseTag(true);
         $string = (string)$code;
         $render = $code->render();
 
         $this->assertEquals($string, $render);
+
+        $this->assertContains('#!/usr/bin/php', $render);
         $this->assertContains('<?php', $render);
         $this->assertContains('abstract class Foo extends AbstractFoo implements FooInterface, SomeOtherInterface', $render);
         $this->assertContains('use SomeTrait;', $render);
@@ -146,6 +205,115 @@ MTHD;
         $this->assertContains('public $otherProp = [];', $render);
         $this->assertContains('public function bar($baz)', $render);
         $this->assertContains('public function printSomething($str)', $render);
+        $this->assertContains('?>', $render);
+    }
+
+    public function testRenderWithNamespaces()
+    {
+        $functionBody = <<<FUNC
+echo 'You have submitted your name!' . PHP_EOL;
+echo \$name . PHP_EOL;
+FUNC;
+
+        $function1 = new Generator\FunctionGenerator('foo');
+        $function1->addArgument('name');
+        $function1->setBody($functionBody);
+
+        $function2 = new Generator\FunctionGenerator('bar');
+        $function2->addArgument('name');
+        $function2->setBody($functionBody);
+
+        $function3 = new Generator\FunctionGenerator('baz');
+        $function3->addArgument('name');
+        $function3->setBody($functionBody);
+
+        $function4 = new Generator\FunctionGenerator('test');
+        $function4->addArgument('name');
+        $function4->setBody($functionBody);
+
+        $code = new Generator();
+        $code->addCodeObjects(['MyNamespace' => $function1]);
+        $code->addCodeObject($function3, '*');
+        $code->addCodeObject($function4);
+        $code->addCodeObjects(['MyNamespace' => $function2]);
+
+        $render = $code->render();
+
+        $this->assertContains('namespace MyNamespace {', $render);
+        $this->assertContains('namespace {', $render);
+    }
+
+    public function testOutputToHttp1()
+    {
+        $functionBody = <<<FUNC
+echo 'You have submitted your name!' . PHP_EOL;
+echo \$name . PHP_EOL;
+FUNC;
+
+        $function1 = new Generator\FunctionGenerator('foo');
+        $function1->addArgument('name');
+        $function1->setBody($functionBody);
+
+        $function2 = new Generator\FunctionGenerator('bar');
+        $function2->addArgument('name');
+        $function2->setBody($functionBody);
+
+        $function3 = new Generator\FunctionGenerator('baz');
+        $function3->addArgument('name');
+        $function3->setBody($functionBody);
+
+        $function4 = new Generator\FunctionGenerator('test');
+        $function4->addArgument('name');
+        $function4->setBody($functionBody);
+
+        $code = new Generator();
+        $code->addCodeObjects(['MyNamespace' => $function1]);
+        $code->addCodeObject($function3, '*');
+        $code->addCodeObject($function4);
+        $code->addCodeObjects(['MyNamespace' => $function2]);
+
+        ob_start();
+        $code->outputToHttp();
+        $results = ob_get_clean();
+
+        $this->assertContains('<?php', $results);
+    }
+
+    public function testOutputToHttp2()
+    {
+        $functionBody = <<<FUNC
+echo 'You have submitted your name!' . PHP_EOL;
+echo \$name . PHP_EOL;
+FUNC;
+
+        $function1 = new Generator\FunctionGenerator('foo');
+        $function1->addArgument('name');
+        $function1->setBody($functionBody);
+
+        $function2 = new Generator\FunctionGenerator('bar');
+        $function2->addArgument('name');
+        $function2->setBody($functionBody);
+
+        $function3 = new Generator\FunctionGenerator('baz');
+        $function3->addArgument('name');
+        $function3->setBody($functionBody);
+
+        $function4 = new Generator\FunctionGenerator('test');
+        $function4->addArgument('name');
+        $function4->setBody($functionBody);
+
+        $code = new Generator();
+        $code->setFilename('code.php');
+        $code->addCodeObjects(['MyNamespace' => $function1]);
+        $code->addCodeObject($function3, '*');
+        $code->addCodeObject($function4);
+        $code->addCodeObjects(['MyNamespace' => $function2]);
+
+        ob_start();
+        $code->outputToHttp();
+        $results = ob_get_clean();
+
+        $this->assertContains('<?php', $results);
     }
 
 }

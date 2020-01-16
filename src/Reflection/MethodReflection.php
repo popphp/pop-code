@@ -88,7 +88,7 @@ class MethodReflection extends AbstractReflection
             $length    = $endLine - $startLine;
             $body      = null;
 
-            if (isset($lines[$startLine]) && isset($lines[$endLine])) {
+            if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
                 $lines = array_slice($lines, ($startLine + 1), $length);
 
                 if (preg_match('/[ ]+\}/', $lines[(count($lines) - 1)])) {
