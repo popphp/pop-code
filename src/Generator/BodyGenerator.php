@@ -49,7 +49,7 @@ class BodyGenerator extends AbstractGenerator
         $body    = preg_replace("/^([ ]*)(.*)/m", $replacePattern, $body);
         $bodyAry = preg_split("/\r\n|\n|\r/", $body);
         $bodyAry = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [null, ']$1', ' => ['], $bodyAry);
-        $body    = implode(PHP_EOL, array_filter(["["] + $bodyAry));
+        $body    = str_replace('NULL', 'null', implode(PHP_EOL, array_filter(["["] + $bodyAry)));
 
         $this->setBody('return ' . $body . ';', 0);
 
