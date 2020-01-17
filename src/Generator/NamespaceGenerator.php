@@ -56,7 +56,7 @@ class NamespaceGenerator extends AbstractGenerator
 
         $this->output  = $this->docblock->render();
 
-        if (!empty($name)) {
+        if (!empty($this->name)) {
             $this->output .= $this->printIndent() . 'namespace ' . $this->name . ';' . PHP_EOL;
         }
 

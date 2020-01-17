@@ -36,11 +36,13 @@ trait BodyTrait
      * Set the function body
      *
      * @param  string $body
+     * @param  int    $indent
      * @return BodyTrait
      */
-    public function setBody($body)
+    public function setBody($body, $indent = 4)
     {
-        $this->body = $this->printIndent() . '    ' .  str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '    ', $body);
+        $this->body = $this->printIndent() . str_repeat(' ', $indent) .
+            str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . str_repeat(' ', $indent), $body);
         return $this;
     }
 

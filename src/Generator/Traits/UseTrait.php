@@ -53,11 +53,11 @@ trait UseTrait
      */
     public function addUses(array $uses)
     {
-        foreach ($uses as $use) {
-            if (is_array($use)) {
-                $this->uses[$use[0]] = (isset($use[1])) ? $use[1] : null;
+        foreach ($uses as $as => $use) {
+            if (!is_numeric($as)) {
+                $this->addUse($use, $as);
             } else {
-                $this->uses[$use] = null;
+                $this->addUse($use);
             }
         }
         return $this;

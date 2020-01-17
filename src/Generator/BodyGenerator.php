@@ -31,12 +31,11 @@ class BodyGenerator extends AbstractGenerator
     /**
      * Create return config
      *
-     * @param  array   $config
-     * @param  int     $indent
-     * @param  boolean $newline
+     * @param  array $config
+     * @param  int   $indent
      * @return BodyGenerator
      */
-    public function createReturnConfig(array $config, $indent = 4, $newline = true)
+    public function createReturnConfig(array $config, $indent = 4)
     {
         $body = var_export($config, true);
 
@@ -52,7 +51,7 @@ class BodyGenerator extends AbstractGenerator
         $bodyAry = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [null, ']$1', ' => ['], $bodyAry);
         $body    = implode(PHP_EOL, array_filter(["["] + $bodyAry));
 
-        $this->setBody('return ' . $body . ';', $newline);
+        $this->setBody('return ' . $body . ';', 0);
 
         return $this;
     }

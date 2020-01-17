@@ -218,6 +218,39 @@ class DocblockGenerator extends AbstractGenerator
     }
 
     /**
+     * Add a throws tag
+     *
+     * @param  string $type
+     * @param  string $desc
+     * @return DocblockGenerator
+     */
+    public function setThrows($type, $desc = null)
+    {
+        $this->tags['throws'] = ['type' => $type, 'desc' => $desc];
+        return $this;
+    }
+
+    /**
+     * Get the throws
+     *
+     * @return array
+     */
+    public function getThrows()
+    {
+        return (isset($this->tags['throws'])) ? $this->tags['throws'] : null;
+    }
+
+    /**
+     * Has a throws
+     *
+     * @return boolean
+     */
+    public function hasThrows()
+    {
+        return (isset($this->tags['throws']));
+    }
+
+    /**
      * Render docblock
      *
      * @return string
@@ -281,9 +314,13 @@ class DocblockGenerator extends AbstractGenerator
 
         // Format throw tag
         if (array_key_exists('throws', $this->tags)) {
+            $throws = $this->tags['throws']['type'];
+            if (!empty($this->tags['throws']['desc'])) {
+                $throws .= ' ' . $this->tags['throws']['desc'];
+            }
             $tags .= $this->printIndent() . ' * @throws' .
                 str_repeat(' ', $tagLength - 5) .
-                $this->tags['throws'] . PHP_EOL;
+                $throws . PHP_EOL;
         }
 
         // Format return tag
