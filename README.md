@@ -21,6 +21,103 @@ Install `pop-code` using Composer.
 BASIC USAGE
 -----------
 
+There are a number of individual code generators available to manage the creation and output of
+various types of code blocks. Code generators are available for the following type of code:
+
+- Classes
+- Interfaces
+- Traits
+- Methods
+- Functions
+- Constants
+- Properties
+- Namespaces
+- Docblocks
+- Bodies (general blocks of code) 
+
+### A simple function
+
+```php
+use Pop\Code\Generator;
+
+$function = new Generator\FunctionGenerator('sayHello');
+$function->addArgument('name');
+$function->setBody("echo 'Hello ' . \$name;");
+$function->setDesc('This is the first function');
+
+echo $function;
+```
+
+The above code will produce the following function:
+
+```php
+/**
+ * This is the first function
+ * 
+ * @param $name
+ */
+function sayHello($name)
+{
+    echo 'Hello ' . $name;
+}
+
+```
+
+If you'd like to generate a standalone block or file of code, the main class
+`Pop\Code\Generator` can consume instances of the various available code generators.
+With it, you have flexibility to generate code that can be saved to a file or output
+to the screen. 
+
+### Create a file with some functions
+
+```php
+use Pop\Code\Generator;
+
+$function1 = new Generator\FunctionGenerator('sayHello');
+$function1->addArgument('name');
+$function1->setBody("echo 'Hello ' . \$name;");
+$function1->setDesc('This is the first function');
+
+$function2 = new Generator\FunctionGenerator('sayGoodbye');
+$function2->addArgument('name');
+$function2->setBody("echo 'Goodbye ' . \$name;");
+$function2->setDesc('This is the second function');
+
+$code = new Generator();
+$code->addCodeObjects([$function1, $function2]);
+$code->writeToFile('code.php');
+```
+
+The above code will produce a file called `code.php` with the following
+code in it:
+
+```php
+<?php
+
+/**
+ * This is the first function
+ * 
+ * @param $name
+ */
+function sayHello($name)
+{
+    echo 'Hello ' . $name;
+}
+
+/**
+ * This is the second function
+ * 
+ * @param $name
+ */
+function sayGoodbye($name)
+{
+    echo 'Goodbye ' . $name;
+}
+```
+
+
+
+
 ### Create a class with a property and a method
 
 ```php
