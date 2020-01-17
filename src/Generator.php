@@ -254,7 +254,7 @@ class Generator extends Generator\AbstractGenerator
         }
 
         $this->output    .= '<?php' . PHP_EOL;
-        $this->output    .= (null !== $this->docblock) ? $this->docblock->render() . PHP_EOL : PHP_EOL;
+        $this->output    .= (null !== $this->docblock) ? $this->docblock->render() . PHP_EOL : null;
         $currentNamespace = null;
         $inNamespace      = false;
 
