@@ -76,6 +76,9 @@ trait FunctionTrait
     public function addArguments(array $args)
     {
         foreach ($args as $arg) {
+            if (!isset($arg['name'])) {
+                throw new \InvalidArgumentException("Error: The 'name' key was not set.");
+            }
             $value = (isset($arg['value'])) ? $arg['value'] : null;
             $type  = (isset($arg['type'])) ? $arg['type'] : null;
             $this->addArgument($arg['name'], $value, $type);
@@ -92,6 +95,16 @@ trait FunctionTrait
     public function hasArgument($name)
     {
         return (isset($this->arguments[$name]));
+    }
+
+    /**
+     * Has arguments
+     *
+     * @return boolean
+     */
+    public function hasArguments()
+    {
+        return (!empty($this->arguments));
     }
 
     /**
@@ -150,6 +163,16 @@ trait FunctionTrait
     public function hasParameter($name)
     {
         return $this->hasArgument($name);
+    }
+
+    /**
+     * Has arguments (alias method for convenience)
+     *
+     * @return boolean
+     */
+    public function hasParameters()
+    {
+        return $this->hasArguments();
     }
 
     /**

@@ -11,6 +11,10 @@ class PropertyGeneratorTest extends TestCase
     public function testTypeAndValue()
     {
         $property = new Generator\PropertyGenerator('foo', 'string', 'foo_value');
+        $property->setDesc('Desc');
+        $this->assertTrue($property->hasDesc());
+        $this->assertTrue($property->hasName());
+        $this->assertEquals('Desc', $property->getDesc());
         $this->assertEquals('string', $property->getType());
         $this->assertEquals('foo_value', $property->getValue());
         $this->assertTrue($property->hasValue());

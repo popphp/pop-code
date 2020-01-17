@@ -19,7 +19,8 @@ class TraitGeneratorTest extends TestCase
 
         $trait->addProperties([
             new Generator\PropertyGenerator('prop', 'string', 'STRING'),
-            new Generator\PropertyGenerator('otherProp', 'string', 'STRING')
+            new Generator\PropertyGenerator('otherProp', 'string', 'STRING'),
+            new Generator\PropertyGenerator('someProp', 'string', 'STRING')
         ]);
 
         $trait->addMethods([
@@ -28,6 +29,17 @@ class TraitGeneratorTest extends TestCase
         ]);
 
         $trait->addUse('OtherTrait');
+
+        $this->assertTrue($trait->hasProperty('someProp'));
+        $this->assertInstanceOf('Pop\Code\Generator\PropertyGenerator', $trait->getProperty('someProp'));
+        $this->assertEquals(3, count($trait->getProperties()));
+
+        $trait->removeProperty('someProp');
+        $this->assertFalse($trait->hasProperty('someProp'));
+        $this->assertEquals(2, count($trait->getProperties()));
+
+        $this->assertTrue($trait->hasUse('OtherTrait'));
+        $this->assertEquals(1, count($trait->getUses()));
 
         $render = (string)$trait;
 

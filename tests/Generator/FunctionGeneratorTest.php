@@ -23,4 +23,34 @@ class FunctionGeneratorTest extends TestCase
         $function->render();
     }
 
+    public function testAddArgumentsException()
+    {
+        $this->expectException('InvalidArgumentException');
+        $function = new Generator\FunctionGenerator();
+        $function->addParameters([
+            'name'  => 'bar',
+            'value' => 'hello',
+            'type'  => 'string'
+        ]);
+    }
+
+    public function testArguments()
+    {
+        $function = new Generator\FunctionGenerator('someFunc');
+        $function->addParameter('foo', '123', 'int');
+        $function->addParameters([
+            [
+                'name'  => 'bar',
+                'value' => 'hello',
+                'type'  => 'string'
+            ]
+        ]);
+
+        $this->assertTrue($function->hasParameters());
+        $this->assertTrue($function->hasParameter('foo'));
+        $this->assertEquals(2, count($function->getParameters()));
+        $this->assertEquals('123', $function->getParameter('foo')['value']);
+        $this->assertContains("function someFunc(\$foo = 123, \$bar = hello)", (string)$function);
+    }
+
 }
