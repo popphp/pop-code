@@ -49,6 +49,7 @@ class MethodReflection extends AbstractReflection
         $doc      = $code->getDocComment();
         if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
             $docblock = DocblockReflection::parse($doc);
+            $docblock->setIndent(4);
         }
 
         $method = new Generator\MethodGenerator($code->getName(), $visibility, $code->isStatic());
@@ -116,7 +117,7 @@ class MethodReflection extends AbstractReflection
             }
 
             if (!empty($body)) {
-                $method->setBody($body, false);
+                $method->setBody($body);
             }
         }
 

@@ -3,7 +3,7 @@
     "description": "Pop Code Component for Pop PHP Framework",
     "keywords": [
         "code generation",
-        "reflection",
+        "code reflection",
         "php",
         "pop",
         "pop php"
@@ -35,7 +35,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "3.1.x-dev"
+            "dev-master": "4.0.x-dev"
         }
     }
 }

@@ -53,6 +53,7 @@ class PropertyReflection extends AbstractReflection
         $doc = $code->getDocComment();
         if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
             $docblock = DocblockReflection::parse($doc);
+            $docblock->setIndent(4);
             $desc     = $docblock->getDesc();
             $type     = $docblock->getTag('var');
         } else if (null !== $value) {
