@@ -43,14 +43,14 @@ class TraitGeneratorTest extends TestCase
 
         $render = (string)$trait;
 
-        $this->assertContains('trait FooTrait', $render);
-        $this->assertContains('use OtherTrait;', $render);
-        $this->assertContains("const SOME_CONSTANT = 'STRING';", $render);
-        $this->assertContains("const SOME_OTHER_CONSTANT = 'STRING';", $render);
-        $this->assertContains("public \$prop = 'STRING';", $render);
-        $this->assertContains("public \$otherProp = 'STRING';", $render);
-        $this->assertContains('abstract public function foo();', $render);
-        $this->assertContains('abstract public function bar();', $render);
+        $this->assertStringContainsString('trait FooTrait', $render);
+        $this->assertStringContainsString('use OtherTrait;', $render);
+        $this->assertStringContainsString("const SOME_CONSTANT = 'STRING';", $render);
+        $this->assertStringContainsString("const SOME_OTHER_CONSTANT = 'STRING';", $render);
+        $this->assertStringContainsString("public \$prop = 'STRING';", $render);
+        $this->assertStringContainsString("public \$otherProp = 'STRING';", $render);
+        $this->assertStringContainsString('abstract public function foo();', $render);
+        $this->assertStringContainsString('abstract public function bar();', $render);
     }
 
 }

@@ -42,11 +42,11 @@ class BodyGeneratorTest extends TestCase
 
         $render = (string)$body;
 
-        $this->assertContains("return [", $render);
-        $this->assertContains("'database' => 'my_db',", $render);
-        $this->assertContains("'username' => 'db_user',", $render);
-        $this->assertContains("'password' => 'db_pass',", $render);
-        $this->assertContains("];", $render);
+        $this->assertStringContainsString("return [", $render);
+        $this->assertStringContainsString("'database' => 'my_db',", $render);
+        $this->assertStringContainsString("'username' => 'db_user',", $render);
+        $this->assertStringContainsString("'password' => 'db_pass',", $render);
+        $this->assertStringContainsString("];", $render);
     }
 
     public function testCreateReturnConfig2()
@@ -63,11 +63,11 @@ class BodyGeneratorTest extends TestCase
 
         $render = (string)$body;
 
-        $this->assertContains("return [", $render);
-        $this->assertContains("'database' => 'my_db',", $render);
-        $this->assertContains("'username' => 'db_user',", $render);
-        $this->assertContains("'password' => 'db_pass',", $render);
-        $this->assertContains("];", $render);
+        $this->assertStringContainsString("return [", $render);
+        $this->assertStringContainsString("'database' => 'my_db',", $render);
+        $this->assertStringContainsString("'username' => 'db_user',", $render);
+        $this->assertStringContainsString("'password' => 'db_pass',", $render);
+        $this->assertStringContainsString("];", $render);
     }
 
 }

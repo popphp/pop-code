@@ -50,15 +50,15 @@ class DocblockGeneratorTest extends TestCase
         $this->assertEquals('Exception', $docblock->getThrows()['type']);
 
         $render = (string)$docblock;
-        $this->assertContains('    /**', $render);
-        $this->assertContains('     * This is a long description. This is a long description. This is a long', $render);
-        $this->assertContains('     * description. This is a long description. This is a long description.', $render);
-        $this->assertContains('     * This is a long description.', $render);
-        $this->assertContains('     * ', $render);
-        $this->assertContains('     * @param  string  fooFoo var', $render);
-        $this->assertContains('     * @throws Exception Error occurred', $render);
-        $this->assertContains('     * @return array', $render);
-        $this->assertContains('     */', $render);
+        $this->assertStringContainsString('    /**', $render);
+        $this->assertStringContainsString('     * This is a long description. This is a long description. This is a long', $render);
+        $this->assertStringContainsString('     * description. This is a long description. This is a long description.', $render);
+        $this->assertStringContainsString('     * This is a long description.', $render);
+        $this->assertStringContainsString('     * ', $render);
+        $this->assertStringContainsString('     * @param  string  fooFoo var', $render);
+        $this->assertStringContainsString('     * @throws Exception Error occurred', $render);
+        $this->assertStringContainsString('     * @return array', $render);
+        $this->assertStringContainsString('     */', $render);
     }
 
 }

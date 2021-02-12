@@ -13,7 +13,7 @@ class FunctionGeneratorTest extends TestCase
         $function = new Generator\FunctionGenerator('foo', true);
         $function->setBody("echo 'Hello World!;");
         $this->assertTrue($function->isClosure());
-        $this->assertContains('};', $function->render());
+        $this->assertStringContainsString('};', $function->render());
     }
 
     public function testRenderException()
@@ -50,7 +50,7 @@ class FunctionGeneratorTest extends TestCase
         $this->assertTrue($function->hasParameter('foo'));
         $this->assertEquals(2, count($function->getParameters()));
         $this->assertEquals('123', $function->getParameter('foo')['value']);
-        $this->assertContains("function someFunc(\$foo = 123, \$bar = hello)", (string)$function);
+        $this->assertStringContainsString("function someFunc(\$foo = 123, \$bar = hello)", (string)$function);
     }
 
 }

@@ -18,8 +18,8 @@ class NamespaceGeneratorTest extends TestCase
 
         $render = (string)$namespace;
 
-        $this->assertContains('namespace MyApp;', $render);
-        $this->assertContains('use MyApp\Foo;', $render);
-        $this->assertContains('use MyApp\Foo\Bar as B;', $render);
+        $this->assertStringContainsString('namespace MyApp;', $render);
+        $this->assertStringContainsString('use MyApp\Foo;', $render);
+        $this->assertStringContainsString('use MyApp\Foo\Bar as B;', $render);
     }
 }

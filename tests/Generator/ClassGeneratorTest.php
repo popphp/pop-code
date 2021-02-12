@@ -101,7 +101,7 @@ class ClassGeneratorTest extends TestCase
     {
         $class = new Generator\ClassGenerator('Foo');
         $class->setAsFinal(true);
-        $this->assertContains('final class Foo', $class->render());
+        $this->assertStringContainsString('final class Foo', $class->render());
     }
 
 }

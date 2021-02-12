@@ -31,11 +31,11 @@ class InterfaceGeneratorTest extends TestCase
 
         $render = (string)$interface;
 
-        $this->assertContains('interface FooInterface extends AbstractFoo', $render);
-        $this->assertContains("const SOME_CONSTANT = 'STRING';", $render);
-        $this->assertContains("const SOME_OTHER_CONSTANT = 'STRING';", $render);
-        $this->assertContains('public function foo();', $render);
-        $this->assertContains('public function bar();', $render);
+        $this->assertStringContainsString('interface FooInterface extends AbstractFoo', $render);
+        $this->assertStringContainsString("const SOME_CONSTANT = 'STRING';", $render);
+        $this->assertStringContainsString("const SOME_OTHER_CONSTANT = 'STRING';", $render);
+        $this->assertStringContainsString('public function foo();', $render);
+        $this->assertStringContainsString('public function bar();', $render);
     }
 
 }

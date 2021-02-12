@@ -73,7 +73,7 @@ FUNC;
         $code = new Generator();
         $code->addCodeObject($function, 'MyNamespace');
 
-        $this->assertContains('namespace MyNamespace {', $code->render());
+        $this->assertStringContainsString('namespace MyNamespace {', $code->render());
     }
 
     public function testNamespace2()
@@ -90,7 +90,7 @@ FUNC;
         $code = new Generator();
         $code->addCodeObjects(['MyNamespace' => $function]);
 
-        $this->assertContains('namespace MyNamespace {', $code->render());
+        $this->assertStringContainsString('namespace MyNamespace {', $code->render());
     }
 
     public function testNamespace3()
@@ -111,7 +111,7 @@ FUNC;
         $code = new Generator();
         $code->addCodeObjects(['MyNamespace' => [$function1, $function2]]);
 
-        $this->assertContains('namespace MyNamespace {', $code->render());
+        $this->assertStringContainsString('namespace MyNamespace {', $code->render());
     }
 
     public function testWriteToFile1()
@@ -195,17 +195,17 @@ MTHD;
 
         $this->assertEquals($string, $render);
 
-        $this->assertContains('#!/usr/bin/php', $render);
-        $this->assertContains('<?php', $render);
-        $this->assertContains('abstract class Foo extends AbstractFoo implements FooInterface, SomeOtherInterface', $render);
-        $this->assertContains('use SomeTrait;', $render);
-        $this->assertContains('const SOME_STR = \'value\';', $render);
-        $this->assertContains('const SOME_NUM = \'123\';', $render);
-        $this->assertContains('public $myProp = null;', $render);
-        $this->assertContains('public $otherProp = [];', $render);
-        $this->assertContains('public function bar($baz)', $render);
-        $this->assertContains('public function printSomething($str)', $render);
-        $this->assertContains('?>', $render);
+        $this->assertStringContainsString('#!/usr/bin/php', $render);
+        $this->assertStringContainsString('<?php', $render);
+        $this->assertStringContainsString('abstract class Foo extends AbstractFoo implements FooInterface, SomeOtherInterface', $render);
+        $this->assertStringContainsString('use SomeTrait;', $render);
+        $this->assertStringContainsString('const SOME_STR = \'value\';', $render);
+        $this->assertStringContainsString('const SOME_NUM = \'123\';', $render);
+        $this->assertStringContainsString('public $myProp = null;', $render);
+        $this->assertStringContainsString('public $otherProp = [];', $render);
+        $this->assertStringContainsString('public function bar($baz)', $render);
+        $this->assertStringContainsString('public function printSomething($str)', $render);
+        $this->assertStringContainsString('?>', $render);
     }
 
     public function testRenderWithNamespaces()
@@ -239,8 +239,8 @@ FUNC;
 
         $render = $code->render();
 
-        $this->assertContains('namespace MyNamespace {', $render);
-        $this->assertContains('namespace {', $render);
+        $this->assertStringContainsString('namespace MyNamespace {', $render);
+        $this->assertStringContainsString('namespace {', $render);
     }
 
     public function testOutputToHttp1()
@@ -276,7 +276,7 @@ FUNC;
         $code->outputToHttp();
         $results = ob_get_clean();
 
-        $this->assertContains('<?php', $results);
+        $this->assertStringContainsString('<?php', $results);
     }
 
     public function testOutputToHttp2()
@@ -313,7 +313,7 @@ FUNC;
         $code->outputToHttp();
         $results = ob_get_clean();
 
-        $this->assertContains('<?php', $results);
+        $this->assertStringContainsString('<?php', $results);
     }
 
 }

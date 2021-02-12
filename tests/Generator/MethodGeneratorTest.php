@@ -13,7 +13,7 @@ class MethodGeneratorTest extends TestCase
         $method = new Generator\MethodGenerator('foo');
         $method->addArgument('var');
         $method->setAsAbstract(true);
-        $this->assertContains('abstract public function foo($var);', (string)$method);
+        $this->assertStringContainsString('abstract public function foo($var);', (string)$method);
     }
 
     public function testStatic()
@@ -22,7 +22,7 @@ class MethodGeneratorTest extends TestCase
         $method->addArgument('var');
         $method->setAsStatic(true);
         $this->assertTrue($method->isStatic());
-        $this->assertContains('public static function foo($var)', (string)$method);
+        $this->assertStringContainsString('public static function foo($var)', (string)$method);
     }
 
     public function testPublic()
@@ -31,7 +31,7 @@ class MethodGeneratorTest extends TestCase
         $method->setAsPublic();
         $this->assertTrue($method->isPublic());
         $this->assertEquals('public', $method->getVisibility());
-        $this->assertContains('public function foo', (string)$method);
+        $this->assertStringContainsString('public function foo', (string)$method);
     }
 
     public function testProtected()
@@ -40,7 +40,7 @@ class MethodGeneratorTest extends TestCase
         $method->setAsProtected();
         $this->assertTrue($method->isProtected());
         $this->assertEquals('protected', $method->getVisibility());
-        $this->assertContains('protected function foo', (string)$method);
+        $this->assertStringContainsString('protected function foo', (string)$method);
     }
 
     public function testPrivate()
@@ -49,7 +49,7 @@ class MethodGeneratorTest extends TestCase
         $method->setAsPrivate();
         $this->assertTrue($method->isPrivate());
         $this->assertEquals('private', $method->getVisibility());
-        $this->assertContains('private function foo', (string)$method);
+        $this->assertStringContainsString('private function foo', (string)$method);
     }
 
     public function testVisibilityException()

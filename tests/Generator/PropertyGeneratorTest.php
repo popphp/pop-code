@@ -24,33 +24,33 @@ class PropertyGeneratorTest extends TestCase
     public function testRender()
     {
         $property = new Generator\PropertyGenerator('foo', 'string', 'foo_value');
-        $this->assertContains("public \$foo = 'foo_value'", (string)$property);
+        $this->assertStringContainsString("public \$foo = 'foo_value'", (string)$property);
     }
 
     public function testRenderInt()
     {
         $property = new Generator\PropertyGenerator('foo', 'int', 1);
-        $this->assertContains("public \$foo = 1", (string)$property);
+        $this->assertStringContainsString("public \$foo = 1", (string)$property);
     }
 
     public function testRenderBoolean()
     {
         $property = new Generator\PropertyGenerator('foo', 'boolean', true);
-        $this->assertContains("public \$foo = true", (string)$property);
+        $this->assertStringContainsString("public \$foo = true", (string)$property);
     }
 
     public function testRenderArray()
     {
         $property = new Generator\PropertyGenerator('foo', 'array', [1, 2, 3]);
-        $this->assertContains("public \$foo = [", (string)$property);
-        $this->assertContains("];", (string)$property);
+        $this->assertStringContainsString("public \$foo = [", (string)$property);
+        $this->assertStringContainsString("];", (string)$property);
     }
 
     public function testRenderAssocArray()
     {
         $property = new Generator\PropertyGenerator('foo', 'array', ['x' => 1, 'y' => 2, 'z' => 3]);
-        $this->assertContains("public \$foo = [", (string)$property);
-        $this->assertContains("];", (string)$property);
+        $this->assertStringContainsString("public \$foo = [", (string)$property);
+        $this->assertStringContainsString("];", (string)$property);
     }
 
 }
