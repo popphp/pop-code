@@ -366,7 +366,7 @@ class DocblockGenerator extends AbstractGenerator
         $length = 0;
 
         foreach ($this->tags['param'] as $param) {
-            if (strlen($param['type']) > $length) {
+            if (!empty($param['type']) && (strlen($param['type']) > $length)) {
                 $length = strlen($param['type']);
             }
         }
