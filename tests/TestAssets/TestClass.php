@@ -7,7 +7,7 @@ namespace Pop\Code\Test\TestAssets;
 /**
  * This is another docblock
  */
-class Test extends AbstractTest
+class TestClass extends AbstractTestClass
 {
 
     use TestTrait;

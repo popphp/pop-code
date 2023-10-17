@@ -11,7 +11,7 @@ class TraitReflectionTest extends TestCase
     public function testException()
     {
         $this->expectException('Pop\Code\Reflection\Exception');
-        $trait = Reflection\TraitReflection::parse('Pop\Code\Test\TestAssets\Test');
+        $trait = Reflection\TraitReflection::parse('Pop\Code\Test\TestAssets\TestClass');
     }
 
 }

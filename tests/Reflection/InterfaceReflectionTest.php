@@ -11,7 +11,7 @@ class InterfaceReflectionTest extends TestCase
     public function testInterfaceException()
     {
         $this->expectException('Pop\Code\Reflection\Exception');
-        $interface = Reflection\InterfaceReflection::parse('Pop\Code\Test\TestAssets\Test');
+        $interface = Reflection\InterfaceReflection::parse('Pop\Code\Test\TestAssets\TestClass');
     }
 
 }

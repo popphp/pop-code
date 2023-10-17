@@ -10,7 +10,7 @@ class ClassReflectionTest extends TestCase
 
     public function testClass()
     {
-        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\Test');
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestClass');
         $this->assertInstanceOf('Pop\Code\Generator\ClassGenerator', $class);
     }
 
@@ -22,13 +22,13 @@ class ClassReflectionTest extends TestCase
 
     public function testAbstractClass()
     {
-        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\AbstractTest');
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\AbstractTestClass');
         $this->assertTrue($class->isAbstract());
     }
 
     public function testFinalClass()
     {
-        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\FinalTest');
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\FinalTestClass');
         $this->assertTrue($class->isFinal());
     }
 

@@ -7,7 +7,7 @@ namespace Pop\Code\Test\TestAssets;
 /**
  * This is another docblock
  */
-abstract class AbstractTest implements TestInterface
+abstract class AbstractTestClass implements TestInterface
 {
 
     /**

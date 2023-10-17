@@ -7,7 +7,7 @@ namespace Pop\Code\Test\TestAssets;
 /**
  * This is another docblock
  */
-final class FinalTest
+final class FinalTestClass
 {
 
     /**

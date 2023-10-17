@@ -10,7 +10,7 @@ class ReflectionTest extends TestCase
 
     public function testCreateClass()
     {
-        $class = Reflection::createClass('Pop\Code\Test\TestAssets\Test');
+        $class = Reflection::createClass('Pop\Code\Test\TestAssets\TestClass');
         $this->assertInstanceOf('Pop\Code\Generator\ClassGenerator', $class);
     }
 
@@ -66,7 +66,7 @@ CODE;
 
     public function testCreateMethod()
     {
-        $class   = new \ReflectionClass('Pop\Code\Test\TestAssets\Test');
+        $class   = new \ReflectionClass('Pop\Code\Generator\ConstantGenerator');
         $methods = $class->getMethods();
 
         $method = Reflection::createMethod($methods[0]);
@@ -75,7 +75,7 @@ CODE;
 
     public function testCreateProperty()
     {
-        $class      = new \ReflectionClass('Pop\Code\Test\TestAssets\Test');
+        $class      = new \ReflectionClass('Pop\Code\Generator\ConstantGenerator');
         $properties = $class->getProperties();
 
         $property = Reflection::createProperty($properties[0]);
