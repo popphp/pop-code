@@ -1,6 +1,6 @@
 <?php
 
-namespace Pop\Code\Test;
+namespace Pop\Code\Test\Generator;
 
 use Pop\Code\Generator;
 use PHPUnit\Framework\TestCase;
@@ -35,7 +35,7 @@ class PropertyGeneratorTest extends TestCase
 
     public function testRenderBoolean()
     {
-        $property = new Generator\PropertyGenerator('foo', 'boolean', true);
+        $property = new Generator\PropertyGenerator('foo', 'bool', true);
         $this->assertStringContainsString("public \$foo = true", (string)$property);
     }
 

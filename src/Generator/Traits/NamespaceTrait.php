@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,27 +21,27 @@ use Pop\Code\Generator\NamespaceGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait NamespaceTrait
 {
 
     /**
      * Namespace generator object
-     * @var NamespaceGenerator
+     * @var ?NamespaceGenerator
      */
-    protected $namespace = null;
+    protected ?NamespaceGenerator $namespace = null;
 
 
     /**
      * Set the namespace generator object
      *
      * @param  NamespaceGenerator $namespace
-     * @return NamespaceTrait
+     * @return static
      */
-    public function setNamespace(NamespaceGenerator $namespace)
+    public function setNamespace(NamespaceGenerator $namespace): static
     {
         $this->namespace = $namespace;
         return $this;
@@ -50,9 +50,9 @@ trait NamespaceTrait
     /**
      * Access the namespace generator object
      *
-     * @return NamespaceGenerator
+     * @return NamespaceGenerator|null
      */
-    public function getNamespace()
+    public function getNamespace(): NamespaceGenerator|null
     {
         return $this->namespace;
     }
@@ -60,11 +60,11 @@ trait NamespaceTrait
     /**
      * Has a namespace generator object
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasNamespace()
+    public function hasNamespace(): bool
     {
-        return (null !== $this->namespace);
+        return ($this->namespace !== null);
     }
 
 }

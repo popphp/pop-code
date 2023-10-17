@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,27 +19,27 @@ namespace Pop\Code\Generator\Traits;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait BodyTrait
 {
 
     /**
      * Function body
-     * @var string
+     * @var ?string
      */
-    protected $body = null;
+    protected ?string $body = null;
 
     /**
      * Set the function body
      *
      * @param  string $body
      * @param  int    $indent
-     * @return BodyTrait
+     * @return static
      */
-    public function setBody($body, $indent = 4)
+    public function setBody(string $body, int $indent = 4): static
     {
         $this->body = $this->printIndent() . str_repeat(' ', $indent) .
             str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . str_repeat(' ', $indent), $body);
@@ -50,9 +50,9 @@ trait BodyTrait
      * Append to the function body
      *
      * @param  string $body
-     * @return BodyTrait
+     * @return static
      */
-    public function appendToBody($body)
+    public function appendToBody(string $body): static
     {
         $body = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '    ', $body);
         $this->body .= PHP_EOL . $this->printIndent() . '    ' . $body;
@@ -63,9 +63,9 @@ trait BodyTrait
      * Append to the function body
      *
      * @param  int $indent
-     * @return BodyTrait
+     * @return static
      */
-    public function indentBody($indent)
+    public function indentBody(int $indent): static
     {
         $indent = (int)$indent;
 
@@ -88,9 +88,9 @@ trait BodyTrait
     /**
      * Get the function body
      *
-     * @return string
+     * @return string|null
      */
-    public function getBody()
+    public function getBody(): string|null
     {
         return $this->body;
     }
@@ -98,11 +98,11 @@ trait BodyTrait
     /**
      * Has method body
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasBody()
+    public function hasBody(): bool
     {
-        return (null !== $this->body);
+        return ($this->body !== null);
     }
 
 }

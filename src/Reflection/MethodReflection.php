@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class MethodReflection extends AbstractReflection
 {
@@ -31,11 +31,11 @@ class MethodReflection extends AbstractReflection
     /**
      * Method to parse a method
      *
-     * @param  mixed  $code
-     * @param  string $name
+     * @param  mixed   $code
+     * @param  ?string $name
      * @return Generator\MethodGenerator
      */
-    public static function parse($code, $name = null)
+    public static function parse(mixed $code, ?string $name = null): Generator\MethodGenerator
     {
         if ($code->isProtected()) {
             $visibility = 'protected';
@@ -47,13 +47,13 @@ class MethodReflection extends AbstractReflection
 
         $docblock = null;
         $doc      = $code->getDocComment();
-        if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
+        if (($doc !== null) && (str_contains($doc, '/*'))) {
             $docblock = DocblockReflection::parse($doc);
             $docblock->setIndent(4);
         }
 
         $method = new Generator\MethodGenerator($code->getName(), $visibility, $code->isStatic());
-        if (null !== $docblock) {
+        if ($docblock !== null) {
             $method->setDocblock($docblock);
         }
 
@@ -101,7 +101,7 @@ class MethodReflection extends AbstractReflection
 
                 $lines = array_values($lines);
 
-                if (isset($lines[0]) && (substr($lines[0], 0, 1) == ' ')) {
+                if (isset($lines[0]) && (str_starts_with($lines[0], ' '))) {
                     $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));
                     if ($spaces > 0) {
                         $lines = array_map(function($value) use ($spaces) {

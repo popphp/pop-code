@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,7 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use ReflectionException;
 
 /**
  * Interface reflection code class
@@ -21,9 +22,9 @@ use Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class InterfaceReflection extends AbstractReflection
 {
@@ -31,17 +32,17 @@ class InterfaceReflection extends AbstractReflection
     /**
      * Method to parse an interface
      *
-     * @param  mixed  $code
-     * @param  string $name
-     * @throws Exception
+     * @param  mixed   $code
+     * @param  ?string $name
+     * @throws Exception|ReflectionException
      * @return Generator\InterfaceGenerator
      */
-    public static function parse($code, $name = null)
+    public static function parse(mixed $code, ?string $name = null): Generator\InterfaceGenerator
     {
         $reflection     = new \ReflectionClass($code);
         $reflectionName = $reflection->getShortName();
 
-        if ((null === $name) && !empty($reflectionName)) {
+        if (($name === null) && !empty($reflectionName)) {
             $name = $reflectionName;
         }
 
@@ -61,7 +62,7 @@ class InterfaceReflection extends AbstractReflection
 
         // Detect and set the class doc block
         $interfaceDocBlock = $reflection->getDocComment();
-        if (!empty($interfaceDocBlock) && (strpos($interfaceDocBlock, '/*') !== false)) {
+        if (!empty($interfaceDocBlock) && (str_contains($interfaceDocBlock, '/*'))) {
             $interface->setDocblock(DocblockReflection::parse($interfaceDocBlock));
         }
 

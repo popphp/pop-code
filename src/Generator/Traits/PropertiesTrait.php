@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator\PropertyGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait PropertiesTrait
 {
@@ -32,15 +32,15 @@ trait PropertiesTrait
      * Array of property generator objects
      * @var array
      */
-    protected $properties = [];
+    protected array $properties = [];
 
     /**
      * Add class properties
      *
      * @param  array $properties
-     * @return PropertiesTrait
+     * @return static
      */
-    public function addProperties(array $properties)
+    public function addProperties(array $properties): static
     {
         foreach ($properties as $property) {
             $this->addProperty($property);
@@ -53,9 +53,9 @@ trait PropertiesTrait
      * Add a class property
      *
      * @param  PropertyGenerator $property
-     * @return PropertiesTrait
+     * @return static
      */
-    public function addProperty(PropertyGenerator $property)
+    public function addProperty(PropertyGenerator $property): static
     {
         $this->properties[$property->getName()] = $property;
         return $this;
@@ -65,9 +65,9 @@ trait PropertiesTrait
      * Get a class property
      *
      * @param  mixed $property
-     * @return PropertyGenerator
+     * @return PropertyGenerator|null
      */
-    public function getProperty($property)
+    public function getProperty(mixed $property): PropertyGenerator|null
     {
         $p = ($property instanceof PropertyGenerator) ? $property->getName() : $property;
         return (isset($this->properties[$p])) ? $this->properties[$p] : null;
@@ -78,7 +78,7 @@ trait PropertiesTrait
      *
      * @return array
      */
-    public function getProperties()
+    public function getProperties(): array
     {
         return $this->properties;
     }
@@ -87,9 +87,9 @@ trait PropertiesTrait
      * Has a class property
      *
      * @param  mixed $property
-     * @return boolean
+     * @return bool
      */
-    public function hasProperty($property)
+    public function hasProperty(mixed $property): bool
     {
         $p = ($property instanceof PropertyGenerator) ? $property->getName() : $property;
         return (isset($this->properties[$p]));
@@ -98,9 +98,9 @@ trait PropertiesTrait
     /**
      * Has properties
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasProperties()
+    public function hasProperties(): bool
     {
         return (!empty($this->properties));
     }
@@ -109,9 +109,9 @@ trait PropertiesTrait
      * Remove a class property
      *
      * @param  mixed $property
-     * @return PropertiesTrait
+     * @return static
      */
-    public function removeProperty($property)
+    public function removeProperty(mixed $property): static
     {
         $p = ($property instanceof PropertyGenerator) ? $property->getName() : $property;
         if (isset($this->properties[$p])) {

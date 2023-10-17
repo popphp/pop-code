@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator\NamespaceGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class NamespaceReflection extends AbstractReflection
 {
@@ -31,14 +31,14 @@ class NamespaceReflection extends AbstractReflection
     /**
      * Method to parse a namespace
      *
-     * @param  string $code
-     * @param  string $name
+     * @param  mixed   $code
+     * @param  ?string $name
      * @throws Exception
      * @return NamespaceGenerator
      */
-    public static function parse($code, $name = null)
+    public static function parse(mixed $code, ?string $name = null): NamespaceGenerator
     {
-        if (null === $name) {
+        if ($name === null) {
             $matches = [];
             preg_match_all('/^namespace(.*);$/m', $code, $matches);
             if (isset($matches[1]) && isset($matches[1][0])) {
@@ -57,7 +57,7 @@ class NamespaceReflection extends AbstractReflection
 
         if (isset($matches[1]) && isset($matches[1][0])) {
             foreach ($matches[1] as $match) {
-                if (strpos($match, ' as ') !== false) {
+                if (str_contains($match, ' as ')) {
                     [$use, $as] = explode(' as ', $match);
                 } else {
                     $use = $match;

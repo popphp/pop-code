@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,7 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator\FunctionGenerator;
+use ReflectionException;
 
 /**
  * Function reflection code class
@@ -21,9 +22,9 @@ use Pop\Code\Generator\FunctionGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class FunctionReflection extends AbstractReflection
 {
@@ -33,17 +34,17 @@ class FunctionReflection extends AbstractReflection
      *
      * @param  mixed  $code
      * @param  string $name
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @return FunctionGenerator
      */
-    public static function parse($code, $name = null)
+    public static function parse(mixed $code, ?string $name = null): FunctionGenerator
     {
         $reflection       = new \ReflectionFunction($code);
         $reflectionName   = $reflection->getName();
         $reflectionParams = $reflection->getParameters();
         $isClosure        = ($reflectionName == '{closure}');
 
-        if ((null === $name) && !($isClosure)) {
+        if (($name === null) && !($isClosure)) {
             $name = $reflectionName;
         }
 
@@ -75,7 +76,7 @@ class FunctionReflection extends AbstractReflection
 
             if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
                 $lines = array_slice($lines, ($startLine + 1), ($length - 1));
-                if (isset($lines[0]) && (substr($lines[0], 0, 1) == ' ')) {
+                if (isset($lines[0]) && (str_starts_with($lines[0], ' '))) {
                     $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));
                     if ($spaces > 0) {
                         $lines = array_map(function($value) use ($spaces) {

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -13,15 +13,18 @@
  */
 namespace Pop\Code;
 
+use Pop\Code\Reflection\Exception;
+use ReflectionException;
+
 /**
  * Reflection code class
  *
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class Reflection
 {
@@ -29,11 +32,12 @@ class Reflection
     /**
      * Create class
      *
-     * @param  mixed  $class
-     * @param  string $name
+     * @param  mixed   $class
+     * @param  ?string $name
+     * @throws Exception
      * @return Generator\ClassGenerator
      */
-    public static function createClass($class, $name = null)
+    public static function createClass(mixed $class, ?string $name = null): Generator\ClassGenerator
     {
         return Reflection\ClassReflection::parse($class, $name);
     }
@@ -41,11 +45,12 @@ class Reflection
     /**
      * Create trait
      *
-     * @param  mixed  $trait
-     * @param  string $name
+     * @param  mixed   $trait
+     * @param  ?string $name
+     * @throws Exception
      * @return Generator\TraitGenerator
      */
-    public static function createTrait($trait, $name = null)
+    public static function createTrait(mixed $trait, ?string $name = null): Generator\TraitGenerator
     {
         return Reflection\TraitReflection::parse($trait, $name);
     }
@@ -53,11 +58,12 @@ class Reflection
     /**
      * Create interface
      *
-     * @param  mixed  $interface
-     * @param  string $name
+     * @param  mixed   $interface
+     * @param  ?string $name
+     * @throws Exception
      * @return Generator\InterfaceGenerator
      */
-    public static function createInterface($interface, $name = null)
+    public static function createInterface(mixed $interface, ?string $name = null): Generator\InterfaceGenerator
     {
         return Reflection\InterfaceReflection::parse($interface, $name);
     }
@@ -66,10 +72,11 @@ class Reflection
      * Create namespace
      *
      * @param  mixed  $namespace
-     * @param  string $name
+     * @param  ?string $name
+     * @throws Exception
      * @return Generator\NamespaceGenerator
      */
-    public static function createNamespace($namespace, $name = null)
+    public static function createNamespace(mixed $namespace, ?string $name = null): Generator\NamespaceGenerator
     {
         return Reflection\NamespaceReflection::parse($namespace, $name);
     }
@@ -77,11 +84,12 @@ class Reflection
     /**
      * Create docblock
      *
-     * @param  mixed  $docblock
-     * @param  int    $forceIndent
+     * @param  mixed $docblock
+     * @param  ?int  $forceIndent
+     * @throws Exception
      * @return Generator\DocblockGenerator
      */
-    public static function createDocblock($docblock, $forceIndent = null)
+    public static function createDocblock(mixed $docblock, ?int $forceIndent = null): Generator\DocblockGenerator
     {
         return Reflection\DocblockReflection::parse($docblock, $forceIndent);
     }
@@ -89,11 +97,12 @@ class Reflection
     /**
      * Create function
      *
-     * @param  mixed  $function
-     * @param  string $name
+     * @param  mixed   $function
+     * @param  ?string $name
+     * @throws ReflectionException
      * @return Generator\FunctionGenerator
      */
-    public static function createFunction($function, $name = null)
+    public static function createFunction(mixed $function, ?string $name = null): Generator\FunctionGenerator
     {
         return Reflection\FunctionReflection::parse($function, $name);
     }
@@ -101,11 +110,11 @@ class Reflection
     /**
      * Create method
      *
-     * @param  mixed  $method
-     * @param  string $name
+     * @param  mixed   $method
+     * @param  ?string $name
      * @return Generator\MethodGenerator
      */
-    public static function createMethod($method, $name = null)
+    public static function createMethod(mixed $method, ?string $name = null): Generator\MethodGenerator
     {
         return Reflection\MethodReflection::parse($method, $name);
     }
@@ -113,12 +122,12 @@ class Reflection
     /**
      * Create property
      *
-     * @param  mixed  $property
-     * @param  string $name
-     * @param  mixed  $value
+     * @param  mixed   $property
+     * @param  ?string $name
+     * @param  mixed   $value
      * @return Generator\PropertyGenerator
      */
-    public static function createProperty($property, $name = null, $value = null)
+    public static function createProperty(mixed $property, ?string $name = null, mixed $value = null): Generator\PropertyGenerator
     {
         return Reflection\PropertyReflection::parse($property, $name, $value);
     }

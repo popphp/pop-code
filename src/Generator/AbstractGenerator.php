@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 abstract class AbstractGenerator implements GeneratorInterface
 {
@@ -30,23 +30,23 @@ abstract class AbstractGenerator implements GeneratorInterface
      * Code indent spaces
      * @var int
      */
-    protected $indent = 4;
+    protected int $indent = 4;
 
     /**
      * Output string
-     * @var string
+     * @var ?string
      */
-    protected $output = null;
+    protected ?string $output = null;
 
     /**
      * Set the indent
      *
-     * @param  string $indent
+     * @param  int $indent
      * @return AbstractGenerator
      */
-    public function setIndent($indent)
+    public function setIndent(int $indent): AbstractGenerator
     {
-        $this->indent = (int)$indent;
+        $this->indent = $indent;
         return $this;
     }
 
@@ -55,7 +55,7 @@ abstract class AbstractGenerator implements GeneratorInterface
      *
      * @return int
      */
-    public function getIndent()
+    public function getIndent(): int
     {
         return $this->indent;
     }
@@ -63,9 +63,9 @@ abstract class AbstractGenerator implements GeneratorInterface
     /**
      * Has indent
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasIndent()
+    public function hasIndent(): bool
     {
         return (!empty($this->indent));
     }
@@ -75,7 +75,7 @@ abstract class AbstractGenerator implements GeneratorInterface
      *
      * @return string
      */
-    public function printIndent()
+    public function printIndent(): string
     {
         return str_repeat(' ', $this->indent);
     }
@@ -85,7 +85,7 @@ abstract class AbstractGenerator implements GeneratorInterface
      *
      * @return string
      */
-    public function getOutput()
+    public function getOutput(): string
     {
         return $this->output;
     }
@@ -93,21 +93,21 @@ abstract class AbstractGenerator implements GeneratorInterface
     /**
      * Has output
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasOutput()
+    public function hasOutput(): bool
     {
-        return (null !== $this->output);
+        return ($this->output !== null);
     }
 
     /**
      * Is rendered (alias to hasOutput())
      *
-     * @return boolean
+     * @return bool
      */
-    public function isRendered()
+    public function isRendered(): bool
     {
-        return (null !== $this->output);
+        return ($this->output !== null);
     }
 
     /**
@@ -115,6 +115,6 @@ abstract class AbstractGenerator implements GeneratorInterface
      *
      * @return string
      */
-    abstract public function render();
+    abstract public function render(): string;
 
 }

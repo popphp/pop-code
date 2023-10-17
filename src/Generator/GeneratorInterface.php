@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 interface GeneratorInterface
 {
@@ -32,55 +32,55 @@ interface GeneratorInterface
      * @param  int $indent
      * @return GeneratorInterface
      */
-    public function setIndent($indent);
+    public function setIndent(int $indent): GeneratorInterface;
 
     /**
      * Get the indent
      *
      * @return int
      */
-    public function getIndent();
+    public function getIndent(): int;
 
     /**
      * Has indent
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasIndent();
+    public function hasIndent(): bool;
 
     /**
      * Print the indent
      *
      * @return string
      */
-    public function printIndent();
+    public function printIndent(): string;
 
     /**
      * Get the output
      *
      * @return string
      */
-    public function getOutput();
+    public function getOutput(): string;
 
     /**
      * Has output
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasOutput();
+    public function hasOutput(): bool;
 
     /**
      * Is rendered (alias to hasOutput())
      *
-     * @return boolean
+     * @return bool
      */
-    public function isRendered();
+    public function isRendered(): bool;
 
     /**
      * Render method
      *
      * @return string
      */
-    public function render();
+    public function render(): string;
 
 }

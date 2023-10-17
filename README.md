@@ -18,6 +18,12 @@ Install `pop-code` using Composer.
 
     composer require popphp/pop-code
 
+Or, require it in your composer.json file
+
+    "require": {
+        "popphp/pop-view" : "^5.0.0"
+    }
+
 BASIC USAGE
 -----------
 

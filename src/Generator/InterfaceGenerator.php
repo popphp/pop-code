@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,18 +19,18 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class InterfaceGenerator extends AbstractClassGenerator
 {
 
     /**
      * Parent interfaces that are extended
-     * @var string
+     * @var ?string
      */
-    protected $parent = null;
+    protected ?string $parent = null;
 
     /**
      * Constructor
@@ -38,9 +38,9 @@ class InterfaceGenerator extends AbstractClassGenerator
      * Instantiate the interface generator object
      *
      * @param  string  $name
-     * @param  string  $parent
+     * @param  ?string $parent
      */
-    public function __construct($name, $parent = null)
+    public function __construct(string $name, ?string $parent = null)
     {
         $this->setName($name);
         $this->setParent($parent);
@@ -49,10 +49,10 @@ class InterfaceGenerator extends AbstractClassGenerator
     /**
      * Set the interface parent
      *
-     * @param  string $parent
+     * @param  ?string $parent
      * @return InterfaceGenerator
      */
-    public function setParent($parent = null)
+    public function setParent(?string $parent = null): InterfaceGenerator
     {
         $this->parent = $parent;
         return $this;
@@ -61,9 +61,9 @@ class InterfaceGenerator extends AbstractClassGenerator
     /**
      * Get the interface parent
      *
-     * @return string
+     * @return string|null
      */
-    public function getParent()
+    public function getParent(): string|null
     {
         return $this->parent;
     }
@@ -71,11 +71,11 @@ class InterfaceGenerator extends AbstractClassGenerator
     /**
      * Has parent
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasParent()
+    public function hasParent(): bool
     {
-        return (null !== $this->parent);
+        return ($this->parent !== null);
     }
 
     /**
@@ -83,13 +83,13 @@ class InterfaceGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
-        $this->output  = (null !== $this->namespace) ? $this->namespace->render() . PHP_EOL : null;
-        $this->output .= (null !== $this->docblock) ? $this->docblock->render() : null;
+        $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
+        $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
         $this->output .= 'interface ' . $this->name;
 
-        if (null !== $this->parent) {
+        if ($this->parent !== null) {
             $this->output .= ' extends ' . $this->parent;
         }
 
@@ -112,7 +112,7 @@ class InterfaceGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatConstants()
+    protected function formatConstants(): string
     {
         $constants = null;
 
@@ -128,7 +128,7 @@ class InterfaceGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatMethods()
+    protected function formatMethods(): string
     {
         $methods = null;
 
@@ -144,7 +144,7 @@ class InterfaceGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

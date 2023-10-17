@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class MethodGenerator extends AbstractClassElementGenerator
 {
@@ -30,20 +30,21 @@ class MethodGenerator extends AbstractClassElementGenerator
 
     /**
      * Method body
-     * @var string
+     * @var ?string string
      */
-    protected $body = null;
+    protected ?string $body = null;
 
     /**
      * Constructor
      *
      * Instantiate the method generator object
      *
-     * @param  string  $name
-     * @param  string  $visibility
-     * @param  boolean $static
+     * @param  string $name
+     * @param  string $visibility
+     * @param  bool $static
+     * @throws Exception
      */
-    public function __construct($name, $visibility = 'public', $static = false)
+    public function __construct(string $name, string $visibility = 'public', bool $static = false)
     {
         $this->setName($name);
         $this->setVisibility($visibility);
@@ -55,14 +56,14 @@ class MethodGenerator extends AbstractClassElementGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $final    = ($this->final) ? 'final ' : null;
         $abstract = ($this->abstract) ? 'abstract ' : null;
         $static   = ($this->static) ? ' static' : null;
         $args     = $this->formatArguments();
 
-        $this->output = PHP_EOL . ((null !== $this->docblock) ? $this->docblock->render() : null);
+        $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
         $this->output .= $this->printIndent() . $final . $abstract . $this->visibility .
             $static . ' function ' . $this->name . '(' . $args . ')';
 
@@ -82,7 +83,7 @@ class MethodGenerator extends AbstractClassElementGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

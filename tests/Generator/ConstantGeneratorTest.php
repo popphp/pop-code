@@ -1,6 +1,6 @@
 <?php
 
-namespace Pop\Code\Test;
+namespace Pop\Code\Test\Generator;
 
 use Pop\Code\Generator;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +30,7 @@ class ConstantGeneratorTest extends TestCase
 
     public function testRenderBoolean()
     {
-        $constant = new Generator\ConstantGenerator('FOO', 'boolean', true);
+        $constant = new Generator\ConstantGenerator('FOO', 'bool', true);
         $this->assertStringContainsString('const FOO = true', (string)$constant);
     }
 

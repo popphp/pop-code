@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class NamespaceGenerator extends AbstractGenerator
 {
@@ -33,12 +33,12 @@ class NamespaceGenerator extends AbstractGenerator
      *
      * Instantiate the namespace generator object
      *
-     * @param  string $namespace
-     * @param  int    $indent
+     * @param  ?string $namespace
+     * @param  int     $indent
      */
-    public function __construct($namespace = null, $indent = 0)
+    public function __construct(?string $namespace = null, int $indent = 0)
     {
-        if (null !== $namespace) {
+        if ($namespace !== null) {
             $this->setName($namespace);
         }
         $this->setIndent($indent);
@@ -49,7 +49,7 @@ class NamespaceGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $this->docblock = new DocblockGenerator(null, $this->indent);
         $this->docblock->addTag('namespace');
@@ -65,7 +65,7 @@ class NamespaceGenerator extends AbstractGenerator
             foreach ($this->uses as $ns => $as) {
                 $this->output .= $this->printIndent() . 'use ';
                 $this->output .= $ns;
-                if (null !== $as) {
+                if ($as !== null) {
                     $this->output .= ' as ' . $as;
                 }
                 $this->output .= ';' . PHP_EOL;
@@ -80,7 +80,7 @@ class NamespaceGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

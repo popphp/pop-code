@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class PropertyGenerator extends AbstractClassElementGenerator
 {
@@ -30,32 +30,39 @@ class PropertyGenerator extends AbstractClassElementGenerator
 
     /**
      * Property type
-     * @var string
+     * @var ?string
      */
-    protected $type = null;
+    protected ?string $type = null;
 
     /**
      * Property value
      * @var mixed
      */
-    protected $value = null;
+    protected mixed $value = null;
 
     /**
      * Constructor
      *
      * Instantiate the property generator object
      *
-     * @param  string  $name
-     * @param  string  $type
-     * @param  mixed   $value
-     * @param  string  $visibility
-     * @param  boolean $static
+     * @param  string $name
+     * @param  ?string $type
+     * @param  mixed $value
+     * @param  string $visibility
+     * @param  bool $static
+     * @throws Exception
      */
-    public function __construct($name, $type = null, $value = null, $visibility = 'public', $static = false)
+    public function __construct(
+        string $name, ?string $type = null, mixed $value = null, string $visibility = 'public', bool $static = false
+    )
     {
         $this->setName($name);
-        $this->setType($type);
-        $this->setValue($value);
+        if ($type !== null) {
+            $this->setType($type);
+        }
+        if ($value !== null) {
+            $this->setValue($value);
+        }
         $this->setVisibility($visibility);
         $this->setAsStatic($static);
     }
@@ -66,7 +73,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
      * @param  string $type
      * @return PropertyGenerator
      */
-    public function setType($type)
+    public function setType(string $type): PropertyGenerator
     {
         $this->type = $type;
         return $this;
@@ -75,9 +82,9 @@ class PropertyGenerator extends AbstractClassElementGenerator
     /**
      * Get the property type
      *
-     * @return string
+     * @return string|null
      */
-    public function getType()
+    public function getType(): string|null
     {
         return $this->type;
     }
@@ -85,11 +92,11 @@ class PropertyGenerator extends AbstractClassElementGenerator
     /**
      * Has property type
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasType()
+    public function hasType(): bool
     {
-        return (null !== $this->type);
+        return ($this->type !== null);
     }
 
     /**
@@ -98,7 +105,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
      * @param  mixed $value
      * @return PropertyGenerator
      */
-    public function setValue($value = null)
+    public function setValue(mixed $value = null): PropertyGenerator
     {
         $this->value = $value;
         return $this;
@@ -109,7 +116,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
      *
      * @return mixed
      */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->value;
     }
@@ -117,21 +124,21 @@ class PropertyGenerator extends AbstractClassElementGenerator
     /**
      * Has property value
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasValue()
+    public function hasValue(): bool
     {
-        return (null !== $this->value);
+        return ($this->value !== null);
     }
 
     /**
      * Render property
      *
-     * @return mixed
+     * @return string
      */
-    public function render()
+    public function render(): string
     {
-        if (null === $this->docblock) {
+        if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
 
@@ -139,13 +146,13 @@ class PropertyGenerator extends AbstractClassElementGenerator
         $this->output = PHP_EOL . $this->docblock->render();
         $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' $' . $this->name;
 
-        if (null !== $this->value) {
+        if ($this->value !== null) {
             if ($this->type == 'array') {
                 $val = (count($this->value) == 0) ? '[]' : $this->formatArrayValues();
                 $this->output .= ' = ' . $val . PHP_EOL;
             } else if (($this->type == 'integer') || ($this->type == 'int') || ($this->type == 'float')) {
                 $this->output .= ' = ' . $this->value . ';';
-            } else if ($this->type == 'boolean') {
+            } else if ($this->type == 'bool') {
                 $val = ($this->value) ? 'true' : 'false';
                 $this->output .= " = " . $val . ";";
             } else {
@@ -164,7 +171,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
      *
      * @return string
      */
-    protected function formatArrayValues()
+    protected function formatArrayValues(): string
     {
         $ary = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '  ', var_export($this->value, true));
         $ary .= ';';
@@ -196,7 +203,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

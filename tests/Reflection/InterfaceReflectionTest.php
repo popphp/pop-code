@@ -1,6 +1,6 @@
 <?php
 
-namespace Pop\Code\Test;
+namespace Pop\Code\Test\Reflection;
 
 use Pop\Code\Reflection;
 use PHPUnit\Framework\TestCase;

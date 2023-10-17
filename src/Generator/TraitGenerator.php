@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class TraitGenerator extends AbstractClassGenerator
 {
@@ -35,7 +35,7 @@ class TraitGenerator extends AbstractClassGenerator
      *
      * @param  string  $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->setName($name);
     }
@@ -44,10 +44,10 @@ class TraitGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
-        $this->output = (null !== $this->namespace) ? $this->namespace->render() . PHP_EOL : null;
-        $this->output .= (null !== $this->docblock) ? $this->docblock->render() : null;
+        $this->output = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
+        $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
         $this->output .= 'trait ' . $this->name;
 
         $this->output .= PHP_EOL . '{';
@@ -57,7 +57,7 @@ class TraitGenerator extends AbstractClassGenerator
             foreach ($this->uses as $ns => $as) {
                 $this->output .= $this->printIndent() . 'use ';
                 $this->output .= $ns;
-                if (null !== $as) {
+                if ($as !== null) {
                     $this->output .= ' as ' . $as;
                 }
                 $this->output .= ';' . PHP_EOL;
@@ -77,7 +77,7 @@ class TraitGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatConstants()
+    protected function formatConstants(): string
     {
         $constants = null;
 
@@ -93,7 +93,7 @@ class TraitGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatProperties()
+    protected function formatProperties(): string
     {
         $props = null;
 
@@ -109,7 +109,7 @@ class TraitGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatMethods()
+    protected function formatMethods(): string
     {
         $methods = null;
 
@@ -125,7 +125,7 @@ class TraitGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

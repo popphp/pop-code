@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator\Traits;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait UseTrait
 {
@@ -30,16 +30,16 @@ trait UseTrait
      * Array of namespaces to use
      * @var array
      */
-    protected $uses = [];
+    protected array $uses = [];
 
     /**
      * Add a namespace to use
      *
-     * @param  string $use
-     * @param  string $as
-     * @return UseTrait
+     * @param  string  $use
+     * @param  ?string $as
+     * @return static
      */
-    public function addUse($use, $as = null)
+    public function addUse(string $use, ?string $as = null): static
     {
         $this->uses[$use] = $as;
         return $this;
@@ -49,9 +49,9 @@ trait UseTrait
      * Add namespaces to use
      *
      * @param  array $uses
-     * @return UseTrait
+     * @return static
      */
-    public function addUses(array $uses)
+    public function addUses(array $uses): static
     {
         foreach ($uses as $as => $use) {
             if (!is_numeric($as)) {
@@ -67,19 +67,19 @@ trait UseTrait
      * Has use
      *
      * @param  string $use
-     * @return boolean
+     * @return bool
      */
-    public function hasUse($use)
+    public function hasUse(string$use): bool
     {
-        return (array_key_exists($use, $this->uses));
+        return array_key_exists($use, $this->uses);
     }
 
     /**
      * Has uses
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasUses()
+    public function hasUses(): bool
     {
         return (!empty($this->uses));
     }
@@ -89,7 +89,7 @@ trait UseTrait
      *
      * @return array
      */
-    public function getUses()
+    public function getUses(): array
     {
         return $this->uses;
     }

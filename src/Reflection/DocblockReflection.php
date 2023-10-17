@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator\DocblockGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class DocblockReflection extends AbstractReflection
 {
@@ -31,14 +31,14 @@ class DocblockReflection extends AbstractReflection
     /**
      * Method to parse a docblock
      *
-     * @param  string $code
-     * @param  int    $forceIndent
+     * @param  mixed $code
+     * @param  ?int  $forceIndent
      * @throws Exception
      * @return DocblockGenerator
      */
-    public static function parse($code, $forceIndent = null)
+    public static function parse(mixed $code, ?int $forceIndent = null): DocblockGenerator
     {
-        if ((strpos($code, '/*') === false) || (strpos($code, '*/') === false)) {
+        if ((!str_contains($code, '/*')) || (!str_contains($code, '*/'))) {
             throw new Exception('The docblock is not in the correct format.');
         }
 
@@ -48,7 +48,7 @@ class DocblockReflection extends AbstractReflection
         $tags          = null;
 
         // Parse the description, if any
-        if (strpos($code, '@') !== false) {
+        if (str_contains($code, '@')) {
             $desc    = substr($code, 0, strpos($code, '@'));
             $desc    = str_replace('/*', '', $desc);
             $desc    = str_replace('*/', '', $desc);
@@ -69,7 +69,7 @@ class DocblockReflection extends AbstractReflection
         $docblock = new DocblockGenerator($formattedDesc, $indent);
 
         // Get the tags, if any
-        if (strpos($code, '@') !== false) {
+        if (str_contains($code, '@')) {
             $tags    = substr($code, strpos($code, '@'));
             $tags    = substr($tags, 0, strpos($tags, '*/'));
             $tags    = str_replace('*', '', $tags);
@@ -83,9 +83,9 @@ class DocblockReflection extends AbstractReflection
                     $paramType = trim(substr($paramTag, 0, strpos($paramTag, ' ')));
                     $varName   = null;
                     $paramDesc = null;
-                    if (strpos($paramTag, ' ') !== false) {
+                    if (str_contains($paramTag, ' ')) {
                         $varName = trim(substr($paramTag, strpos($paramTag, ' ')));
-                        if (strpos($varName, ' ') !== false) {
+                        if (str_contains($varName, ' ')) {
                             $paramDesc = trim(substr($varName, strpos($varName, ' ')));
                         }
                     } else {
@@ -95,7 +95,7 @@ class DocblockReflection extends AbstractReflection
                 // Else, return tags
                 } else if (stripos($value, 'return') !== false) {
                     $returnTag = trim(str_replace('return', '', $value));
-                    if (strpos($returnTag, ' ') !== false) {
+                    if (str_contains($returnTag, ' ')) {
                         $returnType = substr($returnTag, 0, strpos($returnTag, ' '));
                         $returnDesc = trim(str_replace($returnType, '', $returnTag));
                     } else {

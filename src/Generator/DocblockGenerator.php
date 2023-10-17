@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,34 +19,34 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class DocblockGenerator extends AbstractGenerator
 {
 
     /**
      * Docblock description
-     * @var string
+     * @var ?string
      */
-    protected $desc = null;
+    protected ?string $desc = null;
 
     /**
      * Docblock tags
      * @var array
      */
-    protected $tags = ['param' => []];
+    protected array $tags = ['param' => []];
 
     /**
      * Constructor
      *
      * Instantiate the docblock generator object
      *
-     * @param string $desc
-     * @param int    $indent
+     * @param ?string $desc
+     * @param int     $indent
      */
-    public function __construct($desc = null, $indent = 4)
+    public function __construct(?string $desc = null, int $indent = 4)
     {
         $this->setDesc($desc);
         $this->setIndent($indent);
@@ -55,10 +55,10 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Set the docblock description
      *
-     * @param  string $desc
+     * @param  ?string $desc
      * @return DocblockGenerator
      */
-    public function setDesc($desc = null)
+    public function setDesc(?string $desc = null): DocblockGenerator
     {
         $this->desc = $desc;
         return $this;
@@ -67,9 +67,9 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Get the docblock description
      *
-     * @return string
+     * @return string|null
      */
-    public function getDesc()
+    public function getDesc(): string|null
     {
         return $this->desc;
     }
@@ -77,21 +77,21 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Has a docblock description
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasDesc()
+    public function hasDesc(): bool
     {
-        return (null !== $this->desc);
+        return ($this->desc !== null);
     }
 
     /**
      * Add a basic tag
      *
-     * @param  string $name
-     * @param  string $desc
+     * @param  string  $name
+     * @param  ?string $desc
      * @return DocblockGenerator
      */
-    public function addTag($name, $desc = null)
+    public function addTag(string $name, ?string $desc = null): DocblockGenerator
     {
         $this->tags[$name] = $desc;
         return $this;
@@ -103,7 +103,7 @@ class DocblockGenerator extends AbstractGenerator
      * @param  array $tags
      * @return DocblockGenerator
      */
-    public function addTags(array $tags)
+    public function addTags(array $tags): DocblockGenerator
     {
         foreach ($tags as $name => $desc) {
             $this->tags[$name] = $desc;
@@ -115,20 +115,20 @@ class DocblockGenerator extends AbstractGenerator
      * Get a tag
      *
      * @param  string $name
-     * @return string
+     * @return string|null
      */
-    public function getTag($name)
+    public function getTag(string $name): string|null
     {
-        return (isset($this->tags[$name])) ? $this->tags[$name] : null;
+        return $this->tags[$name] ?? null;
     }
 
     /**
      * Has a tag
      *
      * @param  string $name
-     * @return boolean
+     * @return bool
      */
-    public function hasTag($name)
+    public function hasTag(string $name): bool
     {
         return (isset($this->tags[$name]));
     }
@@ -136,12 +136,12 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Add a param tag
      *
-     * @param  string $type
-     * @param  string $var
-     * @param  string $desc
+     * @param  ?string $type
+     * @param  ?string $var
+     * @param  ?string $desc
      * @return DocblockGenerator
      */
-    public function addParam($type = null, $var = null, $desc = null)
+    public function addParam(?string $type = null, ?string $var = null, ?string $desc = null): DocblockGenerator
     {
         $this->tags['param'][] = ['type' => $type, 'var' => $var, 'desc' => $desc];
         return $this;
@@ -153,7 +153,7 @@ class DocblockGenerator extends AbstractGenerator
      * @param  array $params
      * @return DocblockGenerator
      */
-    public function addParams(array $params)
+    public function addParams(array $params): DocblockGenerator
     {
         $params = (isset($params[0]) && is_array($params[0])) ? $params : [$params];
         foreach ($params as $param) {
@@ -166,9 +166,9 @@ class DocblockGenerator extends AbstractGenerator
      * Get a param
      *
      * @param  int $index
-     * @return array
+     * @return array|null
      */
-    public function getParam($index)
+    public function getParam(int $index): array|null
     {
         return (isset($this->tags['param']) && isset($this->tags['param'][$index])) ? $this->tags['param'][$index] : null;
     }
@@ -177,9 +177,9 @@ class DocblockGenerator extends AbstractGenerator
      * Has a param
      *
      * @param  int $index
-     * @return boolean
+     * @return bool
      */
-    public function hasParam($index)
+    public function hasParam(int $index): bool
     {
         return (isset($this->tags['param']) && isset($this->tags['param'][$index]));
     }
@@ -187,11 +187,11 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Add a return tag
      *
-     * @param  string $type
-     * @param  string $desc
+     * @param  string  $type
+     * @param  ?string $desc
      * @return DocblockGenerator
      */
-    public function setReturn($type, $desc = null)
+    public function setReturn(string $type, ?string $desc = null): DocblockGenerator
     {
         $this->tags['return'] = ['type' => $type, 'desc' => $desc];
         return $this;
@@ -200,19 +200,19 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Get the return
      *
-     * @return array
+     * @return array|null
      */
-    public function getReturn()
+    public function getReturn(): array|null
     {
-        return (isset($this->tags['return'])) ? $this->tags['return'] : null;
+        return $this->tags['return'] ?? null;
     }
 
     /**
      * Has a return
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasReturn()
+    public function hasReturn(): bool
     {
         return (isset($this->tags['return']));
     }
@@ -220,11 +220,11 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Add a throws tag
      *
-     * @param  string $type
-     * @param  string $desc
+     * @param  string  $type
+     * @param  ?string $desc
      * @return DocblockGenerator
      */
-    public function setThrows($type, $desc = null)
+    public function setThrows(string $type, ?string $desc = null): DocblockGenerator
     {
         $this->tags['throws'] = ['type' => $type, 'desc' => $desc];
         return $this;
@@ -233,19 +233,19 @@ class DocblockGenerator extends AbstractGenerator
     /**
      * Get the throws
      *
-     * @return array
+     * @return array|null
      */
-    public function getThrows()
+    public function getThrows(): array|null
     {
-        return (isset($this->tags['throws'])) ? $this->tags['throws'] : null;
+        return $this->tags['throws'] ?? null;
     }
 
     /**
      * Has a throws
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasThrows()
+    public function hasThrows(): bool
     {
         return (isset($this->tags['throws']));
     }
@@ -255,7 +255,7 @@ class DocblockGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $this->output = $this->printIndent() . '/**' . PHP_EOL;
 
@@ -283,7 +283,7 @@ class DocblockGenerator extends AbstractGenerator
      *
      * @return string
      */
-    protected function formatTags()
+    protected function formatTags(): string
     {
         $tags      = null;
         $tagLength = $this->getTagLength();
@@ -309,7 +309,7 @@ class DocblockGenerator extends AbstractGenerator
             if (!empty($param['var'])) {
                 $tags .= ' ' . $param['var'];
             }
-            $tags .= (null !== $param['desc']) ? $param['desc'] . PHP_EOL : PHP_EOL;
+            $tags .= ($param['desc'] !== null) ? $param['desc'] . PHP_EOL : PHP_EOL;
         }
 
         // Format throw tag
@@ -328,14 +328,14 @@ class DocblockGenerator extends AbstractGenerator
             $tags .= $this->printIndent() . ' * @return' .
                 str_repeat(' ', $tagLength - 5) .
                 $this->tags['return']['type'];
-            if (null !== $this->tags['return']['desc']) {
+            if ($this->tags['return']['desc'] !== null) {
                 $tags .= ' ' . $this->tags['return']['desc'] . PHP_EOL;
             } else {
                 $tags .= PHP_EOL;
             }
         }
 
-        return ((null !== $tags) && (null !== $this->desc)) ? $this->printIndent() . ' * ' . PHP_EOL . $tags : $tags;
+        return (($tags !== null) && ($this->desc !== null)) ? $this->printIndent() . ' * ' . PHP_EOL . $tags : $tags;
     }
 
     /**
@@ -343,7 +343,7 @@ class DocblockGenerator extends AbstractGenerator
      *
      * @return int
      */
-    protected function getTagLength()
+    protected function getTagLength(): int
     {
         $length = 0;
 
@@ -361,7 +361,7 @@ class DocblockGenerator extends AbstractGenerator
      *
      * @return int
      */
-    protected function getParamLength()
+    protected function getParamLength(): int
     {
         $length = 0;
 
@@ -379,7 +379,7 @@ class DocblockGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

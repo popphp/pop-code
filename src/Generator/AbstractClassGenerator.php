@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 abstract class AbstractClassGenerator extends AbstractGenerator
 {
@@ -32,13 +32,13 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * Array of constant generator objects
      * @var array
      */
-    protected $constants = [];
+    protected array $constants = [];
 
     /**
      * Array of method generator objects
      * @var array
      */
-    protected $methods = [];
+    protected array $methods = [];
 
     /**
      * Add constants
@@ -46,7 +46,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * @param  array $constants
      * @return AbstractClassGenerator
      */
-    public function addConstants(array $constants)
+    public function addConstants(array $constants): AbstractClassGenerator
     {
         foreach ($constants as $constant) {
             $this->addConstant($constant);
@@ -60,7 +60,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * @param  ConstantGenerator $constant
      * @return AbstractClassGenerator
      */
-    public function addConstant(ConstantGenerator $constant)
+    public function addConstant(ConstantGenerator $constant): AbstractClassGenerator
     {
         $this->constants[$constant->getName()] = $constant;
         return $this;
@@ -70,9 +70,9 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * Get a constant
      *
      * @param  mixed $constant
-     * @return ConstantGenerator
+     * @return ConstantGenerator|null
      */
-    public function getConstant($constant)
+    public function getConstant(mixed $constant): ConstantGenerator|null
     {
         $c = ($constant instanceof ConstantGenerator) ? $constant->getName() : $constant;
         return (isset($this->constants[$c])) ? $this->constants[$c] : null;
@@ -82,9 +82,9 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * Has a constant
      *
      * @param  mixed $constant
-     * @return boolean
+     * @return bool
      */
-    public function hasConstant($constant)
+    public function hasConstant(mixed $constant): bool
     {
         $c = ($constant instanceof ConstantGenerator) ? $constant->getName() : $constant;
         return (isset($this->constants[$c]));
@@ -93,9 +93,9 @@ abstract class AbstractClassGenerator extends AbstractGenerator
     /**
      * Has constants
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasConstants()
+    public function hasConstants(): bool
     {
         return (!empty($this->constants));
     }
@@ -105,7 +105,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      *
      * @return array
      */
-    public function getConstants()
+    public function getConstants(): array
     {
         return $this->constants;
     }
@@ -116,7 +116,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * @param  mixed $constant
      * @return AbstractClassGenerator
      */
-    public function removeConstant($constant)
+    public function removeConstant(mixed $constant): AbstractClassGenerator
     {
         $c = ($constant instanceof ConstantGenerator) ? $constant->getName() : $constant;
         if (isset($this->constants[$c])) {
@@ -131,7 +131,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * @param  array $methods
      * @return AbstractClassGenerator
      */
-    public function addMethods(array $methods)
+    public function addMethods(array $methods): AbstractClassGenerator
     {
         foreach ($methods as $method) {
             $this->addMethod($method);
@@ -145,7 +145,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * @param  MethodGenerator $method
      * @return AbstractClassGenerator
      */
-    public function addMethod(MethodGenerator $method)
+    public function addMethod(MethodGenerator $method): AbstractClassGenerator
     {
         $this->methods[$method->getName()] = $method;
         return $this;
@@ -155,9 +155,9 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * Get a method
      *
      * @param  mixed $method
-     * @return MethodGenerator
+     * @return MethodGenerator|null
      */
-    public function getMethod($method)
+    public function getMethod(mixed $method): MethodGenerator|null
     {
         $m = ($method instanceof MethodGenerator) ? $method->getName() : $method;
         return (isset($this->methods[$m])) ? $this->methods[$m] : null;
@@ -167,9 +167,9 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * Has a method
      *
      * @param  mixed $method
-     * @return boolean
+     * @return bool
      */
-    public function hasMethod($method)
+    public function hasMethod(mixed $method): bool
     {
         $m = ($method instanceof MethodGenerator) ? $method->getName() : $method;
         return (isset($this->methods[$m]));
@@ -178,9 +178,9 @@ abstract class AbstractClassGenerator extends AbstractGenerator
     /**
      * Has methods
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasMethods()
+    public function hasMethods(): bool
     {
         return (!empty($this->methods));
     }
@@ -190,7 +190,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      *
      * @return array
      */
-    public function getMethods()
+    public function getMethods(): array
     {
         return $this->methods;
     }
@@ -201,7 +201,7 @@ abstract class AbstractClassGenerator extends AbstractGenerator
      * @param  mixed $method
      * @return AbstractClassGenerator
      */
-    public function removeMethod($method)
+    public function removeMethod(mixed $method): AbstractClassGenerator
     {
         $m = ($method instanceof MethodGenerator) ? $method->getName() : $method;
         if (isset($this->methods[$m])) {

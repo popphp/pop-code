@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,26 +21,26 @@ use Pop\Code\Generator\DocblockGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait DocblockTrait
 {
 
     /**
      * Docblock generator object
-     * @var DocblockGenerator
+     * @var ?DocblockGenerator
      */
-    protected $docblock = null;
+    protected ?DocblockGenerator $docblock = null;
 
     /**
      * Set the docblock generator object
      *
      * @param  DocblockGenerator $docblock
-     * @return DocblockTrait
+     * @return static
      */
-    public function setDocblock(DocblockGenerator $docblock)
+    public function setDocblock(DocblockGenerator $docblock): static
     {
         $this->docblock = $docblock;
         return $this;
@@ -49,9 +49,9 @@ trait DocblockTrait
     /**
      * Access the docblock generator object
      *
-     * @return DocblockGenerator
+     * @return DocblockGenerator|null
      */
-    public function getDocblock()
+    public function getDocblock(): DocblockGenerator|null
     {
         return $this->docblock;
     }
@@ -59,22 +59,22 @@ trait DocblockTrait
     /**
      * Has docblock generator object
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasDocblock()
+    public function hasDocblock(): bool
     {
-        return (null !== $this->docblock);
+        return ($this->docblock !== null);
     }
 
     /**
      * Set the docblock description
      *
-     * @param  string $desc
-     * @return DocblockTrait
+     * @param  ?string $desc
+     * @return static
      */
-    public function setDesc($desc = null)
+    public function setDesc(?string $desc = null): static
     {
-        if (null !== $this->docblock) {
+        if ($this->docblock !== null) {
             $this->docblock->setDesc($desc);
         } else {
             $this->docblock = new DocblockGenerator($desc);
@@ -85,21 +85,21 @@ trait DocblockTrait
     /**
      * Get the docblock description
      *
-     * @return string
+     * @return string|null
      */
-    public function getDesc()
+    public function getDesc(): string|null
     {
-        return (null !== $this->docblock) ? $this->docblock->getDesc() : null;
+        return ($this->docblock !== null) ? $this->docblock->getDesc() : null;
     }
 
     /**
      * Has a docblock description
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasDesc()
+    public function hasDesc(): bool
     {
-        return (null !== $this->docblock) ? $this->docblock->hasDesc() : false;
+        return ($this->docblock !== null) ? $this->docblock->hasDesc() : false;
     }
 
 }

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,7 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use ReflectionException;
 
 /**
  * Property reflection code class
@@ -21,9 +22,9 @@ use Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class TraitReflection extends AbstractReflection
 {
@@ -31,12 +32,12 @@ class TraitReflection extends AbstractReflection
     /**
      * Method to parse a trait
      *
-     * @param  mixed  $code
-     * @param  string $name
-     * @throws Exception
+     * @param  mixed   $code
+     * @param  ?string $name
+     * @throws Exception|ReflectionException
      * @return Generator\TraitGenerator
      */
-    public static function parse($code, $name = null)
+    public static function parse(mixed $code, ?string $name = null): Generator\TraitGenerator
     {
         $reflection     = new \ReflectionClass($code);
         $reflectionName = $reflection->getShortName();
@@ -47,7 +48,7 @@ class TraitReflection extends AbstractReflection
             $fileContents = file_get_contents($reflectionFile);
         }
 
-        if ((null === $name) && !empty($reflectionName)) {
+        if (($name === null) && !empty($reflectionName)) {
             $name = $reflectionName;
         }
 
@@ -58,18 +59,18 @@ class TraitReflection extends AbstractReflection
         $trait = new Generator\TraitGenerator($name);
 
         // Detect and set namespace
-        if (($reflection->inNamespace()) && (null !== $fileContents)) {
+        if (($reflection->inNamespace()) && ($fileContents !== null)) {
             $trait->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
         // Detect and set the class doc block
         $traitDocBlock = $reflection->getDocComment();
-        if (!empty($traitDocBlock) && (strpos($traitDocBlock, '/*') !== false)) {
+        if (!empty($traitDocBlock) && (str_contains($traitDocBlock, '/*'))) {
             $trait->setDocblock(DocblockReflection::parse($traitDocBlock));
         }
 
         // Detect used traits
-        if (null !== $fileContents) {
+        if ($fileContents !== null) {
             $uses = [];
             preg_match_all('/[ ]+use(.*);$/m', $fileContents, $uses);
 

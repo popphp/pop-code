@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,7 @@
 namespace Pop\Code\Generator\Traits;
 
 use Pop\Code\Generator\DocblockGenerator;
+use InvalidArgumentException;
 
 /**
  * Function trait
@@ -21,9 +22,9 @@ use Pop\Code\Generator\DocblockGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait FunctionTrait
 {
@@ -32,34 +33,27 @@ trait FunctionTrait
      * Arguments
      * @var array
      */
-    protected $arguments = [];
+    protected array $arguments = [];
 
     /**
      * Add an argument
      *
      * @param  string  $name
      * @param  mixed   $value
-     * @param  string  $type
-     * @return FunctionTrait
+     * @param  ?string $type
+     * @return static
      */
-    public function addArgument($name, $value = null, $type = null)
+    public function addArgument(string $name, mixed $value = null, ?string $type = null): static
     {
-        $typeHintsNotAllowed = [
-            'int',
-            'integer',
-            'boolean',
-            'float',
-            'string',
-            'mixed'
-        ];
+        $typeHintsNotAllowed = ['integer'];
         $argType = (!in_array($type, $typeHintsNotAllowed)) ? $type : null;
         $this->arguments[$name] = ['value' => $value, 'type' => $argType];
 
-        if (null === $this->docblock) {
+        if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
 
-        if (substr($name, 0, 1) != '$') {
+        if (!str_starts_with($name, '$')) {
             $name = '$' . $name;
         }
         $this->docblock->addParam($type, $name);
@@ -71,13 +65,14 @@ trait FunctionTrait
      * Add arguments
      *
      * @param  array $args
-     * @return FunctionTrait
+     * @throws InvalidArgumentException
+     * @return static
      */
-    public function addArguments(array $args)
+    public function addArguments(array $args): static
     {
         foreach ($args as $arg) {
             if (!isset($arg['name'])) {
-                throw new \InvalidArgumentException("Error: The 'name' key was not set.");
+                throw new InvalidArgumentException("Error: The 'name' key was not set.");
             }
             $value = (isset($arg['value'])) ? $arg['value'] : null;
             $type  = (isset($arg['type'])) ? $arg['type'] : null;
@@ -90,9 +85,9 @@ trait FunctionTrait
      * Has an argument
      *
      * @param  string $name
-     * @return boolean
+     * @return bool
      */
-    public function hasArgument($name)
+    public function hasArgument(string $name): bool
     {
         return (isset($this->arguments[$name]));
     }
@@ -100,9 +95,9 @@ trait FunctionTrait
     /**
      * Has arguments
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasArguments()
+    public function hasArguments(): bool
     {
         return (!empty($this->arguments));
     }
@@ -111,11 +106,11 @@ trait FunctionTrait
      * Get an argument
      *
      * @param  string $name
-     * @return array
+     * @return array|null
      */
-    public function getArgument($name)
+    public function getArgument(string $name): array|null
     {
-        return (isset($this->arguments[$name])) ? $this->arguments[$name] : null;
+        return $this->arguments[$name] ?? null;
     }
 
     /**
@@ -123,7 +118,7 @@ trait FunctionTrait
      *
      * @return array
      */
-    public function getArguments()
+    public function getArguments(): array
     {
         return $this->arguments;
     }
@@ -133,10 +128,10 @@ trait FunctionTrait
      *
      * @param  string  $name
      * @param  mixed   $value
-     * @param  string  $type
-     * @return FunctionTrait
+     * @param  ?string $type
+     * @return static
      */
-    public function addParameter($name, $value = null, $type = null)
+    public function addParameter(string $name, mixed $value = null, ?string $type = null): static
     {
         $this->addArgument($name, $value, $type);
         return $this;
@@ -145,10 +140,10 @@ trait FunctionTrait
     /**
      * Add arguments (alias method for convenience)
      *
-     * @param array $args
-     * @return FunctionTrait
+     * @param  array $args
+     * @return static
      */
-    public function addParameters(array $args)
+    public function addParameters(array $args): static
     {
         $this->addArguments($args);
         return $this;
@@ -158,9 +153,9 @@ trait FunctionTrait
      * Has an argument (alias method for convenience)
      *
      * @param  string $name
-     * @return boolean
+     * @return bool
      */
-    public function hasParameter($name)
+    public function hasParameter(string $name): bool
     {
         return $this->hasArgument($name);
     }
@@ -168,9 +163,9 @@ trait FunctionTrait
     /**
      * Has arguments (alias method for convenience)
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasParameters()
+    public function hasParameters(): bool
     {
         return $this->hasArguments();
     }
@@ -179,9 +174,9 @@ trait FunctionTrait
      * Get an argument (alias method for convenience)
      *
      * @param  string $name
-     * @return array
+     * @return array|null
      */
-    public function getParameter($name)
+    public function getParameter(string $name): array|null
     {
         return $this->getArgument($name);
     }
@@ -191,7 +186,7 @@ trait FunctionTrait
      *
      * @return array
      */
-    public function getParameters()
+    public function getParameters(): array
     {
         return $this->getArguments();
     }
@@ -199,18 +194,18 @@ trait FunctionTrait
     /**
      * Format the arguments
      *
-     * @return string
+     * @return string|null
      */
-    protected function formatArguments()
+    protected function formatArguments(): string|null
     {
         $args = null;
 
         $i = 0;
         foreach ($this->arguments as $name => $arg) {
             $i++;
-            $args .= (null !== $arg['type']) ? $arg['type'] . ' ' : null;
+            $args .= ($arg['type'] !== null) ? $arg['type'] . ' ' : null;
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
-            $args .= (null !== $arg['value']) ? " = " . $arg['value'] : null;
+            $args .= ($arg['value'] !== null) ? " = " . $arg['value'] : null;
             if ($i < count($this->arguments)) {
                 $args .= ', ';
             }

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class ClassGenerator extends AbstractClassGenerator
 {
@@ -30,15 +30,15 @@ class ClassGenerator extends AbstractClassGenerator
 
     /**
      * Parent class that is extended
-     * @var string
+     * @var ?string
      */
-    protected $parent = null;
+    protected ?string $parent = null;
 
     /**
      * Interfaces that are implemented
      * @var array
      */
-    protected $interfaces = [];
+    protected array $interfaces = [];
 
     /**
      * Constructor
@@ -46,22 +46,22 @@ class ClassGenerator extends AbstractClassGenerator
      * Instantiate the class generator object
      *
      * @param  string  $name
-     * @param  string  $parent
+     * @param  ?string $parent
      * @param  mixed   $interface
-     * @param  boolean $abstract
+     * @param  bool    $abstract
      */
-    public function __construct($name, $parent = null, $interface = null, $abstract = false)
+    public function __construct(string $name, ?string $parent = null, mixed $interface = null, bool $abstract = false)
     {
         $this->setName($name);
 
-        if (null !== $parent) {
+        if ($parent !== null) {
             $this->setParent($parent);
         }
 
-        if (null !== $interface) {
+        if ($interface !== null) {
             if (is_array($interface)) {
                 $this->addInterfaces($interface);
-            } else if (strpos($interface, ',') !== false) {
+            } else if (str_contains($interface, ',')) {
                 $this->addInterfaces(array_map('trim', explode(',', $interface)));
             } else {
                 $this->addInterface($interface);
@@ -74,10 +74,10 @@ class ClassGenerator extends AbstractClassGenerator
     /**
      * Set the class parent
      *
-     * @param  string $parent
+     * @param  ?string $parent
      * @return ClassGenerator
      */
-    public function setParent($parent = null)
+    public function setParent(?String $parent = null): ClassGenerator
     {
         $this->parent = $parent;
         return $this;
@@ -86,9 +86,9 @@ class ClassGenerator extends AbstractClassGenerator
     /**
      * Get the class parent
      *
-     * @return string
+     * @return string|null
      */
-    public function getParent()
+    public function getParent(): string|null
     {
         return $this->parent;
     }
@@ -96,11 +96,11 @@ class ClassGenerator extends AbstractClassGenerator
     /**
      * Has parent
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasParent()
+    public function hasParent(): bool
     {
-        return (null !== $this->parent);
+        return ($this->parent !== null);
     }
 
     /**
@@ -109,7 +109,7 @@ class ClassGenerator extends AbstractClassGenerator
      * @param  string $interface
      * @return ClassGenerator
      */
-    public function addInterface($interface)
+    public function addInterface(string $interface): ClassGenerator
     {
         if (!in_array($interface, $this->interfaces)) {
             $this->interfaces[] = $interface;
@@ -124,7 +124,7 @@ class ClassGenerator extends AbstractClassGenerator
      * @param  array $interfaces
      * @return ClassGenerator
      */
-    public function addInterfaces(array $interfaces)
+    public function addInterfaces(array $interfaces): ClassGenerator
     {
         foreach ($interfaces as $interface) {
             $this->addInterface($interface);
@@ -138,7 +138,7 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @return array
      */
-    public function getInterfaces()
+    public function getInterfaces(): array
     {
         return $this->interfaces;
     }
@@ -146,9 +146,9 @@ class ClassGenerator extends AbstractClassGenerator
     /**
      * Has class interfaces
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasInterfaces()
+    public function hasInterfaces(): bool
     {
         return (!empty($this->interfaces));
     }
@@ -157,9 +157,9 @@ class ClassGenerator extends AbstractClassGenerator
      * Has class interface
      *
      * @param  string $interface
-     * @return boolean
+     * @return bool
      */
-    public function hasInterface($interface)
+    public function hasInterface(string $interface): bool
     {
         return (in_array($interface, $this->interfaces));
     }
@@ -170,7 +170,7 @@ class ClassGenerator extends AbstractClassGenerator
      * @param  string $interface
      * @return ClassGenerator
      */
-    public function removeInterface($interface)
+    public function removeInterface(string $interface): ClassGenerator
     {
         if (in_array($interface, $this->interfaces)) {
             $key = array_search($interface, $this->interfaces);
@@ -185,7 +185,7 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $classKeyword = null;
 
@@ -195,11 +195,11 @@ class ClassGenerator extends AbstractClassGenerator
             $classKeyword = 'final ';
         }
 
-        $this->output  = (null !== $this->namespace) ? $this->namespace->render() . PHP_EOL : null;
-        $this->output .= (null !== $this->docblock) ? $this->docblock->render() : null;
+        $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
+        $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
         $this->output .= $classKeyword . 'class ' . $this->name;
 
-        if (null !== $this->parent) {
+        if ($this->parent !== null) {
             $this->output .= ' extends ' . $this->parent;
         }
         if (!empty($this->interfaces)) {
@@ -213,7 +213,7 @@ class ClassGenerator extends AbstractClassGenerator
             foreach ($this->uses as $ns => $as) {
                 $this->output .= $this->printIndent() . 'use ';
                 $this->output .= $ns;
-                if (null !== $as) {
+                if ($as !== null) {
                     $this->output .= ' as ' . $as;
                 }
                 $this->output .= ';' . PHP_EOL;
@@ -240,7 +240,7 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatConstants()
+    protected function formatConstants(): string
     {
         $constants = null;
 
@@ -256,7 +256,7 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatProperties()
+    protected function formatProperties(): string
     {
         $props = null;
 
@@ -272,7 +272,7 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    protected function formatMethods()
+    protected function formatMethods(): string
     {
         $methods = null;
 
@@ -288,7 +288,7 @@ class ClassGenerator extends AbstractClassGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

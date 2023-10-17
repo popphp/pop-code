@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class FunctionGenerator extends AbstractGenerator
 {
@@ -30,33 +30,33 @@ class FunctionGenerator extends AbstractGenerator
 
     /**
      * Function interface flag
-     * @var boolean
+     * @var bool
      */
-    protected $closure = false;
+    protected bool $closure = false;
 
     /**
      * Function body
-     * @var string
+     * @var ?string
      */
-    protected $body = null;
+    protected ?string $body = null;
 
     /**
      * Function indent
      * @var int
      */
-    protected $indent = 0;
+    protected int $indent = 0;
 
     /**
      * Constructor
      *
      * Instantiate the function generator object
      *
-     * @param  string  $name
-     * @param  boolean $closure
+     * @param  ?string $name
+     * @param  bool    $closure
      */
-    public function __construct($name = null, $closure = false)
+    public function __construct(?string $name = null, bool $closure = false)
     {
-        if (null !== $name) {
+        if ($name !== null) {
             $this->setName($name);
         }
         $this->setAsClosure($closure);
@@ -65,21 +65,21 @@ class FunctionGenerator extends AbstractGenerator
     /**
      * Set the function closure flag
      *
-     * @param  boolean $closure
+     * @param  bool $closure
      * @return FunctionGenerator
      */
-    public function setAsClosure($closure = false)
+    public function setAsClosure(bool $closure = false): FunctionGenerator
     {
-        $this->closure = (boolean)$closure;
+        $this->closure = $closure;
         return $this;
     }
 
     /**
      * Get the function closure flag
      *
-     * @return boolean
+     * @return bool
      */
-    public function isClosure()
+    public function isClosure(): bool
     {
         return $this->closure;
     }
@@ -90,15 +90,15 @@ class FunctionGenerator extends AbstractGenerator
      * @throws Exception
      * @return string
      */
-    public function render()
+    public function render(): string
     {
-        if (null === $this->name) {
+        if ($this->name === null) {
             throw new Exception('Error: The function name has not been set.');
         }
 
         $args = $this->formatArguments();
 
-        $this->output = PHP_EOL . ((null !== $this->docblock) ? $this->docblock->render() : null);
+        $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
         if ($this->closure) {
             $this->output .= $this->printIndent() . '$' . $this->name .' = function(' . $args . ')';
         } else {
@@ -123,7 +123,7 @@ class FunctionGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 abstract class AbstractClassElementGenerator extends AbstractGenerator
 {
@@ -32,21 +32,22 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
      * Visibility
      * @var string
      */
-    protected $visibility = 'public';
+    protected string $visibility = 'public';
 
     /**
      * Static flag
-     * @var boolean
+     * @var bool
      */
-    protected $static = false;
+    protected bool $static = false;
 
     /**
      * Set the visibility
      *
      * @param  string $visibility
+     * @throws Exception
      * @return AbstractClassElementGenerator
      */
-    public function setVisibility($visibility = 'public')
+    public function setVisibility(string $visibility = 'public'): AbstractClassElementGenerator
     {
         $visibility = strtolower($visibility);
 
@@ -61,9 +62,10 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Set the visibility to public
      *
+     * @throws Exception
      * @return AbstractClassElementGenerator
      */
-    public function setAsPublic()
+    public function setAsPublic(): AbstractClassElementGenerator
     {
         return $this->setVisibility('public');
     }
@@ -71,9 +73,10 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Set the visibility to protected
      *
+     * @throws Exception
      * @return AbstractClassElementGenerator
      */
-    public function setAsProtected()
+    public function setAsProtected(): AbstractClassElementGenerator
     {
         return $this->setVisibility('protected');
     }
@@ -81,9 +84,10 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Set the visibility to public
      *
+     * @throws Exception
      * @return AbstractClassElementGenerator
      */
-    public function setAsPrivate()
+    public function setAsPrivate(): AbstractClassElementGenerator
     {
         return $this->setVisibility('private');
     }
@@ -91,9 +95,9 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Is visibility public
      *
-     * @return boolean
+     * @return bool
      */
-    public function isPublic()
+    public function isPublic(): bool
     {
         return ($this->visibility == 'public');
     }
@@ -101,9 +105,9 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Set the visibility to protected
      *
-     * @return boolean
+     * @return bool
      */
-    public function isProtected()
+    public function isProtected(): bool
     {
         return ($this->visibility == 'protected');
     }
@@ -111,9 +115,9 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Set the visibility to private
      *
-     * @return boolean
+     * @return bool
      */
-    public function isPrivate()
+    public function isPrivate(): bool
     {
         return ($this->visibility == 'private');
     }
@@ -123,7 +127,7 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function getVisibility()
+    public function getVisibility(): string
     {
         return $this->visibility;
     }
@@ -131,21 +135,21 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     /**
      * Set the static flag
      *
-     * @param  boolean $static
+     * @param  bool $static
      * @return AbstractClassElementGenerator
      */
-    public function setAsStatic($static = true)
+    public function setAsStatic(bool $static = true): AbstractClassElementGenerator
     {
-        $this->static = (boolean)$static;
+        $this->static = $static;
         return $this;
     }
 
     /**
      * Get the static flag
      *
-     * @return boolean
+     * @return bool
      */
-    public function isStatic()
+    public function isStatic(): bool
     {
         return $this->static;
     }

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class ConstantGenerator extends AbstractClassElementGenerator
 {
@@ -30,94 +30,96 @@ class ConstantGenerator extends AbstractClassElementGenerator
 
     /**
      * Constant type
-     * @var string
+     * @var ?string
      */
-    protected $type = null;
+    protected ?string $type = null;
 
     /**
      * Constant value
      * @var mixed
      */
-    protected $value = null;
+    protected mixed $value = null;
 
     /**
      * Constructor
      *
      * Instantiate the constant generator object
      *
-     * @param  string  $name
-     * @param  string  $type
-     * @param  mixed   $value
+     * @param  string $name
+     * @param  string $type
+     * @param  mixed  $value
      */
-    public function __construct($name, $type, $value = null)
+    public function __construct(string $name, string $type, mixed $value = null)
     {
         $this->setName($name);
         $this->setType($type);
-        $this->setValue($value);
+        if ($value !== null) {
+            $this->setValue($value);
+        }
     }
 
     /**
-     * Set the property type
+     * Set the constant type
      *
      * @param  string $type
      * @return ConstantGenerator
      */
-    public function setType($type)
+    public function setType(string $type): ConstantGenerator
     {
         $this->type = $type;
         return $this;
     }
 
     /**
-     * Get the property type
+     * Get the constant type
      *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
     /**
-     * Set the property value
+     * Set the constant value
      *
      * @param  mixed $value
      * @return ConstantGenerator
      */
-    public function setValue($value = null)
+    public function setValue(mixed $value = null): ConstantGenerator
     {
         $this->value = $value;
         return $this;
     }
 
     /**
-     * Get the property value
+     * Get the constant value
      *
      * @return mixed
      */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->value;
     }
 
     /**
-     * Has property value
+     * Has constant value
      *
-     * @return boolean
+     * @return bool
      */
-    public function hasValue()
+    public function hasValue(): bool
     {
-        return (null !== $this->value);
+        return ($this->value !== null);
     }
 
     /**
-     * Render property
+     * Render constant
      *
-     * @return mixed
+     * @return string
      */
-    public function render()
+    public function render(): string
     {
-        if (null === $this->docblock) {
+        if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
 
@@ -125,13 +127,13 @@ class ConstantGenerator extends AbstractClassElementGenerator
         $this->output = PHP_EOL . $this->docblock->render();
         $this->output .= $this->printIndent() . 'const ' . $this->name;
 
-        if (null !== $this->value) {
+        if ($this->value !== null) {
             if ($this->type == 'array') {
                 $val = (count($this->value) == 0) ? '[]' : $this->formatArrayValues();
                 $this->output .= ' = ' . $val . PHP_EOL;
             } else if (($this->type == 'integer') || ($this->type == 'int') || ($this->type == 'float')) {
                 $this->output .= ' = ' . $this->value . ';';
-            } else if ($this->type == 'boolean') {
+            } else if ($this->type == 'bool') {
                 $val = ($this->value) ? 'true' : 'false';
                 $this->output .= " = " . $val . ";";
             } else {
@@ -150,7 +152,7 @@ class ConstantGenerator extends AbstractClassElementGenerator
      *
      * @return string
      */
-    protected function formatArrayValues()
+    protected function formatArrayValues(): string
     {
         $ary = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '  ', var_export($this->value, true));
         $ary .= ';';
@@ -178,11 +180,11 @@ class ConstantGenerator extends AbstractClassElementGenerator
     }
 
     /**
-     * Print property
+     * Print constant
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class PropertyReflection extends AbstractReflection
 {
@@ -31,12 +31,12 @@ class PropertyReflection extends AbstractReflection
     /**
      * Method to parse a property
      *
-     * @param  mixed  $code
-     * @param  string $name
-     * @param  mixed  $value
+     * @param  mixed   $code
+     * @param  ?string $name
+     * @param  mixed   $value
      * @return Generator\PropertyGenerator
      */
-    public static function parse($code, $name = null, $value = null)
+    public static function parse(mixed $code, ?string $name = null, mixed $value = null): Generator\PropertyGenerator
     {
         if ($code->isProtected()) {
             $visibility = 'protected';
@@ -51,12 +51,12 @@ class PropertyReflection extends AbstractReflection
         $type     = null;
 
         $doc = $code->getDocComment();
-        if ((null !== $doc) && (strpos($doc, '/*') !== false)) {
+        if (($doc !== null) && (str_contains($doc, '/*'))) {
             $docblock = DocblockReflection::parse($doc);
             $docblock->setIndent(4);
             $desc     = $docblock->getDesc();
             $type     = $docblock->getTag('var');
-        } else if (null !== $value) {
+        } else if ($value !== null) {
             $type     = strtolower(gettype($value));
         }
 
@@ -67,7 +67,7 @@ class PropertyReflection extends AbstractReflection
         }
 
         $property = new Generator\PropertyGenerator($code->getName(), $type, $formattedValue, $visibility, $code->isStatic());
-        if (null !== $docblock) {
+        if ($docblock !== null) {
             $property->setDocblock($docblock);
         }
         $property->setDesc($desc);

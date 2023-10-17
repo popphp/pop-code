@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 class BodyGenerator extends AbstractGenerator
 {
@@ -35,11 +35,11 @@ class BodyGenerator extends AbstractGenerator
      * @param  int   $indent
      * @return BodyGenerator
      */
-    public function createReturnConfig(array $config, $indent = 4)
+    public function createReturnConfig(array $config, int $indent = 4): BodyGenerator
     {
         $body = var_export($config, true);
 
-        if ((null !== $indent) && (($indent % 2) == 0)) {
+        if (($indent !== null) && (($indent % 2) == 0)) {
             $multiplier     = $indent / 2;
             $replacePattern = str_repeat('$1', $multiplier) . '$2';
         } else {
@@ -61,9 +61,9 @@ class BodyGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
-        $this->output  = PHP_EOL . ((null !== $this->docblock) ? $this->docblock->render() : null);
+        $this->output  = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
         $this->output .= $this->body. PHP_EOL;
 
         return $this->output;
@@ -74,7 +74,7 @@ class BodyGenerator extends AbstractGenerator
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

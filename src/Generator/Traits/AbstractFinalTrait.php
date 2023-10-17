@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
  */
 
@@ -19,34 +19,34 @@ namespace Pop\Code\Generator\Traits;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2023 NOLA Interactive, LLC. (http://www.nolainteractive.com)
+ * @copyright  Copyright (c) 2009-2024 NOLA Interactive, LLC. (http://www.nolainteractive.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    4.1.0
+ * @version    5.0.0
  */
 trait AbstractFinalTrait
 {
 
     /**
      * Method abstract flag
-     * @var boolean
+     * @var bool
      */
-    protected $abstract = false;
+    protected bool $abstract = false;
 
     /**
      * Method final flag
-     * @var boolean
+     * @var bool
      */
-    protected $final = false;
+    protected bool $final = false;
 
     /**
      * Set the method abstract flag
      *
-     * @param  boolean $abstract
-     * @return AbstractFinalTrait
+     * @param  bool $abstract
+     * @return static
      */
-    public function setAsAbstract($abstract = true)
+    public function setAsAbstract(bool $abstract = true): static
     {
-        $this->abstract = (boolean)$abstract;
+        $this->abstract = $abstract;
         if ($this->abstract) {
             $this->setAsFinal(false);
         }
@@ -56,9 +56,9 @@ trait AbstractFinalTrait
     /**
      * Get the method abstract flag
      *
-     * @return boolean
+     * @return bool
      */
-    public function isAbstract()
+    public function isAbstract(): bool
     {
         return $this->abstract;
     }
@@ -66,12 +66,12 @@ trait AbstractFinalTrait
     /**
      * Set the method final flag
      *
-     * @param  boolean $final
-     * @return AbstractFinalTrait
+     * @param  bool $final
+     * @return static
      */
-    public function setAsFinal($final = true)
+    public function setAsFinal(bool $final = true): static
     {
-        $this->final = (boolean)$final;
+        $this->final = $final;
         if ($this->final) {
             $this->setAsAbstract(false);
         }
@@ -81,9 +81,9 @@ trait AbstractFinalTrait
     /**
      * Get the method final flag
      *
-     * @return boolean
+     * @return bool
      */
-    public function isFinal()
+    public function isFinal(): bool
     {
         return $this->final;
     }
