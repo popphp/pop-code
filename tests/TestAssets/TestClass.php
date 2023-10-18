@@ -57,19 +57,21 @@ class TestClass extends AbstractTestClass
     }
 
     /**
-     * @param $str
+     * @param ?string $str
+     * @return string|null
      */
-    protected function test1($str)
+    protected function test1(?string $str = null): string|null
     {
-        echo $str;
+        return $str;
     }
 
     /**
-     * @param $str
+     * @param ?string $str
+     * @return array|string|null
      */
-    private function test2($str)
+    private function test2(?string $str = null): array|string|null
     {
-        echo $str;
+        return $str;
     }
 
 }

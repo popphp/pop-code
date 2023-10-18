@@ -121,6 +121,29 @@ class MethodReflection extends AbstractReflection
             }
         }
 
+        // Get return type(s)
+        if ($code->hasReturnType()) {
+            $namedTypes  = [];
+            $returnTypes = $code->getReturnType();
+            if ($returnTypes instanceof \ReflectionUnionType) {
+                $types = $returnTypes->getTypes();
+                foreach ($types as $type) {
+                    $namedTypes[] = $type->getName();
+                }
+                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
+                    $namedTypes[] = 'null';
+                }
+            } else if ($returnTypes instanceof \ReflectionNamedType) {
+                $namedTypes[] = $returnTypes->getName();
+                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
+                    $namedTypes[] = 'null';
+                }
+            }
+            if (!empty($namedTypes)) {
+                $method->addReturnTypes($namedTypes);
+            }
+        }
+
         return $method;
     }
 

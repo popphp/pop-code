@@ -105,6 +105,10 @@ class FunctionGenerator extends AbstractGenerator
             $this->output .= $this->printIndent() . 'function ' . $this->name . '(' . $args . ')';
         }
 
+        if ($this->hasReturnTypes()) {
+            $this->output .= ': ' . implode('|', $this->returnTypes);
+        }
+
         $this->output .= PHP_EOL . $this->printIndent() . '{' . PHP_EOL;
         $this->output .= $this->body. PHP_EOL;
         $this->output .= $this->printIndent() . '}';

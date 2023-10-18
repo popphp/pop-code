@@ -67,6 +67,10 @@ class MethodGenerator extends AbstractClassElementGenerator
         $this->output .= $this->printIndent() . $final . $abstract . $this->visibility .
             $static . ' function ' . $this->name . '(' . $args . ')';
 
+        if ($this->hasReturnTypes()) {
+            $this->output .= ': ' . implode('|', $this->returnTypes);
+        }
+
         if (!empty($this->body)) {
             $this->output .= PHP_EOL . $this->printIndent() . '{' . PHP_EOL;
             $this->output .= $this->body. PHP_EOL;

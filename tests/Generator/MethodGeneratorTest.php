@@ -29,9 +29,11 @@ class MethodGeneratorTest extends TestCase
     {
         $method = new Generator\MethodGenerator('foo');
         $method->setAsPublic();
+        $method->addReturnTypes(['string', 'null']);
         $this->assertTrue($method->isPublic());
         $this->assertEquals('public', $method->getVisibility());
         $this->assertStringContainsString('public function foo', (string)$method);
+        $this->assertStringContainsString('): string|null', (string)$method);
     }
 
     public function testProtected()

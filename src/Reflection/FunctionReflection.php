@@ -32,8 +32,8 @@ class FunctionReflection extends AbstractReflection
     /**
      * Method to parse a function or closure
      *
-     * @param  mixed  $code
-     * @param  string $name
+     * @param  mixed   $code
+     * @param  ?string $name
      * @throws ReflectionException
      * @return FunctionGenerator
      */
@@ -92,6 +92,29 @@ class FunctionReflection extends AbstractReflection
 
             if (!empty($body)) {
                 $function->setBody($body, false);
+            }
+        }
+
+        // Get return type(s)
+        if ($reflection->hasReturnType()) {
+            $namedTypes  = [];
+            $returnTypes = $reflection->getReturnType();
+            if ($returnTypes instanceof \ReflectionUnionType) {
+                $types = $returnTypes->getTypes();
+                foreach ($types as $type) {
+                    $namedTypes[] = $type->getName();
+                }
+                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
+                    $namedTypes[] = 'null';
+                }
+            } else if ($returnTypes instanceof \ReflectionNamedType) {
+                $namedTypes[] = $returnTypes->getName();
+                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
+                    $namedTypes[] = 'null';
+                }
+            }
+            if (!empty($namedTypes)) {
+                $function->addReturnTypes($namedTypes);
             }
         }
 

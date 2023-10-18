@@ -36,6 +36,12 @@ trait FunctionTrait
     protected array $arguments = [];
 
     /**
+     * Return Types
+     * @var array
+     */
+    protected array $returnTypes = [];
+
+    /**
      * Add an argument
      *
      * @param  string  $name
@@ -89,7 +95,7 @@ trait FunctionTrait
      */
     public function hasArgument(string $name): bool
     {
-        return (isset($this->arguments[$name]));
+        return isset($this->arguments[$name]);
     }
 
     /**
@@ -99,7 +105,7 @@ trait FunctionTrait
      */
     public function hasArguments(): bool
     {
-        return (!empty($this->arguments));
+        return !empty($this->arguments);
     }
 
     /**
@@ -189,6 +195,73 @@ trait FunctionTrait
     public function getParameters(): array
     {
         return $this->getArguments();
+    }
+
+    /**
+     * Add a return type
+     *
+     * @param  string $type
+     * @return static
+     */
+    public function addReturnType(string $type): static
+    {
+        $typeHintsNotAllowed = ['integer'];
+        if (!in_array($type, $typeHintsNotAllowed)) {
+            $this->returnTypes[] = $type;
+
+            if ($this->docblock === null) {
+                $this->docblock = new DocblockGenerator(null, $this->indent);
+            }
+
+            $this->docblock->setReturn(implode('|', $this->returnTypes));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add return types
+     *
+     * @param  array $types
+     * @return static
+     */
+    public function addReturnTypes(array $types): static
+    {
+        foreach ($types as $type) {
+            $this->addReturnType($type);
+        }
+        return $this;
+    }
+
+    /**
+     * Has return type
+     *
+     * @param  string $type
+     * @return bool
+     */
+    public function hasReturnType(string $type): bool
+    {
+        return in_array($type, $this->returnTypes);
+    }
+
+    /**
+     * Has return types
+     *
+     * @return bool
+     */
+    public function hasReturnTypes(): bool
+    {
+        return !empty($this->returnTypes);
+    }
+
+    /**
+     * Get the return types
+     *
+     * @return array
+     */
+    public function getReturnTypes(): array
+    {
+        return $this->returnTypes;
     }
 
     /**

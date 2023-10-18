@@ -56,12 +56,18 @@ CODE;
 
     public function testCreateFunction()
     {
-        $code = function($var) {
+        $code1 = function($var): string|null {
             echo $var;
         };
 
-        $function = Reflection::createFunction($code);
-        $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function);
+        $function1 = Reflection::createFunction($code1);
+        $code2 = function($var): array|string|null {
+            echo $var;
+        };
+
+        $function2 = Reflection::createFunction($code2);
+        $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function1);
+        $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function2);
     }
 
     public function testCreateMethod()
