@@ -4,14 +4,23 @@ pop-code
 [![Build Status](https://github.com/popphp/pop-code/workflows/phpunit/badge.svg)](https://github.com/popphp/pop-code/actions)
 [![Coverage Status](http://cc.popphp.org/coverage.php?comp=pop-code)](http://cc.popphp.org/pop-code/)
 
-OVERVIEW
+[![Join the chat at https://popphp.slack.com](https://media.popphp.org/img/slack.svg)](https://popphp.slack.com)
+[![Join the chat at https://discord.gg/D9JBxPa5](https://media.popphp.org/img/discord.svg)](https://discord.gg/D9JBxPa5)
+
+* [Overview](#overview)
+* [Install](#install)
+* [Quickstart](#quickstart)
+* [Generate Code](#generate-code)
+* [Parse Code](#parse-code)
+
+Overview
 --------
 `pop-code` provides the ability to dynamically generate PHP code on the fly
 as well as parse and modify existing PHP code.
 
 `pop-code` is a component of the [Pop PHP Framework](http://www.popphp.org/).
 
-INSTALL
+Install
 -------
 
 Install `pop-code` using Composer.
@@ -24,24 +33,14 @@ Or, require it in your composer.json file
         "popphp/pop-view" : "^5.0.0"
     }
 
-BASIC USAGE
------------
+[Top](#pop-code)
 
-There are a number of individual code generators available to manage the creation and output of
-various types of code blocks. Code generators are available for the following type of code:
+Quickstart
+----------
 
-- Classes
-- Interfaces
-- Traits
-- Methods
-- Functions
-- Constants
-- Properties
-- Namespaces
-- Docblocks
-- Bodies (general blocks of code) 
+### Create a simple function
 
-### A simple function
+In this example, a function is created and rendered to a string:
 
 ```php
 use Pop\Code\Generator;
@@ -54,8 +53,6 @@ $function->setDesc('This is the first function');
 echo $function;
 ```
 
-The above code will produce the following function:
-
 ```php
 /**
  * This is the first function
@@ -66,65 +63,11 @@ function sayHello($name)
 {
     echo 'Hello ' . $name;
 }
-
 ```
 
-If you'd like to generate a standalone block or file of code, the main class
-`Pop\Code\Generator` can consume instances of the various available code generators.
-With it, you have flexibility to generate code that can be saved to a file or output
-to the screen. 
+### Create a simple class
 
-### Create a file with some functions
-
-```php
-use Pop\Code\Generator;
-
-$function1 = new Generator\FunctionGenerator('sayHello');
-$function1->addArgument('name');
-$function1->setBody("echo 'Hello ' . \$name;");
-$function1->setDesc('This is the first function');
-
-$function2 = new Generator\FunctionGenerator('sayGoodbye');
-$function2->addArgument('name');
-$function2->setBody("echo 'Goodbye ' . \$name;");
-$function2->setDesc('This is the second function');
-
-$code = new Generator();
-$code->addCodeObjects([$function1, $function2]);
-$code->writeToFile('code.php');
-```
-
-The above code will produce a file called `code.php` with the following
-code in it:
-
-```php
-<?php
-
-/**
- * This is the first function
- * 
- * @param $name
- */
-function sayHello($name)
-{
-    echo 'Hello ' . $name;
-}
-
-/**
- * This is the second function
- * 
- * @param $name
- */
-function sayGoodbye($name)
-{
-    echo 'Goodbye ' . $name;
-}
-```
-
-
-
-
-### Create a class with a property and a method
+In this example, a class is created and saved to a file:
 
 ```php
 use Pop\Code\Generator;
@@ -146,14 +89,12 @@ $method->addArgument('foo')
 $class->addProperty($prop);
 $class->addMethod($method);
 
-// Save the class file
+// Save the class to a file
 $code = new Generator($class);
-
-// Or, you can echo out the contents of the code directly
-echo $code;
+$code->writeToFile('MuClass.php');
 ```
 
-##### The newly created class will look like:
+The contents of the file will be:
 
 ```php
 <?php
@@ -182,10 +123,81 @@ class MyClass
     }
 
 }
-
 ```
 
-### Parse an existing class and add a method to it
+[Top](#pop-code)
+
+Generate Code
+-------------
+
+There are a number of individual code generators available to manage the creation and output of
+various types of code blocks. Code generators are available for the following type of code:
+
+- Classes
+- Interfaces
+- Traits
+- Methods
+- Functions
+- Constants
+- Properties
+- Namespaces
+- Docblocks
+- Bodies (general blocks of code)
+
+### Create a file with some functions
+
+```php
+use Pop\Code\Generator;
+
+$function1 = new Generator\FunctionGenerator('sayHello');
+$function1->addArgument('name');
+$function1->setBody("echo 'Hello ' . \$name;");
+$function1->setDesc('This is the first function');
+
+$function2 = new Generator\FunctionGenerator('sayGoodbye');
+$function2->addArgument('name');
+$function2->setBody("echo 'Goodbye ' . \$name;");
+$function2->setDesc('This is the second function');
+
+$code = new Generator();
+$code->addCodeObjects([$function1, $function2]);
+$code->writeToFile('functions.php');
+```
+
+The above code will produce a file called `functions.php` with the following
+code in it:
+
+```php
+<?php
+
+/**
+ * This is the first function
+ * 
+ * @param $name
+ */
+function sayHello($name)
+{
+    echo 'Hello ' . $name;
+}
+
+/**
+ * This is the second function
+ * 
+ * @param $name
+ */
+function sayGoodbye($name)
+{
+    echo 'Goodbye ' . $name;
+}
+```
+
+[Top](#pop-code)
+
+Parse Code
+----------
+
+This `pop-code` component also provides the ability to parse existing code, which is useful
+to obtain information about the code or to even modify and save new code from it.
 
 In this example, we use the class that we created above. The reflection object provides
 you with a code generator object like the one above so that you can add or remove things
@@ -208,12 +220,10 @@ $class->addMethod($method);
 
 // Echo out the code
 $code = new Generator($class);
-
-// Or, you can echo out the contents of the code directly
-echo $code;
+$code->writeToFile('MyClass.php');
 ```
 
-##### The modified class will look like:
+And the modified class will look like:
 
 ```php
 <?php
@@ -251,7 +261,6 @@ class MyClass
     }
 
 }
-
 ```
 
-As you can see, the new method was appended to the class.
+[Top](#pop-code)
