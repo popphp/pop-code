@@ -47,8 +47,8 @@ class TraitGeneratorTest extends TestCase
         $this->assertStringContainsString('use OtherTrait;', $render);
         $this->assertStringContainsString("const SOME_CONSTANT = 'STRING';", $render);
         $this->assertStringContainsString("const SOME_OTHER_CONSTANT = 'STRING';", $render);
-        $this->assertStringContainsString("public \$prop = 'STRING';", $render);
-        $this->assertStringContainsString("public \$otherProp = 'STRING';", $render);
+        $this->assertStringContainsString("public string \$prop = 'STRING';", $render);
+        $this->assertStringContainsString("public string \$otherProp = 'STRING';", $render);
         $this->assertStringContainsString('abstract public function foo();', $render);
         $this->assertStringContainsString('abstract public function bar();', $render);
     }

@@ -62,6 +62,9 @@ trait FunctionTrait
         if (!str_starts_with($name, '$')) {
             $name = '$' . $name;
         }
+        if ($value == 'null') {
+            $type .= '|null';
+        }
         $this->docblock->addParam($type, $name);
 
         return $this;
@@ -276,7 +279,13 @@ trait FunctionTrait
         $i = 0;
         foreach ($this->arguments as $name => $arg) {
             $i++;
-            $args .= ($arg['type'] !== null) ? $arg['type'] . ' ' : null;
+            if ($arg['type'] !== null) {
+                $type = $arg['type'];
+                if ($arg['value'] == 'null') {
+                    $type .= '|null';
+                }
+                $args .= $type . ' ';
+            }
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
             $args .= ($arg['value'] !== null) ? " = " . $arg['value'] : null;
             if ($i < count($this->arguments)) {

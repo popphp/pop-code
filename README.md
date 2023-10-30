@@ -48,8 +48,9 @@ In this example, a function is created and rendered to a string:
 use Pop\Code\Generator;
 
 $function = new Generator\FunctionGenerator('sayHello');
-$function->addArgument('name');
+$function->addArgument('name', 'null', 'string');
 $function->setBody("echo 'Hello ' . \$name;");
+$function->addReturnType('void');
 $function->setDesc('This is the first function');
 
 echo $function;
@@ -59,9 +60,10 @@ echo $function;
 /**
  * This is the first function
  * 
- * @param $name
+ * @param  string|null  $name
+ * @return void
  */
-function sayHello($name)
+function sayHello(string|null $name = null): void
 {
     echo 'Hello ' . $name;
 }
@@ -79,12 +81,13 @@ $class = new Generator\ClassGenerator('MyClass');
 $class->setNamespace(new Generator\NamespaceGenerator('MyApp'));
 
 // Create a new protected property with a default value
-$prop = new Generator\PropertyGenerator('foo', 'string', 'bar', 'protected');
+$prop = new Generator\PropertyGenerator('foo', 'string', null, 'protected');
 
 // Create a method and give it an argument, body and docblock description
 $method = new Generator\MethodGenerator('setFoo', 'public');
-$method->addArgument('foo')
+$method->addArgument('foo', null, 'string')
     ->setBody('$this->foo = $foo;')
+    ->addReturnType('void')
     ->setDesc('This is the method to set foo.');
 
 // Add the property and the method to the class code object
@@ -112,14 +115,15 @@ class MyClass
     /**
      * @var   string
      */
-    protected $foo = 'bar';
+    protected string|null $foo = null;
 
     /**
      * This is the method to set foo.
      * 
-     * @param $foo
+     * @param  string  $foo
+     * @return void
      */
-    public function setFoo($foo)
+    public function setFoo(string $foo): void
     {
         $this->foo = $foo;
     }
@@ -152,14 +156,16 @@ various types of code blocks. Code generators are available for the following ty
 use Pop\Code\Generator;
 
 $function1 = new Generator\FunctionGenerator('sayHello');
-$function1->addArgument('name');
-$function1->setBody("echo 'Hello ' . \$name;");
-$function1->setDesc('This is the first function');
+$function1->addArgument('name', null, 'string')
+    ->setBody("echo 'Hello ' . \$name;")
+    ->setDesc('This is the first function')
+    ->addReturnType('void');
 
 $function2 = new Generator\FunctionGenerator('sayGoodbye');
-$function2->addArgument('name');
-$function2->setBody("echo 'Goodbye ' . \$name;");
-$function2->setDesc('This is the second function');
+$function2->addArgument('name', null, 'string')
+    ->setBody("echo 'Goodbye ' . \$name;")
+    ->setDesc('This is the second function')
+    ->addReturnType('void');
 
 $code = new Generator();
 $code->addCodeObjects([$function1, $function2]);
@@ -175,9 +181,10 @@ code in it:
 /**
  * This is the first function
  * 
- * @param $name
+ * @param  string  $name
+ * @return void
  */
-function sayHello($name)
+function sayHello(string $name): void
 {
     echo 'Hello ' . $name;
 }
@@ -185,12 +192,14 @@ function sayHello($name)
 /**
  * This is the second function
  * 
- * @param $name
+ * @param  string  $name
+ * @return void
  */
-function sayGoodbye($name)
+function sayGoodbye(string $name): void
 {
     echo 'Goodbye ' . $name;
 }
+
 ```
 
 [Top](#pop-code)
@@ -213,9 +222,10 @@ $class = Reflection::createClass('MyApp\MyClass');
 
 // Create the new method that you want to add to the existing class
 $method = new Generator\MethodGenerator('hasFoo', 'public');
-$method->addArgument('foo')
-    ->setBody('return (null !== $this->foo);')
-    ->setDesc('This is the method to see if foo is set.');
+$method->addArgument('foo', null, 'string')
+    ->setBody('return ($this->foo !== null);')
+    ->setDesc('This is the method to see if foo is set.')
+    ->addReturnType('bool');
 
 // Access the generator and it's code object to add the new method to it
 $class->addMethod($method);
@@ -239,15 +249,17 @@ class MyClass
 {
 
     /**
-     * 
      * @var   string
      */
-    protected $foo = 'bar';
+    protected string|null $foo = null;
 
     /**
-     * @param $foo
+     * This is the method to set foo.
+     * 
+     * @param  string  $foo
+     * @return void
      */
-    public function setFoo($foo)
+    public function setFoo(string $foo): void
     {
         $this->foo = $foo;
     }
@@ -255,11 +267,12 @@ class MyClass
     /**
      * This is the method to see if foo is set.
      * 
-     * @param $foo
+     * @param  string  $foo
+     * @return bool
      */
-    public function hasFoo($foo)
+    public function hasFoo(string $foo): bool
     {
-        return (null !== $this->foo);
+        return ($this->foo !== null);
     }
 
 }

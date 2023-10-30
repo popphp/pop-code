@@ -143,8 +143,16 @@ class PropertyGenerator extends AbstractClassElementGenerator
         }
 
         $this->docblock->addTag('var', $this->type);
+        $type = null;
+        if ($this->type !== null) {
+            $type = $this->type;
+            if ($this->value === null) {
+                $type .= '|null';
+            }
+            $type .= ' ';
+        }
         $this->output = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' $' . $this->name;
+        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' '  . $type . '$' . $this->name;
 
         if ($this->value !== null) {
             if ($this->type == 'array') {
@@ -159,7 +167,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
                 $this->output .= " = '" . $this->value . "';";
             }
         } else {
-            $val = ($this->type == 'array') ? '[]' : 'null';
+            $val = 'null';
             $this->output .= ' = ' . $val . ';';
         }
 
