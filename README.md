@@ -208,7 +208,7 @@ Parse Code
 ----------
 
 This `pop-code` component also provides the ability to parse existing code, which is useful
-to obtain information about the code or to even modify and save new code from it.
+to obtain information about the code or to even modify and save new code.
 
 In this example, we use the class that we created above. The reflection object provides
 you with a code generator object like the one above so that you can add or remove things
@@ -235,7 +235,7 @@ $code = new Generator($class);
 $code->writeToFile('MyClass.php');
 ```
 
-And the modified class will look like:
+And the modified class will look like, complete with the new `hasFoo()` method:
 
 ```php
 <?php
