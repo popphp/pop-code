@@ -20,6 +20,8 @@ as well as parse and modify existing PHP code.
 
 `pop-code` is a component of the [Pop PHP Framework](http://www.popphp.org/).
 
+[Top](#pop-code)
+
 Install
 -------
 
