@@ -68,7 +68,7 @@ class NamespaceGenerator extends AbstractGenerator
                 if ($as !== null) {
                     $this->output .= ' as ' . $as;
                 }
-                $this->output .= ';' . PHP_EOL;
+                $this->output .= ';' . PHP_EOL . PHP_EOL;
             }
         }
 
