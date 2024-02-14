@@ -68,7 +68,8 @@ class MethodReflection extends AbstractReflection
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
             $paramType  = $reflectionParam->getType();
-            $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType)) ? $paramType->getName() : null;
+            $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType) &&
+                method_exists($paramType, 'getName')) ? $paramType->getName() : null;
 
             try {
                 $paramValue = $reflectionParam->getDefaultValue();
