@@ -18,7 +18,7 @@ Overview
 `pop-code` provides the ability to dynamically generate PHP code on the fly
 as well as parse and modify existing PHP code.
 
-`pop-code` is a component of the [Pop PHP Framework](http://www.popphp.org/).
+`pop-code` is a component of the [Pop PHP Framework](https://www.popphp.org/).
 
 [Top](#pop-code)
 
