@@ -31,7 +31,7 @@ Install `pop-code` using Composer.
 Or, require it in your composer.json file
 
     "require": {
-        "popphp/pop-view" : "^5.0.0"
+        "popphp/pop-view" : "^5.0.3"
     }
 
 [Top](#pop-code)
