@@ -282,7 +282,7 @@ class Generator extends Generator\AbstractGenerator
                 }
             }
 
-            $this->output .= $code;
+            $this->output .= $code . PHP_EOL;
         }
 
         if ($inNamespace) {
