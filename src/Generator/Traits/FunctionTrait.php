@@ -62,7 +62,7 @@ trait FunctionTrait
         if (!str_starts_with($name, '$')) {
             $name = '$' . $name;
         }
-        if ($value == 'null') {
+        if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed')) {
             $type .= '|null';
         }
         $this->docblock->addParam($type, $name);
@@ -281,7 +281,7 @@ trait FunctionTrait
             $i++;
             if ($arg['type'] !== null) {
                 $type = $arg['type'];
-                if ($arg['value'] == 'null') {
+                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] == 'null')) {
                     $type .= '|null';
                 }
                 $args .= $type . ' ';
