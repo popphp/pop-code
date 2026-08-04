@@ -21,6 +21,7 @@ class DocblockGeneratorTest extends TestCase
             'foo' => 'bar'
         ]);
         $this->assertTrue($docblock->hasTag('foo'));
+        $this->assertTrue($docblock->hasTags());
     }
 
     public function testParams()
@@ -33,6 +34,7 @@ class DocblockGeneratorTest extends TestCase
 
         ]);
         $this->assertTrue($docblock->hasParam(0));
+        $this->assertTrue($docblock->hasTags());
     }
 
     public function testRender()

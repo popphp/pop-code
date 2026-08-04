@@ -134,6 +134,16 @@ class DocblockGenerator extends AbstractGenerator
     }
 
     /**
+     * Has tags
+     *
+     * @return bool
+     */
+    public function hasTags(): bool
+    {
+        return ((count($this->tags) > 1) || (count($this->tags['param']) > 0));
+    }
+
+    /**
      * Add a param tag
      *
      * @param  ?string $type
@@ -272,7 +282,9 @@ class DocblockGenerator extends AbstractGenerator
             }
         }
 
-        $this->output .= $this->formatTags();
+        if ($this->hasTags()) {
+            $this->output .= $this->formatTags();
+        }
         $this->output .= $this->printIndent() . ' */' . PHP_EOL;
 
         return $this->output;
