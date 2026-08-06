@@ -23,4 +23,4 @@ namespace Pop\Code\Reflection;
  * @license    https://www.popphp.org/license     New BSD License
  * @version    5.0.5
  */
-class Exception extends \Exception {}
+class Exception extends \Pop\Code\Exception {}
