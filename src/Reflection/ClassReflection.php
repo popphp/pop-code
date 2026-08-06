@@ -112,11 +112,8 @@ class ClassReflection extends AbstractReflection
         }
 
         // Detect constants
-        $constants = $reflection->getConstants();
-        if (count($constants) > 0) {
-            foreach ($constants as $key => $value) {
-                $class->addConstant(new Generator\ConstantGenerator($key, gettype($value), $value));
-            }
+        foreach ($reflection->getReflectionConstants() as $constant) {
+            $class->addConstant(ConstantReflection::parse($constant));
         }
 
         // Detect properties

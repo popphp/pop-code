@@ -79,11 +79,8 @@ class InterfaceReflection extends AbstractReflection
         }
 
         // Detect constants
-        $constants = $reflection->getConstants();
-        if (count($constants) > 0) {
-            foreach ($constants as $key => $value) {
-                $interface->addConstant(new Generator\ConstantGenerator($key, gettype($value), $value));
-            }
+        foreach ($reflection->getReflectionConstants() as $constant) {
+            $interface->addConstant(ConstantReflection::parse($constant));
         }
 
         // Detect methods
