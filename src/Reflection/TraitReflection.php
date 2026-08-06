@@ -14,6 +14,7 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Reflection\Support\UseStatementParser;
 use ReflectionException;
 
 /**
@@ -71,22 +72,8 @@ class TraitReflection extends AbstractReflection
 
         // Detect used traits
         if ($fileContents !== null) {
-            $uses = [];
-            preg_match_all('/[ ]+use(.*);$/m', $fileContents, $uses);
-
-            if (isset($uses[1])) {
-                foreach ($uses[1] as $u) {
-                    $useAry = array_map('trim', explode(',', trim($u)));
-                    foreach ($useAry as $useValue) {
-                        if (strpos($useValue, ' as ') !== false) {
-                            [$use, $as] = explode(' as ', $useValue);
-                        } else {
-                            $use = $useValue;
-                            $as  = null;
-                        }
-                        $trait->addUse($use, $as);
-                    }
-                }
+            foreach (UseStatementParser::parse($fileContents) as $use => $as) {
+                $trait->addUse($use, $as);
             }
         }
 
