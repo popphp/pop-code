@@ -143,7 +143,7 @@ trait FunctionTrait
      * @param  ?string $type
      * @return static
      */
-    public function addParameter(string $name, mixed $value = null, ?string $type = null): static
+    public function addParameter(string $name, mixed $value = new NoValue(), ?string $type = null): static
     {
         $this->addArgument($name, $value, $type);
         return $this;

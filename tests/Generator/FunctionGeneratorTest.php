@@ -53,6 +53,15 @@ class FunctionGeneratorTest extends TestCase
         $this->assertStringContainsString("function someFunc(int \$foo = 123, string \$bar = 'hello')", (string)$function);
     }
 
+    public function testAddParameterNoValueDefault()
+    {
+        $function = new Generator\FunctionGenerator('someFunc');
+        $function->addParameter('bar');
+
+        $this->assertStringContainsString('function someFunc($bar)', (string)$function);
+        $this->assertStringNotContainsString('= null', (string)$function);
+    }
+
     public function testReturnTypes()
     {
         $function = new Generator\FunctionGenerator('someFunc');
