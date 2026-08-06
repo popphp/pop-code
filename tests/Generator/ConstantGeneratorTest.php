@@ -48,4 +48,28 @@ class ConstantGeneratorTest extends TestCase
         $this->assertStringContainsString('];', (string)$constant);
     }
 
+    public function testVisibilityRenders()
+    {
+        $constant = new Generator\ConstantGenerator('FOO', 'string', 'bar');
+        $constant->setAsPrivate();
+        $this->assertStringContainsString('private const FOO', (string)$constant);
+    }
+
+    public function testDefaultVisibilityIsPublic()
+    {
+        $constant = new Generator\ConstantGenerator('FOO', 'string', 'bar');
+        $this->assertStringContainsString('public const FOO', (string)$constant);
+    }
+
+    public function testTypedSignatureIsOptIn()
+    {
+        $constant = new Generator\ConstantGenerator('FOO', 'int', 10);
+        $this->assertFalse($constant->isTyped());
+        $this->assertStringNotContainsString('const int FOO', (string)$constant);
+
+        $constant->setTyped(true);
+        $this->assertTrue($constant->isTyped());
+        $this->assertStringContainsString('const int FOO', (string)$constant);
+    }
+
 }
