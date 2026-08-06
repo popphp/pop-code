@@ -13,6 +13,8 @@
  */
 namespace Pop\Code\Generator;
 
+use Pop\Code\Generator\Support\ValueFormatter;
+
 /**
  * Property generator class
  *
@@ -151,59 +153,11 @@ class PropertyGenerator extends AbstractClassElementGenerator
             }
             $type .= ' ';
         }
-        $this->output = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' '  . $type . '$' . $this->name;
-
-        if ($this->value !== null) {
-            if ($this->type == 'array') {
-                $val = (count($this->value) == 0) ? '[]' : $this->formatArrayValues();
-                $this->output .= ' = ' . $val . PHP_EOL;
-            } else if (($this->type == 'integer') || ($this->type == 'int') || ($this->type == 'float')) {
-                $this->output .= ' = ' . $this->value . ';';
-            } else if ($this->type == 'bool') {
-                $val = ($this->value) ? 'true' : 'false';
-                $this->output .= " = " . $val . ";";
-            } else {
-                $this->output .= " = '" . $this->value . "';";
-            }
-        } else {
-            $val = 'null';
-            $this->output .= ' = ' . $val . ';';
-        }
+        $this->output  = PHP_EOL . $this->docblock->render();
+        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' ' . $type . '$' . $this->name;
+        $this->output .= ' = ' . ValueFormatter::format($this->value, $this->type, $this->printIndent()) . ';';
 
         return $this->output;
-    }
-
-    /**
-     * Format array value
-     *
-     * @return string
-     */
-    protected function formatArrayValues(): string
-    {
-        $ary = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '  ', var_export($this->value, true));
-        $ary .= ';';
-        $ary = str_replace('array (', '[', $ary);
-        $ary = str_replace('  );', '];', $ary);
-        $ary = str_replace('NULL', 'null', $ary);
-
-        $keys = array_keys($this->value);
-
-        $isAssoc = false;
-
-        for ($i = 0; $i < count($keys); $i++) {
-            if ($keys[$i] != $i) {
-                $isAssoc = true;
-            }
-        }
-
-        if (!$isAssoc) {
-            for ($i = 0; $i < count($keys); $i++) {
-                $ary = str_replace($i . ' => ', '', $ary);
-            }
-        }
-
-        return $ary;
     }
 
     /**
