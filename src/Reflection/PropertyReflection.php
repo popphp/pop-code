@@ -14,6 +14,7 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Reflection\Support\TypeNormalizer;
 
 /**
  * Property reflection code class
@@ -48,16 +49,20 @@ class PropertyReflection extends AbstractReflection
 
         $docblock = null;
         $desc     = null;
-        $type     = null;
+        $type     = self::resolveType($code);
 
         $doc = $code->getDocComment();
         if (($doc !== null) && (str_contains($doc, '/*'))) {
             $docblock = DocblockReflection::parse($doc);
             $docblock->setIndent(4);
-            $desc     = $docblock->getDesc();
-            $type     = $docblock->getTag('var');
-        } else if ($value !== null) {
-            $type     = strtolower(gettype($value));
+            $desc = $docblock->getDesc();
+            if ($type === null) {
+                $type = $docblock->getTag('var');
+            }
+        }
+
+        if (($type === null) && ($value !== null)) {
+            $type = TypeNormalizer::normalize(strtolower(gettype($value)));
         }
 
         if (is_array($value)) {
@@ -73,6 +78,36 @@ class PropertyReflection extends AbstractReflection
         $property->setDesc($desc);
 
         return $property;
+    }
+
+    /**
+     * Resolve a property's declared type (if any) into a bare, pipe-joined type-hint string
+     *
+     * @param  \ReflectionProperty $property
+     * @return string|null
+     */
+    protected static function resolveType(\ReflectionProperty $property): string|null
+    {
+        if (!$property->hasType()) {
+            return null;
+        }
+
+        $reflectionType = $property->getType();
+        $namedTypes     = [];
+
+        if ($reflectionType instanceof \ReflectionUnionType) {
+            foreach ($reflectionType->getTypes() as $namedType) {
+                $namedTypes[] = $namedType->getName();
+            }
+        } else if ($reflectionType instanceof \ReflectionNamedType) {
+            $namedTypes[] = $reflectionType->getName();
+        }
+
+        if (!in_array('mixed', $namedTypes, true) && $reflectionType->allowsNull() && !in_array('null', $namedTypes, true)) {
+            $namedTypes[] = 'null';
+        }
+
+        return implode('|', $namedTypes);
     }
 
 }

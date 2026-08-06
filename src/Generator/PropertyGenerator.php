@@ -148,7 +148,8 @@ class PropertyGenerator extends AbstractClassElementGenerator
         $type = null;
         if ($this->type !== null) {
             $type = $this->type;
-            if (($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')) {
+            if (($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')
+                && !in_array('null', explode('|', $type), true)) {
                 $type .= '|null';
             }
             $type .= ' ';

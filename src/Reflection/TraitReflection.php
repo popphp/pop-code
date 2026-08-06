@@ -78,11 +78,9 @@ class TraitReflection extends AbstractReflection
         }
 
         // Detect properties
-        $properties = $reflection->getDefaultProperties();
-        if (count($properties) > 0) {
-            foreach ($properties as $name => $value) {
-                $trait->addProperty(PropertyReflection::parse($reflection->getProperty($name), $name, $value));
-            }
+        foreach ($reflection->getProperties() as $property) {
+            $value = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
+            $trait->addProperty(PropertyReflection::parse($property, $property->getName(), $value));
         }
 
         // Detect methods
