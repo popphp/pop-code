@@ -47,7 +47,7 @@ In this example, a function is created and rendered to a string:
 use Pop\Code\Generator;
 
 $function = new Generator\FunctionGenerator('sayHello');
-$function->addArgument('name', 'null', 'string');
+$function->addArgument('name', null, 'string');
 $function->setBody("echo 'Hello ' . \$name;");
 $function->addReturnType('void');
 $function->setDesc('This is the first function');
