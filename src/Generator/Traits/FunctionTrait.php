@@ -14,7 +14,10 @@
 namespace Pop\Code\Generator\Traits;
 
 use Pop\Code\Generator\DocblockGenerator;
-use InvalidArgumentException;
+use Pop\Code\Generator\Exception;
+use Pop\Code\Generator\Literal;
+use Pop\Code\Generator\NoValue;
+use Pop\Code\Generator\Support\ValueFormatter;
 
 /**
  * Function trait
@@ -49,23 +52,23 @@ trait FunctionTrait
      * @param  ?string $type
      * @return static
      */
-    public function addArgument(string $name, mixed $value = null, ?string $type = null): static
+    public function addArgument(string $name, mixed $value = new NoValue(), ?string $type = null): static
     {
-        $typeHintsNotAllowed = ['integer'];
-        $argType = (!in_array($type, $typeHintsNotAllowed)) ? $type : null;
-        $this->arguments[$name] = ['value' => $value, 'type' => $argType];
+        $this->arguments[$name] = ['value' => $value, 'type' => $type];
 
         if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
 
-        if (!str_starts_with($name, '$')) {
-            $name = '$' . $name;
+        $docName = $name;
+        if (!str_starts_with($docName, '$')) {
+            $docName = '$' . $docName;
         }
-        if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed')) {
-            $type .= '|null';
+        $docType = $type;
+        if (!empty($docType) && !str_starts_with($docType, '?') && ($docType !== 'mixed')) {
+            $docType .= '|null';
         }
-        $this->docblock->addParam($type, $name);
+        $this->docblock->addParam($docType, $docName);
 
         return $this;
     }
@@ -74,17 +77,17 @@ trait FunctionTrait
      * Add arguments
      *
      * @param  array $args
-     * @throws InvalidArgumentException
+     * @throws Exception
      * @return static
      */
     public function addArguments(array $args): static
     {
         foreach ($args as $arg) {
             if (!isset($arg['name'])) {
-                throw new InvalidArgumentException("Error: The 'name' key was not set.");
+                throw new Exception("Error: The 'name' key was not set.");
             }
-            $value = (isset($arg['value'])) ? $arg['value'] : null;
-            $type  = (isset($arg['type'])) ? $arg['type'] : null;
+            $value = array_key_exists('value', $arg) ? $arg['value'] : new NoValue();
+            $type  = $arg['type'] ?? null;
             $this->addArgument($arg['name'], $value, $type);
         }
         return $this;
@@ -208,16 +211,13 @@ trait FunctionTrait
      */
     public function addReturnType(string $type): static
     {
-        $typeHintsNotAllowed = ['integer'];
-        if (!in_array($type, $typeHintsNotAllowed)) {
-            $this->returnTypes[] = $type;
+        $this->returnTypes[] = $type;
 
-            if ($this->docblock === null) {
-                $this->docblock = new DocblockGenerator(null, $this->indent);
-            }
-
-            $this->docblock->setReturn(implode('|', $this->returnTypes));
+        if ($this->docblock === null) {
+            $this->docblock = new DocblockGenerator(null, $this->indent);
         }
+
+        $this->docblock->setReturn(implode('|', $this->returnTypes));
 
         return $this;
     }
@@ -281,13 +281,20 @@ trait FunctionTrait
             $i++;
             if ($arg['type'] !== null) {
                 $type = $arg['type'];
-                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] == 'null')) {
+                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] === null)) {
                     $type .= '|null';
                 }
                 $args .= $type . ' ';
             }
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
-            $args .= ($arg['value'] !== null) ? " = " . $arg['value'] : null;
+
+            if (!($arg['value'] instanceof NoValue)) {
+                $value = ($arg['value'] instanceof Literal)
+                    ? $arg['value']->getValue()
+                    : ValueFormatter::format($arg['value'], $arg['type']);
+                $args .= ' = ' . $value;
+            }
+
             if ($i < count($this->arguments)) {
                 $args .= ', ';
             }

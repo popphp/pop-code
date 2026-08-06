@@ -25,7 +25,7 @@ class FunctionGeneratorTest extends TestCase
 
     public function testAddArgumentsException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException('Pop\Code\Generator\Exception');
         $function = new Generator\FunctionGenerator();
         $function->addParameters([
             'name'  => 'bar',
@@ -50,7 +50,7 @@ class FunctionGeneratorTest extends TestCase
         $this->assertTrue($function->hasParameter('foo'));
         $this->assertEquals(2, count($function->getParameters()));
         $this->assertEquals('123', $function->getParameter('foo')['value']);
-        $this->assertStringContainsString("function someFunc(int \$foo = 123, string \$bar = hello)", (string)$function);
+        $this->assertStringContainsString("function someFunc(int \$foo = 123, string \$bar = 'hello')", (string)$function);
     }
 
     public function testReturnTypes()
