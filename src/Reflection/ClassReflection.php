@@ -41,6 +41,11 @@ class ClassReflection extends AbstractReflection
     public static function parse(mixed $code, ?string $name = null): Generator\ClassGenerator
     {
         $reflection     = new \ReflectionClass($code);
+
+        if ($reflection->isEnum()) {
+            throw new Exception('Error: Enums are not yet supported by ClassReflection.');
+        }
+
         $reflectionName = $reflection->getShortName();
         $reflectionFile = $reflection->getFileName();
         $fileContents   = null;

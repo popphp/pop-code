@@ -32,4 +32,10 @@ class ClassReflectionTest extends TestCase
         $this->assertTrue($class->isFinal());
     }
 
+    public function testEnumThrowsReflectionException()
+    {
+        $this->expectException('Pop\Code\Reflection\Exception');
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestEnum');
+    }
+
 }
