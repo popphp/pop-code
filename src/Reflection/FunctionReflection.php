@@ -14,6 +14,9 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator\FunctionGenerator;
+use Pop\Code\Generator\Literal;
+use Pop\Code\Generator\NoValue;
+use Pop\Code\Reflection\Support\SourceBodyExtractor;
 use ReflectionException;
 
 /**
@@ -55,44 +58,21 @@ class FunctionReflection extends AbstractReflection
             $paramType  = $reflectionParam->getType();
             $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType)) ? $paramType->getName() : null;
 
-            try {
+            if (!$reflectionParam->isDefaultValueAvailable()) {
+                $paramValue = new NoValue();
+            } else if (($constantName = $reflectionParam->getDefaultValueConstantName()) !== null) {
+                $paramValue = new Literal($constantName);
+            } else {
                 $paramValue = $reflectionParam->getDefaultValue();
-            } catch (\ReflectionException $e) {
-                $paramValue = null;
             }
 
             $function->addArgument($paramName, $paramValue, $paramType);
         }
 
         // Parse the body if available
-        $file = $reflection->getFileName();
-
-        if (!empty($file) && file_exists($file)) {
-            $lines     = file($file);
-            $startLine = $reflection->getStartLine() - 1;
-            $endLine   = $reflection->getEndLine() - 1;
-            $length    = $endLine - $startLine;
-            $body      = null;
-
-            if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
-                $lines = array_slice($lines, ($startLine + 1), ($length - 1));
-                if (isset($lines[0]) && (str_starts_with($lines[0], ' '))) {
-                    $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));
-                    if ($spaces > 0) {
-                        $lines = array_map(function($value) use ($spaces) {
-                            if (substr($value, 0, $spaces) == str_repeat(' ', $spaces)) {
-                                $value = substr($value, $spaces);
-                            }
-                            return $value;
-                        }, $lines);
-                    }
-                }
-                $body = implode('', $lines);
-            }
-
-            if (!empty($body)) {
-                $function->setBody($body, false);
-            }
+        $body = SourceBodyExtractor::extract($reflection, false);
+        if ($body !== null) {
+            $function->setBody($body, 0);
         }
 
         // Get return type(s)

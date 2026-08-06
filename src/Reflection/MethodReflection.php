@@ -14,6 +14,9 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Generator\Literal;
+use Pop\Code\Generator\NoValue;
+use Pop\Code\Reflection\Support\SourceBodyExtractor;
 
 /**
  * Method reflection code class
@@ -71,55 +74,21 @@ class MethodReflection extends AbstractReflection
             $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType) &&
                 method_exists($paramType, 'getName')) ? $paramType->getName() : null;
 
-            try {
+            if (!$reflectionParam->isDefaultValueAvailable()) {
+                $paramValue = new NoValue();
+            } else if (($constantName = $reflectionParam->getDefaultValueConstantName()) !== null) {
+                $paramValue = new Literal($constantName);
+            } else {
                 $paramValue = $reflectionParam->getDefaultValue();
-            } catch (\ReflectionException $e) {
-                $paramValue = null;
             }
 
             $method->addArgument($paramName, $paramValue, $paramType);
         }
 
         // Parse the body if available
-        $file = $code->getFileName();
-
-        if (!empty($file) && file_exists($file)) {
-            $lines     = file($file);
-            $startLine = $code->getStartLine() - 1;
-            $endLine   = $code->getEndLine() - 1;
-            $length    = $endLine - $startLine;
-            $body      = null;
-
-            if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
-                $lines = array_slice($lines, ($startLine + 1), $length);
-
-                if (preg_match('/[ ]+\}/', $lines[(count($lines) - 1)])) {
-                    unset($lines[(count($lines) - 1)]);
-                }
-                if (isset($lines[0]) && preg_match('/[ ]+\{/', $lines[0])) {
-                    unset($lines[0]);
-                }
-
-                $lines = array_values($lines);
-
-                if (isset($lines[0]) && (str_starts_with($lines[0], ' '))) {
-                    $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));
-                    if ($spaces > 0) {
-                        $lines = array_map(function($value) use ($spaces) {
-                            if (substr($value, 0, $spaces) == str_repeat(' ', $spaces)) {
-                                $value = substr($value, $spaces);
-                            }
-                            return $value;
-                        }, $lines);
-                    }
-                }
-
-                $body = implode('', $lines);
-            }
-
-            if (!empty($body)) {
-                $method->setBody($body);
-            }
+        $body = SourceBodyExtractor::extract($code, true);
+        if ($body !== null) {
+            $method->setBody($body);
         }
 
         // Get return type(s)
