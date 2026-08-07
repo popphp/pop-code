@@ -41,6 +41,12 @@ class ClassGenerator extends AbstractClassGenerator
     protected array $interfaces = [];
 
     /**
+     * Readonly flag
+     * @var bool
+     */
+    protected bool $readonly = false;
+
+    /**
      * Constructor
      *
      * Instantiate the class generator object
@@ -181,6 +187,28 @@ class ClassGenerator extends AbstractClassGenerator
     }
 
     /**
+     * Set the readonly flag
+     *
+     * @param  bool $readonly
+     * @return ClassGenerator
+     */
+    public function setAsReadonly(bool $readonly = true): ClassGenerator
+    {
+        $this->readonly = $readonly;
+        return $this;
+    }
+
+    /**
+     * Get the readonly flag
+     *
+     * @return bool
+     */
+    public function isReadonly(): bool
+    {
+        return $this->readonly;
+    }
+
+    /**
      * Render class
      *
      * @return string
@@ -193,6 +221,10 @@ class ClassGenerator extends AbstractClassGenerator
             $classKeyword = 'abstract ';
         } else if ($this->isFinal()) {
             $classKeyword = 'final ';
+        }
+
+        if ($this->readonly) {
+            $classKeyword .= 'readonly ';
         }
 
         $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;

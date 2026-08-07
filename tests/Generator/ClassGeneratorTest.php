@@ -104,4 +104,20 @@ class ClassGeneratorTest extends TestCase
         $this->assertStringContainsString('final class Foo', $class->render());
     }
 
+    public function testReadonly()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->setAsReadonly(true);
+        $this->assertTrue($class->isReadonly());
+        $this->assertStringContainsString('readonly class Foo', $class->render());
+    }
+
+    public function testReadonlyWithAbstract()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->setAsAbstract(true);
+        $class->setAsReadonly(true);
+        $this->assertStringContainsString('abstract readonly class Foo', $class->render());
+    }
+
 }
