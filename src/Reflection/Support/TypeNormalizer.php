@@ -52,4 +52,66 @@ class TypeNormalizer
         return self::MAP[$gettypeName] ?? $gettypeName;
     }
 
+    /**
+     * Resolve a native ReflectionType into a bare, pipe-joined type-hint string
+     *
+     * Handles named types, union types, and intersection types -- including a DNF union whose
+     * members are themselves intersection types (e.g. `(A&B)|C`), which PHP 8.2+ allows. This
+     * consolidates what used to be four separate, partially-duplicated, partially-incomplete
+     * copies of this logic (MethodReflection and FunctionReflection each had their own -- neither
+     * handled intersection types, and MethodReflection's parameter branch and FunctionReflection's
+     * parameter branch didn't handle unions at all, either crashing or silently dropping the type).
+     *
+     * @param  ?\ReflectionType $type
+     * @return string|null
+     */
+    public static function resolveReflectionType(?\ReflectionType $type): string|null
+    {
+        if ($type === null) {
+            return null;
+        }
+
+        if ($type instanceof \ReflectionIntersectionType) {
+            return self::joinIntersectionType($type);
+        }
+
+        if ($type instanceof \ReflectionUnionType) {
+            $names = [];
+            foreach ($type->getTypes() as $memberType) {
+                $names[] = ($memberType instanceof \ReflectionIntersectionType)
+                    ? self::joinIntersectionType($memberType)
+                    : $memberType->getName();
+            }
+            if ($type->allowsNull() && !in_array('null', $names, true)) {
+                $names[] = 'null';
+            }
+            return implode('|', $names);
+        }
+
+        if ($type instanceof \ReflectionNamedType) {
+            $name = $type->getName();
+            if (($name !== 'mixed') && ($name !== 'null') && $type->allowsNull()) {
+                $name .= '|null';
+            }
+            return $name;
+        }
+
+        return null;
+    }
+
+    /**
+     * Join an intersection type's member names with '&'
+     *
+     * @param  \ReflectionIntersectionType $type
+     * @return string
+     */
+    protected static function joinIntersectionType(\ReflectionIntersectionType $type): string
+    {
+        $names = [];
+        foreach ($type->getTypes() as $memberType) {
+            $names[] = $memberType->getName();
+        }
+        return implode('&', $names);
+    }
+
 }

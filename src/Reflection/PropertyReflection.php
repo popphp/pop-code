@@ -94,26 +94,7 @@ class PropertyReflection extends AbstractReflection
      */
     protected static function resolveType(\ReflectionProperty $property): string|null
     {
-        if (!$property->hasType()) {
-            return null;
-        }
-
-        $reflectionType = $property->getType();
-        $namedTypes     = [];
-
-        if ($reflectionType instanceof \ReflectionUnionType) {
-            foreach ($reflectionType->getTypes() as $namedType) {
-                $namedTypes[] = $namedType->getName();
-            }
-        } else if ($reflectionType instanceof \ReflectionNamedType) {
-            $namedTypes[] = $reflectionType->getName();
-        }
-
-        if (!in_array('mixed', $namedTypes, true) && $reflectionType->allowsNull() && !in_array('null', $namedTypes, true)) {
-            $namedTypes[] = 'null';
-        }
-
-        return implode('|', $namedTypes);
+        return $property->hasType() ? TypeNormalizer::resolveReflectionType($property->getType()) : null;
     }
 
 }

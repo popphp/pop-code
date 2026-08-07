@@ -243,6 +243,24 @@ FUNC;
         $this->assertStringContainsString('namespace {', $render);
     }
 
+    public function testRenderIsIdempotentWhenNested()
+    {
+        // Previously, rendering a code object nested inside a namespace block permanently
+        // mutated that object's own indent (and its docblock's, and its body's, if it had one)
+        // with no reset -- so a second render() call (e.g. echo $code; then
+        // $code->writeToFile(...)) compounded the indentation further each time.
+        $function = new Generator\FunctionGenerator('doThing');
+        $function->setBody('return 1;');
+
+        $code = new Generator();
+        $code->addCodeObject($function, 'MyNamespace');
+
+        $render1 = $code->render();
+        $render2 = $code->render();
+
+        $this->assertEquals($render1, $render2);
+    }
+
     public function testOutputToHttp1()
     {
         $functionBody = <<<FUNC

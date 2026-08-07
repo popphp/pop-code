@@ -88,6 +88,21 @@ class ClassReflectionTest extends TestCase
         $this->assertStringContainsString('#[ForeignTagAttribute(', $render);
     }
 
+    public function testSameNamespaceParentClassDoesNotGetARedundantUseImport()
+    {
+        // TestClass extends AbstractTestClass and implements TestInterface, both in the same
+        // namespace (Pop\Code\Test\TestAssets) -- both resolve correctly by their bare short
+        // names with no import, matching the same-namespace guard already applied to attributes.
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestClass');
+
+        if ($class->hasNamespace()) {
+            $this->assertFalse($class->getNamespace()->hasUse('Pop\Code\Test\TestAssets\AbstractTestClass'));
+            $this->assertFalse($class->getNamespace()->hasUse('Pop\Code\Test\TestAssets\TestInterface'));
+        } else {
+            $this->assertFalse($class->hasNamespace());
+        }
+    }
+
     public function testSameNamespaceAttributeDoesNotGetARedundantUseImport()
     {
         // TagAttribute lives in the same namespace as AttributedTestClass itself

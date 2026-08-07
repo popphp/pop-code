@@ -91,7 +91,7 @@ class EnumReflection extends AbstractReflection
                 if (in_array($interface->getName(), ['UnitEnum', 'BackedEnum'], true)) {
                     continue;
                 }
-                if ($interface->inNamespace()) {
+                if ($interface->inNamespace() && ($interface->getNamespaceName() !== $reflection->getNamespaceName())) {
                     if (!$enum->hasNamespace()) {
                         $enum->setNamespace(new Generator\NamespaceGenerator());
                     }

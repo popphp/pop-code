@@ -58,9 +58,9 @@ interface GeneratorInterface
     /**
      * Get the output
      *
-     * @return string
+     * @return ?string
      */
-    public function getOutput(): string;
+    public function getOutput(): ?string;
 
     /**
      * Has output

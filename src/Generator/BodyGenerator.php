@@ -39,7 +39,7 @@ class BodyGenerator extends AbstractGenerator
     {
         $body = var_export($config, true);
 
-        if (($indent !== null) && (($indent % 2) == 0)) {
+        if (($indent % 2) == 0) {
             $multiplier     = $indent / 2;
             $replacePattern = str_repeat('$1', $multiplier) . '$2';
         } else {

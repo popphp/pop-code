@@ -18,6 +18,7 @@ use Pop\Code\Generator\Literal;
 use Pop\Code\Generator\NoValue;
 use Pop\Code\Reflection\Support\AttributeCollector;
 use Pop\Code\Reflection\Support\SourceBodyExtractor;
+use Pop\Code\Reflection\Support\TypeNormalizer;
 use ReflectionException;
 
 /**
@@ -59,8 +60,7 @@ class FunctionReflection extends AbstractReflection
 
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
-            $paramType  = $reflectionParam->getType();
-            $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType)) ? $paramType->getName() : null;
+            $paramType  = TypeNormalizer::resolveReflectionType($reflectionParam->getType());
 
             if (!$reflectionParam->isDefaultValueAvailable()) {
                 $paramValue = new NoValue();
@@ -88,26 +88,9 @@ class FunctionReflection extends AbstractReflection
         }
 
         // Get return type(s)
-        if ($reflection->hasReturnType()) {
-            $namedTypes  = [];
-            $returnTypes = $reflection->getReturnType();
-            if ($returnTypes instanceof \ReflectionUnionType) {
-                $types = $returnTypes->getTypes();
-                foreach ($types as $type) {
-                    $namedTypes[] = $type->getName();
-                }
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            } else if ($returnTypes instanceof \ReflectionNamedType) {
-                $namedTypes[] = $returnTypes->getName();
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            }
-            if (!empty($namedTypes)) {
-                $function->addReturnTypes($namedTypes);
-            }
+        $returnType = TypeNormalizer::resolveReflectionType($reflection->getReturnType());
+        if ($returnType !== null) {
+            $function->addReturnType($returnType);
         }
 
         return $function;

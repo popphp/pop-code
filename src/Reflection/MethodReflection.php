@@ -18,6 +18,7 @@ use Pop\Code\Generator\Literal;
 use Pop\Code\Generator\NoValue;
 use Pop\Code\Reflection\Support\AttributeCollector;
 use Pop\Code\Reflection\Support\SourceBodyExtractor;
+use Pop\Code\Reflection\Support\TypeNormalizer;
 
 /**
  * Method reflection code class
@@ -64,20 +65,21 @@ class MethodReflection extends AbstractReflection
             $method->setDocblock($docblock);
         }
 
-        if ($code->isAbstract()) {
+        $reflectionParams = $code->getParameters();
+        $declaringClass   = $code->getDeclaringClass();
+
+        // An interface method is always reported abstract by native reflection, but the
+        // `abstract` keyword is implicit -- and syntactically forbidden -- inside an interface
+        // body. Only apply the flag for a real abstract method on a class.
+        if ($code->isAbstract() && !$declaringClass->isInterface()) {
             $method->setAsAbstract(true);
         } else if ($code->isFinal()) {
             $method->setAsFinal(true);
         }
 
-        $reflectionParams = $code->getParameters();
-        $declaringClass   = $code->getDeclaringClass();
-
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
-            $paramType  = $reflectionParam->getType();
-            $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType) &&
-                method_exists($paramType, 'getName')) ? $paramType->getName() : null;
+            $paramType  = TypeNormalizer::resolveReflectionType($reflectionParam->getType());
 
             if (!$reflectionParam->isDefaultValueAvailable()) {
                 $paramValue = new NoValue();
@@ -120,26 +122,9 @@ class MethodReflection extends AbstractReflection
         }
 
         // Get return type(s)
-        if ($code->hasReturnType()) {
-            $namedTypes  = [];
-            $returnTypes = $code->getReturnType();
-            if ($returnTypes instanceof \ReflectionUnionType) {
-                $types = $returnTypes->getTypes();
-                foreach ($types as $type) {
-                    $namedTypes[] = $type->getName();
-                }
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            } else if ($returnTypes instanceof \ReflectionNamedType) {
-                $namedTypes[] = $returnTypes->getName();
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            }
-            if (!empty($namedTypes)) {
-                $method->addReturnTypes($namedTypes);
-            }
+        $returnType = TypeNormalizer::resolveReflectionType($code->getReturnType());
+        if ($returnType !== null) {
+            $method->addReturnType($returnType);
         }
 
         return $method;

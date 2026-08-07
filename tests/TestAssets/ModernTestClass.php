@@ -40,4 +40,14 @@ class ModernTestClass
     {
     }
 
+    public function unionTyped(int|string $x, ?string $y = null): int|string
+    {
+        return $x;
+    }
+
+    public function intersectionTyped(\Countable&\Traversable $x): \Countable&\Traversable
+    {
+        return $x;
+    }
+
 }

@@ -69,7 +69,7 @@ trait UseTrait
      * @param  string $use
      * @return bool
      */
-    public function hasUse(string$use): bool
+    public function hasUse(string $use): bool
     {
         return array_key_exists($use, $this->uses);
     }

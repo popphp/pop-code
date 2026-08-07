@@ -94,4 +94,12 @@ class PropertyGeneratorTest extends TestCase
         $this->assertStringContainsString("    #[Column]\n    public string", $render);
     }
 
+    public function testLiteralValueRendersVerbatim()
+    {
+        // Previously threw "Cannot format an object value of type ...Literal" -- Literal
+        // unwrapping only happened in FunctionTrait and AttributeGenerator, not here.
+        $property = new Generator\PropertyGenerator('baz', 'string', new Generator\Literal('self::FOO'));
+        $this->assertStringContainsString('public string $baz = self::FOO;', (string) $property);
+    }
+
 }

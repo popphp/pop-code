@@ -145,4 +145,16 @@ class Reflection
         return Reflection\PropertyReflection::parse($property, $name, $value);
     }
 
+    /**
+     * Create constant
+     *
+     * @param  mixed   $constant
+     * @param  ?string $name
+     * @return Generator\ConstantGenerator
+     */
+    public static function createConstant(mixed $constant, ?string $name = null): Generator\ConstantGenerator
+    {
+        return Reflection\ConstantReflection::parse($constant, $name);
+    }
+
 }

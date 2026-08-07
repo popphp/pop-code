@@ -81,10 +81,15 @@ class InterfaceReflection extends AbstractReflection
             $interface->setDocblock(DocblockReflection::parse($interfaceDocBlock));
         }
 
-        // Detect parent class
-        $parent = $reflection->getParentClass();
-        if ($parent !== false) {
-            if ($parent->inNamespace()) {
+        // Detect parent interface(s) -- for an interface, getParentClass() always returns false
+        // (that API is for class `extends`); the interfaces it extends are reported via
+        // getInterfaces() instead. InterfaceGenerator only supports a single parent today, so
+        // only the first is used if the interface extends more than one -- a pre-existing
+        // generator-side limitation, not something introduced by this fix.
+        $parents = $reflection->getInterfaces();
+        if (!empty($parents)) {
+            $parent = reset($parents);
+            if ($parent->inNamespace() && ($parent->getNamespaceName() !== $reflection->getNamespaceName())) {
                 if (!$interface->hasNamespace()) {
                     $interface->setNamespace(new Generator\NamespaceGenerator());
                 }

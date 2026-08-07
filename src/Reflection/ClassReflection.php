@@ -103,7 +103,7 @@ class ClassReflection extends AbstractReflection
         // Detect parent class
         $parent = $reflection->getParentClass();
         if ($parent !== false) {
-            if ($parent->inNamespace()) {
+            if ($parent->inNamespace() && ($parent->getNamespaceName() !== $reflection->getNamespaceName())) {
                 if (!$class->hasNamespace()) {
                     $class->setNamespace(new Generator\NamespaceGenerator());
                 }
@@ -117,7 +117,7 @@ class ClassReflection extends AbstractReflection
         if ($interfaces !== false) {
             $interfacesAry = [];
             foreach ($interfaces as $interface) {
-                if ($interface->inNamespace()) {
+                if ($interface->inNamespace() && ($interface->getNamespaceName() !== $reflection->getNamespaceName())) {
                     if (!$class->hasNamespace()) {
                         $class->setNamespace(new Generator\NamespaceGenerator());
                     }

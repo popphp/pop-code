@@ -272,17 +272,35 @@ class Generator extends Generator\AbstractGenerator
                 $inNamespace   = false;
             }
 
+            // Temporarily bump the code object's own indent (and its docblock's, and its body's,
+            // if it has one) to account for nesting inside a namespace block, then restore the
+            // original values immediately after rendering -- render() must have no side effects
+            // beyond building $this->output, or calling it twice (e.g. `echo $generator;` then
+            // `$generator->writeToFile(...)`) would compound the indent further on each call.
+            $usesBodyTrait = in_array('Pop\Code\Generator\Traits\BodyTrait', class_uses($code));
             if ($currentNamespace !== null) {
-                $code->setIndent($code->getIndent() + $this->indent);
+                $originalIndent = $code->getIndent();
+                $code->setIndent($originalIndent + $this->indent);
                 if ($code->hasDocblock()) {
-                    $code->getDocblock()->setIndent($code->getDocblock()->getIndent() + $this->indent);
+                    $originalDocblockIndent = $code->getDocblock()->getIndent();
+                    $code->getDocblock()->setIndent($originalDocblockIndent + $this->indent);
                 }
-                if (in_array('Pop\Code\Generator\Traits\BodyTrait', class_uses($code))) {
+                if ($usesBodyTrait) {
                     $code->indentBody($this->indent);
                 }
             }
 
             $this->output .= $code . PHP_EOL;
+
+            if ($currentNamespace !== null) {
+                $code->setIndent($originalIndent);
+                if ($code->hasDocblock()) {
+                    $code->getDocblock()->setIndent($originalDocblockIndent);
+                }
+                if ($usesBodyTrait) {
+                    $code->indentBody(-$this->indent);
+                }
+            }
         }
 
         if ($inNamespace) {

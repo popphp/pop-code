@@ -28,8 +28,6 @@ use Pop\Code\Generator\Support\ValueFormatter;
 class PropertyGenerator extends AbstractClassElementGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait;
-
     /**
      * Property type
      * @var ?string

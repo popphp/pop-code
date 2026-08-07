@@ -3,6 +3,7 @@
 namespace Pop\Code\Test\Generator\Support;
 
 use Pop\Code\Generator\Exception;
+use Pop\Code\Generator\Literal;
 use Pop\Code\Generator\Support\ValueFormatter;
 use Pop\Code\Test\TestAssets\StatusEnum;
 use PHPUnit\Framework\TestCase;
@@ -90,6 +91,12 @@ class ValueFormatterTest extends TestCase
     public function testCompactModeStillRendersEmptyArrayAsBareBrackets()
     {
         $this->assertEquals('[]', ValueFormatter::format([], 'array', '', true));
+    }
+
+    public function testLiteralValueIsEmittedVerbatim()
+    {
+        $this->assertEquals('self::FOO', ValueFormatter::format(new Literal('self::FOO')));
+        $this->assertEquals('Status::Active', ValueFormatter::format(new Literal('Status::Active'), 'string'));
     }
 
 }

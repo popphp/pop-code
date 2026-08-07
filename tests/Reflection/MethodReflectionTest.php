@@ -68,6 +68,32 @@ class MethodReflectionTest extends TestCase
         $this->assertStringContainsString('function collectByRef(&...$items)', (string) $method);
     }
 
+    public function testUnionAndIntersectionParameterAndReturnTypesRoundTripCorrectly()
+    {
+        // Previously: MethodReflection's parameter loop silently dropped union/intersection
+        // parameter types (a method_exists('getName') guard prevented a crash but discarded the
+        // type entirely), and neither the parameter nor the return-type branch handled
+        // intersection types at all.
+        $class = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+
+        $union = $class->getMethod('unionTyped');
+        $render = (string) $union;
+        $this->assertTrue(
+            str_contains($render, 'int|string $x') || str_contains($render, 'string|int $x'),
+            'Union parameter type was dropped: ' . $render
+        );
+        $this->assertStringContainsString('string|null $y = null', $render);
+        $this->assertTrue(
+            str_contains($render, '): int|string') || str_contains($render, '): string|int'),
+            'Union return type was dropped: ' . $render
+        );
+
+        $intersection = $class->getMethod('intersectionTyped');
+        $intersectionRender = (string) $intersection;
+        $this->assertStringContainsString('Countable&Traversable $x', $intersectionRender);
+        $this->assertStringContainsString('): Countable&Traversable', $intersectionRender);
+    }
+
     public function testMethodAndParameterAttributesAreDetected()
     {
         $class  = Reflection::createClass('Pop\Code\Test\TestAssets\AttributedTestClass');

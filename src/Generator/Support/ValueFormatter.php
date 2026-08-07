@@ -14,6 +14,7 @@
 namespace Pop\Code\Generator\Support;
 
 use Pop\Code\Generator\Exception;
+use Pop\Code\Generator\Literal;
 
 /**
  * Value formatter class
@@ -49,6 +50,14 @@ class ValueFormatter
     {
         if ($value === null) {
             return 'null';
+        }
+
+        // A Literal wraps a raw PHP-source expression (e.g. 'self::FOO') that must be emitted
+        // verbatim rather than quoted/escaped -- must be checked before the object/Stringable
+        // check below, since Literal itself has no __toString() and would otherwise incorrectly
+        // hit that exception path.
+        if ($value instanceof Literal) {
+            return $value->getValue();
         }
 
         // Enum cases (e.g. a class constant like `const DEFAULT = self::Active;`) aren't

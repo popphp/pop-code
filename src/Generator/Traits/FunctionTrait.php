@@ -15,7 +15,6 @@ namespace Pop\Code\Generator\Traits;
 
 use Pop\Code\Generator\DocblockGenerator;
 use Pop\Code\Generator\Exception;
-use Pop\Code\Generator\Literal;
 use Pop\Code\Generator\NoValue;
 use Pop\Code\Generator\Support\ValueFormatter;
 
@@ -78,7 +77,9 @@ trait FunctionTrait
             $docName = '$' . $docName;
         }
         $docType = $type;
-        if (!empty($docType) && !str_starts_with($docType, '?') && ($docType !== 'mixed')) {
+        if (!empty($docType) && !str_starts_with($docType, '?') && ($docType !== 'mixed') && ($value === null)
+            && !in_array('null', explode('|', $docType), true)
+        ) {
             $docType .= '|null';
         }
         $this->docblock->addParam($docType, $docName);
@@ -319,7 +320,9 @@ trait FunctionTrait
 
             if ($arg['type'] !== null) {
                 $type = $arg['type'];
-                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] === null)) {
+                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] === null)
+                    && !in_array('null', explode('|', $type), true)
+                ) {
                     $type .= '|null';
                 }
                 $args .= $promoted . $type . ' ';
@@ -331,10 +334,7 @@ trait FunctionTrait
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
 
             if (!($arg['value'] instanceof NoValue)) {
-                $value = ($arg['value'] instanceof Literal)
-                    ? $arg['value']->getValue()
-                    : ValueFormatter::format($arg['value'], $arg['type']);
-                $args .= ' = ' . $value;
+                $args .= ' = ' . ValueFormatter::format($arg['value'], $arg['type']);
             }
 
             if ($i < count($this->arguments)) {

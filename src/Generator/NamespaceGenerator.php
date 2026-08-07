@@ -51,8 +51,16 @@ class NamespaceGenerator extends AbstractGenerator
      */
     public function render(): string
     {
-        $this->docblock = new DocblockGenerator(null, $this->indent);
-        $this->docblock->addTag('namespace');
+        // Only create a fresh docblock if one hasn't already been set -- render() used to
+        // unconditionally overwrite $this->docblock, silently discarding any docblock a caller
+        // had set via DocblockTrait's setDocblock()/setDesc(), despite this class mixing that
+        // trait in.
+        if ($this->docblock === null) {
+            $this->docblock = new DocblockGenerator(null, $this->indent);
+        }
+        if (!$this->docblock->hasTag('namespace')) {
+            $this->docblock->addTag('namespace');
+        }
 
         $this->output  = $this->docblock->render();
 

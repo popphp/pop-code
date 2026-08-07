@@ -81,4 +81,12 @@ class ConstantGeneratorTest extends TestCase
         $this->assertStringContainsString("    #[Deprecated]\n    public const", $render);
     }
 
+    public function testLiteralValueRendersVerbatim()
+    {
+        // Previously threw "Cannot format an object value of type ...Literal" -- Literal
+        // unwrapping only happened in FunctionTrait and AttributeGenerator, not here.
+        $constant = new Generator\ConstantGenerator('BAZ', 'string', new Generator\Literal('self::FOO'));
+        $this->assertStringContainsString('public const BAZ = self::FOO;', (string) $constant);
+    }
+
 }

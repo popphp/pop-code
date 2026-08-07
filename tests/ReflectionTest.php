@@ -78,6 +78,21 @@ CODE;
         $this->assertStringContainsString("#[TagAttribute('closure')]", (string) $function4);
     }
 
+    public function testCreateFunctionResolvesUnionAndIntersectionParameterTypes()
+    {
+        // FunctionReflection previously crashed on a union-typed parameter (getName() called
+        // directly on a ReflectionType without checking for ReflectionUnionType), and had no
+        // handling at all for intersection types.
+        $unionCode     = function(int|string $x) { return $x; };
+        $unionFunction = Reflection::createFunction($unionCode);
+        $render        = (string) $unionFunction;
+        $this->assertTrue(str_contains($render, 'int|string') || str_contains($render, 'string|int'));
+
+        $intersectCode     = function(\Countable&\Traversable $x) { return $x; };
+        $intersectFunction = Reflection::createFunction($intersectCode);
+        $this->assertStringContainsString('Countable&Traversable', (string) $intersectFunction);
+    }
+
     public function testCreateMethod()
     {
         $class   = new \ReflectionClass('Pop\Code\Generator\ConstantGenerator');
@@ -100,6 +115,15 @@ CODE;
     {
         $enum = Reflection::createEnum('Pop\Code\Test\TestAssets\StatusEnum');
         $this->assertInstanceOf('Pop\Code\Generator\EnumGenerator', $enum);
+    }
+
+    public function testCreateConstant()
+    {
+        $class     = new \ReflectionClass('Pop\Code\Generator\ConstantGenerator');
+        $constants = $class->getReflectionConstants();
+
+        $constant = Reflection::createConstant($constants[0]);
+        $this->assertInstanceOf('Pop\Code\Generator\ConstantGenerator', $constant);
     }
 
 }

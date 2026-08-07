@@ -83,9 +83,9 @@ abstract class AbstractGenerator implements GeneratorInterface
     /**
      * Get the output
      *
-     * @return string
+     * @return ?string
      */
-    public function getOutput(): string
+    public function getOutput(): ?string
     {
         return $this->output;
     }

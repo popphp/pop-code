@@ -28,8 +28,6 @@ use Pop\Code\Generator\Support\ValueFormatter;
 class ConstantGenerator extends AbstractClassElementGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait;
-
     /**
      * Constant type
      * @var ?string

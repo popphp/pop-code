@@ -128,4 +128,30 @@ class FunctionGeneratorTest extends TestCase
         $this->assertStringContainsString('function route(#[Autowire] #[Required] string $path)', (string) $function);
     }
 
+    public function testTypedArgumentWithNoDefaultDoesNotGainSpuriousNullable()
+    {
+        // Previously the docblock unconditionally appended |null to any typed parameter's
+        // @param tag regardless of whether it actually had a null default -- a parameter with
+        // no default at all (NoValue, not null) still got marked nullable in the docblock.
+        $function = new Generator\FunctionGenerator('noDefault');
+        $function->addArgument('foo', new Generator\NoValue(), 'string');
+        $render = (string) $function;
+
+        $this->assertStringContainsString('function noDefault(string $foo)', $render);
+        $this->assertStringNotContainsString('string|null $foo', $render);
+        $this->assertStringNotContainsString('@param string|null', $render);
+    }
+
+    public function testAlreadyNullableTypeWithNullDefaultDoesNotDuplicateNull()
+    {
+        // Previously an already-nullable type (e.g. reflected from a real `?string`/`string|null`
+        // parameter) combined with a null default produced `string|null|null` -- invalid PHP.
+        $function = new Generator\FunctionGenerator('alreadyNullable');
+        $function->addArgument('bar', null, 'string|null');
+        $render = (string) $function;
+
+        $this->assertStringContainsString('string|null $bar = null', $render);
+        $this->assertStringNotContainsString('string|null|null', $render);
+    }
+
 }

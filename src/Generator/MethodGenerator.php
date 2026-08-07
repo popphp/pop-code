@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class MethodGenerator extends AbstractClassElementGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait, Traits\AbstractFinalTrait, Traits\FunctionTrait, Traits\BodyTrait;
+    use Traits\AbstractFinalTrait, Traits\FunctionTrait, Traits\BodyTrait;
 
     /**
      * Method body

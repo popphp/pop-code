@@ -103,9 +103,7 @@ class AttributeGenerator extends AbstractGenerator
         if (!empty($this->arguments)) {
             $formatted = [];
             foreach ($this->arguments as $argument) {
-                $value = ($argument['value'] instanceof Literal)
-                    ? $argument['value']->getValue()
-                    : ValueFormatter::format($argument['value'], null, '', true);
+                $value       = ValueFormatter::format($argument['value'], null, '', true);
                 $formatted[] = ($argument['name'] !== null) ? $argument['name'] . ': ' . $value : $value;
             }
             $this->output .= '(' . implode(', ', $formatted) . ')';
