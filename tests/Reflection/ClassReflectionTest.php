@@ -62,7 +62,7 @@ class ClassReflectionTest extends TestCase
         $render = (string) $class;
 
         $tmpFile = sys_get_temp_dir() . '/pop-code-composite-' . uniqid() . '.php';
-        file_put_contents($tmpFile, $render);
+        file_put_contents($tmpFile, "<?php\n" . $render);
         exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
         unlink($tmpFile);
         $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $render);
