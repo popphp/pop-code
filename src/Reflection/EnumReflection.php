@@ -16,6 +16,7 @@ namespace Pop\Code\Reflection;
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
 use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\NamespaceImportResolver;
 
 /**
  * Enum reflection code class
@@ -63,18 +64,20 @@ class EnumReflection extends AbstractReflection
             $enum->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
+        // Shared across enum-level attributes, interfaces, and case-level attributes below --
+        // see NamespaceImportResolver.
+        $importResolver = new NamespaceImportResolver();
+
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            $attributeName = $reflectionAttribute->getName();
-            if (str_contains($attributeName, '\\')
-                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
-            ) {
+            [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$enum->hasNamespace()) {
                     $enum->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $enum->getNamespace()->addUse($attributeName);
+                $enum->getNamespace()->addUse($reflectionAttribute->getName());
             }
-            $enum->addAttribute(AttributeCollector::build($reflectionAttribute));
+            $enum->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
         }
 
         // Detect and set the enum doc block
@@ -91,13 +94,14 @@ class EnumReflection extends AbstractReflection
                 if (in_array($interface->getName(), ['UnitEnum', 'BackedEnum'], true)) {
                     continue;
                 }
-                if ($interface->inNamespace() && ($interface->getNamespaceName() !== $reflection->getNamespaceName())) {
+                [$interfaceReference, $needsImport] = $importResolver->resolve($interface->getName(), $reflection->getNamespaceName());
+                if ($needsImport) {
                     if (!$enum->hasNamespace()) {
                         $enum->setNamespace(new Generator\NamespaceGenerator());
                     }
-                    $enum->getNamespace()->addUse($interface->getNamespaceName() . '\\' . $interface->getShortName());
+                    $enum->getNamespace()->addUse($interface->getName());
                 }
-                $interfacesAry[] = $interface->getShortName();
+                $interfacesAry[] = $interfaceReference;
             }
             $enum->addInterfaces($interfacesAry);
         }
@@ -125,16 +129,14 @@ class EnumReflection extends AbstractReflection
             }
 
             foreach ($case->getAttributes() as $reflectionAttribute) {
-                $attributeName = $reflectionAttribute->getName();
-                if (str_contains($attributeName, '\\')
-                    && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
-                ) {
+                [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+                if ($needsImport) {
                     if (!$enum->hasNamespace()) {
                         $enum->setNamespace(new Generator\NamespaceGenerator());
                     }
-                    $enum->getNamespace()->addUse($attributeName);
+                    $enum->getNamespace()->addUse($reflectionAttribute->getName());
                 }
-                $enumCase->addAttribute(AttributeCollector::build($reflectionAttribute));
+                $enumCase->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
             }
 
             $enum->addCase($enumCase);

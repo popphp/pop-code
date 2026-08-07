@@ -16,6 +16,7 @@ namespace Pop\Code\Reflection;
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
 use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
 /**
@@ -66,17 +67,16 @@ class TraitReflection extends AbstractReflection
         }
 
         // Detect attributes
+        $importResolver = new NamespaceImportResolver();
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            $attributeName = $reflectionAttribute->getName();
-            if (str_contains($attributeName, '\\')
-                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
-            ) {
+            [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$trait->hasNamespace()) {
                     $trait->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $trait->getNamespace()->addUse($attributeName);
+                $trait->getNamespace()->addUse($reflectionAttribute->getName());
             }
-            $trait->addAttribute(AttributeCollector::build($reflectionAttribute));
+            $trait->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
         }
 
         // Detect and set the class doc block

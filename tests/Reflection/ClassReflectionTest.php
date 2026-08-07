@@ -156,6 +156,23 @@ class ClassReflectionTest extends TestCase
         $this->assertFalse($class->getNamespace()->hasUse('Pop\Code\Test\TestAssets\TagAttribute'));
     }
 
+    public function testCollidingShortNamesFallBackToFullyQualifiedReferenceInsteadOfUseCollision()
+    {
+        // CollidingAttributesTestClass carries two attributes both short-named
+        // ForeignTagAttribute, from two different foreign namespaces. Without collision handling,
+        // regenerating this would emit two `use` statements for different classes sharing one
+        // short name -- a PHP fatal error ("Cannot use X as Y because the name is already in
+        // use"), not just invalid output.
+        $class  = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\CollidingAttributesTestClass');
+        $render = (string) $class;
+
+        $this->assertTrue($class->hasAttribute('ForeignTagAttribute'));
+        $this->assertStringContainsString('\Pop\Code\Test\TestAssets\AttrsB\ForeignTagAttribute', $render);
+
+        [$exitCode, $output, $content] = $this->executeRenderedFragment($render);
+        $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $content);
+    }
+
     public function testConstantAndMethodAndParameterAttributesAreDetected()
     {
         $class    = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\AttributedTestClass');

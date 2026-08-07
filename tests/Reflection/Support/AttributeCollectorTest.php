@@ -35,4 +35,16 @@ class AttributeCollectorTest extends TestCase
         $this->assertStringContainsString("name: 'b', priority: 5", (string) $attribute);
     }
 
+    public function testNameOverrideIsUsedInPlaceOfTheComputedShortName()
+    {
+        // A caller with its own NamespaceImportResolver (a collision-avoidance FQCN, or a
+        // same-namespace short name) can override what would otherwise be computed here.
+        $reflection = new \ReflectionClass(AttributeCollectorTestFixture::class);
+        $attributes = $reflection->getAttributes();
+
+        $attribute = AttributeCollector::build($attributes[0], '\Pop\Code\Test\TestAssets\TagAttribute');
+
+        $this->assertEquals('\Pop\Code\Test\TestAssets\TagAttribute', $attribute->getName());
+    }
+
 }

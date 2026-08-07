@@ -16,6 +16,7 @@ namespace Pop\Code\Reflection;
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
 use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
 /**
@@ -70,18 +71,23 @@ class ClassReflection extends AbstractReflection
             $class->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
+        // Shared across attributes, the parent class, and interfaces below, so a same-short-name
+        // collision between e.g. the parent class and an attribute is caught too, not just among
+        // attributes alone. See NamespaceImportResolver for why: two `use` statements for
+        // different classes sharing one short name is a PHP fatal error, so the second one must
+        // fall back to a fully-qualified reference instead of colliding.
+        $importResolver = new NamespaceImportResolver();
+
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            $attributeName = $reflectionAttribute->getName();
-            if (str_contains($attributeName, '\\')
-                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
-            ) {
+            [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$class->hasNamespace()) {
                     $class->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $class->getNamespace()->addUse($attributeName);
+                $class->getNamespace()->addUse($reflectionAttribute->getName());
             }
-            $class->addAttribute(AttributeCollector::build($reflectionAttribute));
+            $class->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
         }
 
         // Detect and set the class doc block
@@ -103,13 +109,14 @@ class ClassReflection extends AbstractReflection
         // Detect parent class
         $parent = $reflection->getParentClass();
         if ($parent !== false) {
-            if ($parent->inNamespace() && ($parent->getNamespaceName() !== $reflection->getNamespaceName())) {
+            [$parentReference, $needsImport] = $importResolver->resolve($parent->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$class->hasNamespace()) {
                     $class->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $class->getNamespace()->addUse($parent->getNamespaceName() . '\\' . $parent->getShortName());
+                $class->getNamespace()->addUse($parent->getName());
             }
-            $class->setParent($parent->getShortName());
+            $class->setParent($parentReference);
         }
 
         // Detect implemented interfaces -- getInterfaces() returns the full transitive closure
@@ -137,13 +144,14 @@ class ClassReflection extends AbstractReflection
                     continue;
                 }
 
-                if ($interface->inNamespace() && ($interface->getNamespaceName() !== $reflection->getNamespaceName())) {
+                [$interfaceReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
+                if ($needsImport) {
                     if (!$class->hasNamespace()) {
                         $class->setNamespace(new Generator\NamespaceGenerator());
                     }
-                    $class->getNamespace()->addUse($interface->getNamespaceName() . '\\' . $interface->getShortName());
+                    $class->getNamespace()->addUse($candidateName);
                 }
-                $interfacesAry[] = $interface->getShortName();
+                $interfacesAry[] = $interfaceReference;
             }
             $class->addInterfaces($interfacesAry);
         }

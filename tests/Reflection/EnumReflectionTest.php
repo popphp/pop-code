@@ -153,6 +153,22 @@ class EnumReflectionTest extends TestCase
         $this->assertFalse($inactive->hasAttribute('TagAttribute'));
     }
 
+    public function testCollidingShortNamesAcrossEnumLevelAndCaseLevelFallBackToFqcn()
+    {
+        // The enum-level attribute and the case-level attribute share the same short name
+        // (ForeignTagAttribute) from two different foreign namespaces, and must share one
+        // NamespaceImportResolver so the collision is caught across both levels, not just within
+        // one.
+        $enum   = Reflection::createEnum('Pop\Code\Test\TestAssets\CollidingAttributesEnum');
+        $render = (string) $enum;
+
+        $this->assertTrue($enum->hasAttribute('ForeignTagAttribute'));
+        $this->assertStringContainsString('\Pop\Code\Test\TestAssets\AttrsB\ForeignTagAttribute', $render);
+
+        [$exitCode, $output, $content] = $this->executeRenderedFragment($render);
+        $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $content);
+    }
+
     public function testSameNamespaceAttributeDoesNotGetARedundantUseImport()
     {
         // TagAttribute lives in the same namespace as AttributedEnum itself

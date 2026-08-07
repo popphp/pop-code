@@ -20,7 +20,9 @@ use Pop\Code\Generator\AttributeGenerator;
  *
  * Builds an AttributeGenerator from a \ReflectionAttribute. Deliberately does not attempt any
  * `use`-import wiring for the attribute's own class — only a top-level *Reflection::parse() call has
- * direct access to the construct's namespace object, so that stays inline in each caller.
+ * direct access to the construct's namespace object, so that stays inline in each caller. A caller
+ * that does have that access (and a Reflection\Support\NamespaceImportResolver to go with it, for
+ * same-short-name collision avoidance) can override the computed name via $name.
  *
  * @category   Pop
  * @package    Pop\Code
@@ -36,15 +38,18 @@ class AttributeCollector
      * Build an AttributeGenerator from a ReflectionAttribute
      *
      * @param  \ReflectionAttribute $reflectionAttribute
+     * @param  ?string              $name  overrides the short name this would otherwise compute
      * @return AttributeGenerator
      */
-    public static function build(\ReflectionAttribute $reflectionAttribute): AttributeGenerator
+    public static function build(\ReflectionAttribute $reflectionAttribute, ?string $name = null): AttributeGenerator
     {
-        $name  = $reflectionAttribute->getName();
-        $parts = explode('\\', $name);
-        $short = str_contains($name, '\\') ? end($parts) : '\\' . $name;
+        if ($name === null) {
+            $fqcn  = $reflectionAttribute->getName();
+            $parts = explode('\\', $fqcn);
+            $name  = str_contains($fqcn, '\\') ? end($parts) : '\\' . $fqcn;
+        }
 
-        $attribute = new AttributeGenerator($short);
+        $attribute = new AttributeGenerator($name);
 
         foreach ($reflectionAttribute->getArguments() as $key => $value) {
             if (is_string($key)) {

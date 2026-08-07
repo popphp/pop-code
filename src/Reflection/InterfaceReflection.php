@@ -15,6 +15,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
 /**
@@ -61,18 +62,19 @@ class InterfaceReflection extends AbstractReflection
             }
         }
 
+        // Shared across attributes and parent interfaces below -- see NamespaceImportResolver.
+        $importResolver = new NamespaceImportResolver();
+
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            $attributeName = $reflectionAttribute->getName();
-            if (str_contains($attributeName, '\\')
-                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
-            ) {
+            [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$interface->hasNamespace()) {
                     $interface->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $interface->getNamespace()->addUse($attributeName);
+                $interface->getNamespace()->addUse($reflectionAttribute->getName());
             }
-            $interface->addAttribute(AttributeCollector::build($reflectionAttribute));
+            $interface->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
         }
 
         // Detect and set the class doc block
@@ -101,13 +103,14 @@ class InterfaceReflection extends AbstractReflection
                 continue;
             }
 
-            if ($candidate->inNamespace() && ($candidate->getNamespaceName() !== $reflection->getNamespaceName())) {
+            [$parentReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$interface->hasNamespace()) {
                     $interface->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $interface->getNamespace()->addUse($candidate->getNamespaceName() . '\\' . $candidate->getShortName());
+                $interface->getNamespace()->addUse($candidateName);
             }
-            $interface->addParent($candidate->getShortName());
+            $interface->addParent($parentReference);
         }
 
         // Detect constants
