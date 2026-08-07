@@ -43,7 +43,7 @@ class ClassReflection extends AbstractReflection
         $reflection     = new \ReflectionClass($code);
 
         if ($reflection->isEnum()) {
-            throw new Exception('Error: Enums are not yet supported by ClassReflection.');
+            throw new Exception('Error: The code is an enum; use Reflection::createEnum() instead.');
         }
 
         $reflectionName = $reflection->getShortName();

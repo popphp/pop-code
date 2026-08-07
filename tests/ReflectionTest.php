@@ -92,4 +92,10 @@ CODE;
         $this->assertInstanceOf('Pop\Code\Generator\PropertyGenerator', $property);
     }
 
+    public function testCreateEnum()
+    {
+        $enum = Reflection::createEnum('Pop\Code\Test\TestAssets\StatusEnum');
+        $this->assertInstanceOf('Pop\Code\Generator\EnumGenerator', $enum);
+    }
+
 }

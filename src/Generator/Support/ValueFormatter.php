@@ -46,6 +46,15 @@ class ValueFormatter
             return 'null';
         }
 
+        // Enum cases (e.g. a class constant like `const DEFAULT = self::Active;`) aren't
+        // Stringable, but they do have a well-defined literal form: <ShortClassName>::<CaseName>.
+        // Using the short name (not an FQCN) matches how the rest of this codebase renders
+        // in-namespace type references, and is always valid PHP when the value is a case of the
+        // enum being rendered, since that reference lands back in the same namespace.
+        if ($value instanceof \UnitEnum) {
+            return (new \ReflectionClass($value))->getShortName() . '::' . $value->name;
+        }
+
         if (is_object($value) && !method_exists($value, '__toString')) {
             throw new Exception('Error: Cannot format an object value of type ' . get_class($value) . '.');
         }

@@ -69,6 +69,19 @@ class Reflection
     }
 
     /**
+     * Create enum
+     *
+     * @param  mixed   $enum
+     * @param  ?string $name
+     * @throws Exception
+     * @return Generator\EnumGenerator
+     */
+    public static function createEnum(mixed $enum, ?string $name = null): Generator\EnumGenerator
+    {
+        return Reflection\EnumReflection::parse($enum, $name);
+    }
+
+    /**
      * Create namespace
      *
      * @param  mixed  $namespace

@@ -47,21 +47,24 @@ class DocblockReflection extends AbstractReflection
         $indent        = null;
         $tags          = null;
 
-        // Parse the description, if any
-        if (str_contains($code, '@')) {
-            $desc    = substr($code, 0, strpos($code, '@'));
-            $desc    = str_replace('/*', '', $desc);
-            $desc    = str_replace('*/', '', $desc);
-            $desc    = str_replace(PHP_EOL . ' * ', ' ', $desc);
-            $desc    = trim(str_replace('*', '', $desc));
-            $descAry = explode("\n", $desc);
+        // Parse the description, if any. A docblock with no @-tags at all (just a summary line,
+        // as is common on enum cases) still has a description to extract, so this must not be
+        // gated on the presence of '@' — only the *extent* of the description text depends on it.
+        $desc    = str_contains($code, '@') ? substr($code, 0, strpos($code, '@')) : $code;
+        $desc    = str_replace('/*', '', $desc);
+        $desc    = str_replace('*/', '', $desc);
+        $desc    = str_replace(PHP_EOL . ' * ', ' ', $desc);
+        $desc    = trim(str_replace('*', '', $desc));
+        $descAry = explode("\n", $desc);
 
+        $formattedDesc = null;
+        foreach ($descAry as $line) {
+            $formattedDesc .= ' ' . trim($line);
+        }
+
+        $formattedDesc = trim($formattedDesc);
+        if ($formattedDesc === '') {
             $formattedDesc = null;
-            foreach ($descAry as $line) {
-                $formattedDesc .= ' ' . trim($line);
-            }
-
-            $formattedDesc = trim($formattedDesc);
         }
 
         // Get the indentation, if any, and create docblock object
