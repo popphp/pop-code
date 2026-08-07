@@ -28,6 +28,18 @@ DOC;
         $this->assertEquals('This is a string', $docblock->getParam(0)['desc']);
     }
 
+    public function testDescriptionOnlyDocblockWithNoTags()
+    {
+        $doc = <<<DOC
+/**
+ * Just a description, no tags
+ */
+DOC;
+
+        $docblock = Reflection\DocblockReflection::parse($doc);
+        $this->assertEquals('Just a description, no tags', $docblock->getDesc());
+    }
+
     public function testReturn()
     {
         $doc = <<<DOC

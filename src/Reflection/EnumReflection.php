@@ -104,7 +104,9 @@ class EnumReflection extends AbstractReflection
 
             $caseDocBlock = $case->getDocComment();
             if (!empty($caseDocBlock) && (str_contains($caseDocBlock, '/*'))) {
-                $enumCase->setDocblock(DocblockReflection::parse($caseDocBlock));
+                $caseDocblock = DocblockReflection::parse($caseDocBlock);
+                $caseDocblock->setIndent(4);
+                $enumCase->setDocblock($caseDocblock);
             }
 
             $enum->addCase($enumCase);
@@ -118,10 +120,16 @@ class EnumReflection extends AbstractReflection
             $enum->addConstant(ConstantReflection::parse($constant));
         }
 
-        // Detect methods
+        // Detect methods, skipping the internal cases()/from()/tryFrom() methods PHP synthesizes
+        // on every enum (backed enums get from()/tryFrom() too) -- re-emitting these as empty
+        // user-declared methods causes a fatal "Cannot redeclare" error when the generated code
+        // is loaded.
         $methods = $reflection->getMethods();
         if (count($methods) > 0) {
             foreach ($methods as $method) {
+                if ($method->isInternal()) {
+                    continue;
+                }
                 $enum->addMethod(MethodReflection::parse($method, $method->name));
             }
         }

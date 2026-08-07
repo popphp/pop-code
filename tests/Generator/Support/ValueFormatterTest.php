@@ -4,10 +4,16 @@ namespace Pop\Code\Test\Generator\Support;
 
 use Pop\Code\Generator\Exception;
 use Pop\Code\Generator\Support\ValueFormatter;
+use Pop\Code\Test\TestAssets\StatusEnum;
 use PHPUnit\Framework\TestCase;
 
 class ValueFormatterTest extends TestCase
 {
+
+    public function testFormatsEnumCaseAsShortClassNameDoubleColonCaseName()
+    {
+        $this->assertEquals('StatusEnum::Active', ValueFormatter::format(StatusEnum::Active));
+    }
 
     public function testFormatsNullAsNullRegardlessOfType()
     {
