@@ -33,4 +33,15 @@ class PropertyReflectionTest extends TestCase
         $this->assertTrue($class->hasProperty('noDefault'));
     }
 
+    public function testReadonlyPropertyIsDetectedOnAnOrdinaryClass()
+    {
+        $class    = Reflection::createClass('Pop\Code\Test\TestAssets\ReadonlyPropertyTestClass');
+        $token    = $class->getProperty('token');
+        $mutable  = $class->getProperty('mutable');
+
+        $this->assertTrue($token->isReadonly());
+        $this->assertStringContainsString('public readonly string $token;', (string) $token);
+        $this->assertFalse($mutable->isReadonly());
+    }
+
 }

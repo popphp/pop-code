@@ -72,6 +72,7 @@ class PropertyReflection extends AbstractReflection
         }
 
         $property = new Generator\PropertyGenerator($code->getName(), $type, $formattedValue, $visibility, $code->isStatic());
+        $property->setAsReadonly($code->isReadOnly());
         if ($docblock !== null) {
             $property->setDocblock($docblock);
         }

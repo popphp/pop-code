@@ -49,6 +49,13 @@ class PropertyGenerator extends AbstractClassElementGenerator
     protected bool $readonly = false;
 
     /**
+     * Flag to suppress printing the redundant 'readonly' keyword when the enclosing
+     * class is itself declared readonly (the property remains readonly regardless)
+     * @var bool
+     */
+    protected bool $suppressReadonlyKeyword = false;
+
+    /**
      * Constructor
      *
      * Instantiate the property generator object
@@ -165,6 +172,20 @@ class PropertyGenerator extends AbstractClassElementGenerator
     }
 
     /**
+     * Suppress printing the 'readonly' keyword on this property, e.g. because the enclosing
+     * class is itself declared readonly, making a per-property 'readonly' keyword redundant.
+     * The property is still treated as readonly for type/value rendering purposes.
+     *
+     * @param  bool $suppress
+     * @return PropertyGenerator
+     */
+    public function suppressReadonlyKeyword(bool $suppress = true): PropertyGenerator
+    {
+        $this->suppressReadonlyKeyword = $suppress;
+        return $this;
+    }
+
+    /**
      * Set the static flag (overridden to enforce mutual exclusion with readonly)
      *
      * @param  bool $static
@@ -207,7 +228,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
         }
         $this->output  = PHP_EOL . $this->docblock->render();
         $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '')
-            . ($this->readonly ? ' readonly' : '') . ' ' . $type . '$' . $this->name;
+            . (($this->readonly && !$this->suppressReadonlyKeyword) ? ' readonly' : '') . ' ' . $type . '$' . $this->name;
 
         if ($this->readonly) {
             $this->output .= ';';

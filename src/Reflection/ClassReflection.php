@@ -81,6 +81,10 @@ class ClassReflection extends AbstractReflection
             $class->setAsFinal(true);
         }
 
+        if ($reflection->isReadOnly()) {
+            $class->setAsReadonly(true);
+        }
+
         // Detect parent class
         $parent = $reflection->getParentClass();
         if ($parent !== false) {
@@ -122,12 +126,24 @@ class ClassReflection extends AbstractReflection
         }
 
         // Detect properties
+        $classIsReadonly = $reflection->isReadOnly();
         foreach ($reflection->getProperties() as $property) {
             if ($property->isPromoted()) {
                 continue;
             }
-            $value = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
-            $class->addProperty(PropertyReflection::parse($property, $property->getName(), $value));
+            $value             = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
+            $propertyGenerator = PropertyReflection::parse($property, $property->getName(), $value);
+            if ($classIsReadonly) {
+                // Every property in a readonly class reports isReadOnly()=true regardless of whether it
+                // says so explicitly; rely on the class-level keyword instead of stuttering it per-property.
+                // NOTE: deviates from the task brief's literal `setAsReadonly(false)` — that call also
+                // re-enables PropertyGenerator's nullable-widening/default-value logic (gated on the same
+                // flag), which produced invalid PHP (a default value on a readonly property). Verified
+                // empirically; see task-3-report.md. suppressReadonlyKeyword() only hides the redundant
+                // keyword while keeping the property's true readonly semantics for rendering.
+                $propertyGenerator->suppressReadonlyKeyword();
+            }
+            $class->addProperty($propertyGenerator);
         }
 
         // Detect methods

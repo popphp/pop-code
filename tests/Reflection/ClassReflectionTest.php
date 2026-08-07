@@ -38,4 +38,22 @@ class ClassReflectionTest extends TestCase
         $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestEnum');
     }
 
+    public function testReadonlyClassSuppressesRedundantPropertyReadonly()
+    {
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\ReadonlyClassTestClass');
+        $render = (string) $class;
+
+        $this->assertTrue($class->isReadonly());
+        $this->assertStringContainsString('readonly class ReadonlyClassTestClass', $render);
+        // Every property is implicitly readonly via the class keyword — no per-property "readonly" needed.
+        $this->assertStringNotContainsString('public readonly int $id', $render);
+        $this->assertStringNotContainsString('protected readonly string $label', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-readonly-class-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\n" . $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
 }
