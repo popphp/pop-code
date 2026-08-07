@@ -15,6 +15,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
+use Pop\Code\Reflection\Support\AttributeCollector;
 
 /**
  * Enum reflection code class
@@ -62,6 +63,17 @@ class EnumReflection extends AbstractReflection
             $enum->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
+        // Detect attributes
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            if (str_contains($reflectionAttribute->getName(), '\\')) {
+                if (!$enum->hasNamespace()) {
+                    $enum->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $enum->getNamespace()->addUse($reflectionAttribute->getName());
+            }
+            $enum->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
+
         // Detect and set the enum doc block
         $enumDocBlock = $reflection->getDocComment();
         if (!empty($enumDocBlock) && (str_contains($enumDocBlock, '/*'))) {
@@ -107,6 +119,16 @@ class EnumReflection extends AbstractReflection
                 $caseDocblock = DocblockReflection::parse($caseDocBlock);
                 $caseDocblock->setIndent(4);
                 $enumCase->setDocblock($caseDocblock);
+            }
+
+            foreach ($case->getAttributes() as $reflectionAttribute) {
+                if (str_contains($reflectionAttribute->getName(), '\\')) {
+                    if (!$enum->hasNamespace()) {
+                        $enum->setNamespace(new Generator\NamespaceGenerator());
+                    }
+                    $enum->getNamespace()->addUse($reflectionAttribute->getName());
+                }
+                $enumCase->addAttribute(AttributeCollector::build($reflectionAttribute));
             }
 
             $enum->addCase($enumCase);

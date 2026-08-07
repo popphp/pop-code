@@ -132,4 +132,23 @@ class EnumReflectionTest extends TestCase
         $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $render);
     }
 
+    public function testEnumLevelAttributeIsDetected()
+    {
+        $enum = Reflection::createEnum('Pop\Code\Test\TestAssets\AttributedEnum');
+        $this->assertTrue($enum->hasAttribute('TagAttribute'));
+        $this->assertStringContainsString("#[TagAttribute('enum')]\nenum AttributedEnum", (string) $enum);
+    }
+
+    public function testCaseLevelAttributeIsDetected()
+    {
+        $enum   = Reflection::createEnum('Pop\Code\Test\TestAssets\AttributedEnum');
+        $active = $enum->getCase('Active');
+
+        $this->assertTrue($active->hasAttribute('TagAttribute'));
+        $this->assertStringContainsString("#[TagAttribute('case')]", (string) $active);
+
+        $inactive = $enum->getCase('Inactive');
+        $this->assertFalse($inactive->hasAttribute('TagAttribute'));
+    }
+
 }
