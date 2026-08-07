@@ -124,4 +124,55 @@ class ClassReflectionTest extends TestCase
         $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $content);
     }
 
+    public function testRootNamespaceAttributeIsPreservedWithLeadingBackslash()
+    {
+        $class  = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\RootNamespaceAttributeTestClass');
+        $render = (string) $class;
+
+        // AttributeCollector must not reduce a genuinely root-namespace attribute (PHP's own
+        // #[\AllowDynamicProperties], which has no backslash in ReflectionAttribute::getName())
+        // down to its short name. If it did, the bare "#[AllowDynamicProperties]" emitted here
+        // would silently resolve to the WRONG class once regenerated inside a namespaced
+        // construct -- PHP resolves attribute classes lazily, so that produces no error at
+        // load time, only when something actually asks for the attribute instance.
+        $this->assertStringContainsString('#[\AllowDynamicProperties]', $render);
+    }
+
+    public function testRootNamespaceAttributeResolvesCorrectlyWhenRegeneratedIntoNamespace()
+    {
+        $class  = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\RootNamespaceAttributeTestClass');
+        $render = (string) $class;
+
+        // Regenerate the class into a *different* namespace than the fixture's own, then have a
+        // subprocess actually resolve the attribute instance. If AttributeCollector had reduced
+        // #[\AllowDynamicProperties] to the bare short name, PHP would resolve it relative to
+        // this new namespace (e.g. Pop\Code\Test\Reflection\Regenerated\AllowDynamicProperties),
+        // which doesn't exist -- but since attribute resolution is lazy, that failure would only
+        // surface here, at the point newInstance() is actually called.
+        $autoload         = dirname(__DIR__, 2) . '/vendor/autoload.php';
+        $requireStatement = 'require ' . var_export($autoload, true) . ';' . PHP_EOL;
+        // Anchor to a line that actually *starts* with "namespace " (the real declaration), not
+        // the "@namespace" docblock text that precedes it in the rendered fragment.
+        if (preg_match('/^namespace\s+[^;]+;\s*\n/m', $render, $matches)) {
+            $newNamespace   = 'Pop\\Code\\Test\\Reflection\\Regenerated';
+            $namespaceLine  = 'namespace ' . $newNamespace . ';' . PHP_EOL;
+            $renderRewritten = substr_replace($render, $namespaceLine, strpos($render, $matches[0]), strlen($matches[0]));
+            $content        = '<?php' . PHP_EOL
+                . substr($renderRewritten, 0, strpos($renderRewritten, $namespaceLine) + strlen($namespaceLine))
+                . $requireStatement
+                . substr($renderRewritten, strpos($renderRewritten, $namespaceLine) + strlen($namespaceLine))
+                . PHP_EOL
+                . '$refl = new \ReflectionClass(\\' . $newNamespace . '\RootNamespaceAttributeTestClass::class);'
+                . 'exit($refl->getAttributes()[0]->newInstance() instanceof \AllowDynamicProperties ? 0 : 1);';
+        } else {
+            $this->fail('Rendered class did not contain an expected namespace declaration: ' . $render);
+        }
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-root-namespace-attribute-' . uniqid() . '.php';
+        file_put_contents($tmpFile, $content);
+        exec('php ' . escapeshellarg($tmpFile) . ' 2>&1', $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $content);
+    }
+
 }

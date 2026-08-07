@@ -42,7 +42,7 @@ class AttributeCollector
     {
         $name  = $reflectionAttribute->getName();
         $parts = explode('\\', $name);
-        $short = end($parts);
+        $short = str_contains($name, '\\') ? end($parts) : '\\' . $name;
 
         $attribute = new AttributeGenerator($short);
 
