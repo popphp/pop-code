@@ -109,4 +109,23 @@ class FunctionGeneratorTest extends TestCase
         $this->assertStringContainsString("#[Pure]\nfunction foo", $render);
     }
 
+    public function testParameterAttributeRendersInline()
+    {
+        $function = new Generator\FunctionGenerator('route');
+        $function->addArgument('path', new Generator\NoValue(), 'string', false, false, [
+            new Generator\AttributeGenerator('Autowire'),
+        ]);
+        $this->assertStringContainsString('function route(#[Autowire] string $path)', (string) $function);
+    }
+
+    public function testMultipleParameterAttributesAreSpaceSeparated()
+    {
+        $function = new Generator\FunctionGenerator('route');
+        $function->addArgument('path', new Generator\NoValue(), 'string', false, false, [
+            new Generator\AttributeGenerator('Autowire'),
+            new Generator\AttributeGenerator('Required'),
+        ]);
+        $this->assertStringContainsString('function route(#[Autowire] #[Required] string $path)', (string) $function);
+    }
+
 }

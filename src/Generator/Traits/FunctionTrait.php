@@ -56,14 +56,17 @@ trait FunctionTrait
      * @return static
      */
     public function addArgument(
-        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false
+        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false,
+        array $attributes = []
     ): static
     {
         if ($variadic && !($value instanceof NoValue)) {
             throw new Exception('Error: A variadic argument cannot have a default value.');
         }
 
-        $this->arguments[$name] = ['value' => $value, 'type' => $type, 'variadic' => $variadic, 'byRef' => $byRef];
+        $this->arguments[$name] = [
+            'value' => $value, 'type' => $type, 'variadic' => $variadic, 'byRef' => $byRef, 'attributes' => $attributes
+        ];
 
         if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
@@ -95,11 +98,12 @@ trait FunctionTrait
             if (!isset($arg['name'])) {
                 throw new Exception("Error: The 'name' key was not set.");
             }
-            $value    = array_key_exists('value', $arg) ? $arg['value'] : new NoValue();
-            $type     = $arg['type'] ?? null;
-            $variadic = $arg['variadic'] ?? false;
-            $byRef    = $arg['byRef'] ?? false;
-            $this->addArgument($arg['name'], $value, $type, $variadic, $byRef);
+            $value      = array_key_exists('value', $arg) ? $arg['value'] : new NoValue();
+            $type       = $arg['type'] ?? null;
+            $variadic   = $arg['variadic'] ?? false;
+            $byRef      = $arg['byRef'] ?? false;
+            $attributes = $arg['attributes'] ?? [];
+            $this->addArgument($arg['name'], $value, $type, $variadic, $byRef, $attributes);
         }
         return $this;
     }
@@ -158,10 +162,11 @@ trait FunctionTrait
      * @return static
      */
     public function addParameter(
-        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false
+        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false,
+        array $attributes = []
     ): static
     {
-        $this->addArgument($name, $value, $type, $variadic, $byRef);
+        $this->addArgument($name, $value, $type, $variadic, $byRef, $attributes);
         return $this;
     }
 
@@ -295,6 +300,14 @@ trait FunctionTrait
         $i = 0;
         foreach ($this->arguments as $name => $arg) {
             $i++;
+
+            if (!empty($arg['attributes'])) {
+                $attrs = [];
+                foreach ($arg['attributes'] as $attribute) {
+                    $attrs[] = $attribute->render();
+                }
+                $args .= implode(' ', $attrs) . ' ';
+            }
 
             $promoted = null;
             if (!empty($arg['promotedVisibility'])) {

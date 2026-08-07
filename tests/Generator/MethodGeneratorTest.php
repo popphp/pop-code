@@ -102,4 +102,13 @@ class MethodGeneratorTest extends TestCase
         $this->assertStringContainsString("    #[Route]\n    public function foo", $render);
     }
 
+    public function testPromotedParameterAttributeRendersInline()
+    {
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('logger', 'private', new Generator\NoValue(), 'LoggerInterface', false, [
+            new Generator\AttributeGenerator('Autowire'),
+        ]);
+        $this->assertStringContainsString('function __construct(#[Autowire] private LoggerInterface $logger)', (string) $method);
+    }
+
 }

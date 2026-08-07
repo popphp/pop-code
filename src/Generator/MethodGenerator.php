@@ -63,7 +63,8 @@ class MethodGenerator extends AbstractClassElementGenerator
      * @return MethodGenerator
      */
     public function addPromotedArgument(
-        string $name, string $visibility, mixed $value = new NoValue(), ?string $type = null, bool $readonly = false
+        string $name, string $visibility, mixed $value = new NoValue(), ?string $type = null, bool $readonly = false,
+        array $attributes = []
     ): MethodGenerator
     {
         if ($this->name !== '__construct') {
@@ -79,7 +80,7 @@ class MethodGenerator extends AbstractClassElementGenerator
             throw new Exception('Error: A readonly property must have a type.');
         }
 
-        $this->addArgument($name, $value, $type);
+        $this->addArgument($name, $value, $type, false, false, $attributes);
         $this->arguments[$name]['promotedVisibility'] = $visibility;
         $this->arguments[$name]['promotedReadonly']   = $readonly;
 
