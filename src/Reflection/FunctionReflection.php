@@ -16,6 +16,7 @@ namespace Pop\Code\Reflection;
 use Pop\Code\Generator\FunctionGenerator;
 use Pop\Code\Generator\Literal;
 use Pop\Code\Generator\NoValue;
+use Pop\Code\Reflection\Support\AttributeCollector;
 use Pop\Code\Reflection\Support\SourceBodyExtractor;
 use ReflectionException;
 
@@ -52,6 +53,9 @@ class FunctionReflection extends AbstractReflection
         }
 
         $function = new FunctionGenerator($name, $isClosure);
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            $function->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
 
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
@@ -66,8 +70,14 @@ class FunctionReflection extends AbstractReflection
                 $paramValue = $reflectionParam->getDefaultValue();
             }
 
+            $paramAttributes = [];
+            foreach ($reflectionParam->getAttributes() as $reflectionAttribute) {
+                $paramAttributes[] = AttributeCollector::build($reflectionAttribute);
+            }
+
             $function->addArgument(
-                $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference()
+                $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference(),
+                $paramAttributes
             );
         }
 

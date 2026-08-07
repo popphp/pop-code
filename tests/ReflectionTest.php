@@ -72,6 +72,10 @@ CODE;
         $code3     = function(int ...$nums) { return array_sum($nums); };
         $function3 = Reflection::createFunction($code3);
         $this->assertStringContainsString('...$nums', (string) $function3);
+
+        $code4     = #[\Pop\Code\Test\TestAssets\TagAttribute('closure')] function(string $x) { return $x; };
+        $function4 = Reflection::createFunction($code4);
+        $this->assertStringContainsString("#[TagAttribute('closure')]", (string) $function4);
     }
 
     public function testCreateMethod()

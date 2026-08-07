@@ -86,4 +86,15 @@ class ClassReflectionTest extends TestCase
         $this->assertStringContainsString('#[ForeignTagAttribute(', $render);
     }
 
+    public function testConstantAndMethodAndParameterAttributesAreDetected()
+    {
+        $class    = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\AttributedTestClass');
+        $constant = $class->getConstant('LIMIT');
+        $method   = $class->getMethod('greet');
+
+        $this->assertStringContainsString('#[TagAttribute(', (string) $constant);
+        $this->assertStringContainsString('#[TagAttribute(', (string) $method);
+        $this->assertStringContainsString("#[TagAttribute('param')] string \$name", (string) $method);
+    }
+
 }

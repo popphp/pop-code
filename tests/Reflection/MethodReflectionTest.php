@@ -68,4 +68,15 @@ class MethodReflectionTest extends TestCase
         $this->assertStringContainsString('function collectByRef(&...$items)', (string) $method);
     }
 
+    public function testMethodAndParameterAttributesAreDetected()
+    {
+        $class  = Reflection::createClass('Pop\Code\Test\TestAssets\AttributedTestClass');
+        $method = $class->getMethod('greet');
+        $render = (string) $method;
+
+        $this->assertTrue($method->hasAttribute('TagAttribute'));
+        $this->assertStringContainsString("#[TagAttribute('method')]", $render);
+        $this->assertStringContainsString("#[TagAttribute('param')] string \$name", $render);
+    }
+
 }

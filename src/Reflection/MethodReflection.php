@@ -16,6 +16,7 @@ namespace Pop\Code\Reflection;
 use Pop\Code\Generator;
 use Pop\Code\Generator\Literal;
 use Pop\Code\Generator\NoValue;
+use Pop\Code\Reflection\Support\AttributeCollector;
 use Pop\Code\Reflection\Support\SourceBodyExtractor;
 
 /**
@@ -56,6 +57,9 @@ class MethodReflection extends AbstractReflection
         }
 
         $method = new Generator\MethodGenerator($code->getName(), $visibility, $code->isStatic());
+        foreach ($code->getAttributes() as $reflectionAttribute) {
+            $method->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
         if ($docblock !== null) {
             $method->setDocblock($docblock);
         }
@@ -83,6 +87,11 @@ class MethodReflection extends AbstractReflection
                 $paramValue = $reflectionParam->getDefaultValue();
             }
 
+            $paramAttributes = [];
+            foreach ($reflectionParam->getAttributes() as $reflectionAttribute) {
+                $paramAttributes[] = AttributeCollector::build($reflectionAttribute);
+            }
+
             if ($reflectionParam->isPromoted()) {
                 $promotedProperty = $declaringClass->getProperty($paramName);
                 if ($promotedProperty->isProtected()) {
@@ -92,10 +101,13 @@ class MethodReflection extends AbstractReflection
                 } else {
                     $promotedVisibility = 'public';
                 }
-                $method->addPromotedArgument($paramName, $promotedVisibility, $paramValue, $paramType, $promotedProperty->isReadOnly());
+                $method->addPromotedArgument(
+                    $paramName, $promotedVisibility, $paramValue, $paramType, $promotedProperty->isReadOnly(), $paramAttributes
+                );
             } else {
                 $method->addArgument(
-                    $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference()
+                    $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference(),
+                    $paramAttributes
                 );
             }
         }
