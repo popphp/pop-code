@@ -75,6 +75,10 @@ class MethodGenerator extends AbstractClassElementGenerator
             throw new Exception("Error: The visibility '" . $visibility . "' is not allowed.");
         }
 
+        if ($readonly && ($type === null)) {
+            throw new Exception('Error: A readonly property must have a type.');
+        }
+
         $this->addArgument($name, $value, $type);
         $this->arguments[$name]['promotedVisibility'] = $visibility;
         $this->arguments[$name]['promotedReadonly']   = $readonly;

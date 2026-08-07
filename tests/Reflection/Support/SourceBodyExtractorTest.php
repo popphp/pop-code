@@ -26,6 +26,16 @@ class ExtractorFixtureClass
     {
         echo $var;
     }
+
+    public function extractorFixtureWrapMethod(string $close = ')')
+    {
+        return $close;
+    }
+}
+
+function extractorFixtureWrapFunction(string $close = ')')
+{
+    return $close;
 }
 CODE
         );
@@ -51,6 +61,24 @@ CODE
         $this->assertStringContainsString('echo $var;', $body);
         $this->assertStringNotContainsString('{', $body);
         $this->assertStringNotContainsString('}', $body);
+    }
+
+    public function testExtractsMethodBodyWhenParameterListContainsClosingParenInStringLiteral()
+    {
+        $reflection = new \ReflectionMethod('ExtractorFixtureClass', 'extractorFixtureWrapMethod');
+        $body       = SourceBodyExtractor::extract($reflection, true);
+        $this->assertNotNull($body);
+        $this->assertStringContainsString('return $close;', $body);
+        $this->assertStringNotContainsString('{', $body);
+        $this->assertStringNotContainsString('}', $body);
+    }
+
+    public function testExtractsFunctionBodyWhenParameterListContainsClosingParenInStringLiteral()
+    {
+        $reflection = new \ReflectionFunction('extractorFixtureWrapFunction');
+        $body       = SourceBodyExtractor::extract($reflection, false);
+        $this->assertNotNull($body);
+        $this->assertStringContainsString('return $close;', $body);
     }
 
 }

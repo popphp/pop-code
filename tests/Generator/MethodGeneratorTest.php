@@ -86,4 +86,11 @@ class MethodGeneratorTest extends TestCase
         $method->addPromotedArgument('x', 'private');
     }
 
+    public function testAddPromotedArgumentReadonlyRequiresType()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('y', 'private', new Generator\NoValue(), null, true);
+    }
+
 }

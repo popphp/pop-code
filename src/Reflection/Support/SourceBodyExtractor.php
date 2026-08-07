@@ -57,23 +57,26 @@ class SourceBodyExtractor
         // Locate the line containing the function/method body's opening brace by tracking
         // parenthesis depth. It is not necessarily the line immediately after the declaration:
         // a parameter list (e.g. constructor property promotion) may span multiple lines.
+        //
+        // This is done with PHP's tokenizer rather than a raw character scan so that stray
+        // '(' / ')' / '{' characters inside a string literal or comment in the parameter list
+        // (e.g. a default value like `string $close = ')'`) are never mistaken for real parens.
+        $snippet = '<?php ' . implode('', array_slice($lines, $startLine, $endLine - $startLine + 1));
+        $tokens  = \PhpToken::tokenize($snippet);
+
         $parenDepth = 0;
         $seenParen  = false;
         $braceLine  = null;
 
-        for ($i = $startLine; $i <= $endLine; $i++) {
-            $lineLength = strlen($lines[$i]);
-            for ($j = 0; $j < $lineLength; $j++) {
-                $char = $lines[$i][$j];
-                if ($char === '(') {
-                    $parenDepth++;
-                    $seenParen = true;
-                } else if ($char === ')') {
-                    $parenDepth--;
-                } else if (($char === '{') && $seenParen && ($parenDepth === 0)) {
-                    $braceLine = $i;
-                    break 2;
-                }
+        foreach ($tokens as $token) {
+            if ($token->text === '(') {
+                $parenDepth++;
+                $seenParen = true;
+            } else if ($token->text === ')') {
+                $parenDepth--;
+            } else if (($token->text === '{') && $seenParen && ($parenDepth === 0)) {
+                $braceLine = $startLine + $token->line - 1;
+                break;
             }
         }
 
