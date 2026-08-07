@@ -138,7 +138,7 @@ trait AttributesTrait
      */
     protected function formatAttributes(bool $indented = true): string
     {
-        $output = null;
+        $output = '';
         $prefix = $indented ? $this->printIndent() : '';
 
         foreach ($this->attributes as $attribute) {
