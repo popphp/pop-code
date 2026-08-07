@@ -220,7 +220,9 @@ class PropertyGenerator extends AbstractClassElementGenerator
             $type = $this->type;
             if (!$this->readonly && ($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')
                 && !in_array('null', explode('|', $type), true)) {
-                $type .= '|null';
+                // An intersection type (`Countable&Traversable`) needs parens before combining
+                // with `|null` -- PHP requires DNF syntax `(A&B)|null`, not the bare `A&B|null`.
+                $type = str_contains($type, '&') ? '(' . $type . ')|null' : $type . '|null';
             }
             $type .= ' ';
         }

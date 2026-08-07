@@ -99,4 +99,24 @@ class ValueFormatterTest extends TestCase
         $this->assertEquals('Status::Active', ValueFormatter::format(new Literal('Status::Active'), 'string'));
     }
 
+    public function testUnionTypeFormatsUsingTheValuesActualType()
+    {
+        // Previously a union type string (e.g. 'int|string') matched none of the single-type
+        // checks, so it always fell through to the string-quoting branch regardless of the
+        // value's real type -- silently coercing e.g. an int|string default that's actually an
+        // int into a quoted string literal ('1' instead of 1).
+        $this->assertEquals('1', ValueFormatter::format(1, 'int|string'));
+        $this->assertEquals("'1'", ValueFormatter::format('1', 'string|int'));
+        $this->assertEquals('true', ValueFormatter::format(true, 'bool|int'));
+        $this->assertEquals('1.5', ValueFormatter::format(1.5, 'float|string'));
+    }
+
+    public function testUnionTypeWithNoMatchingMemberStillFormatsAsString()
+    {
+        // A union type where the value's actual type isn't one of the listed members (e.g. a
+        // value that doesn't correspond to any declared member) should fall back to the
+        // pre-existing catch-all behavior rather than throwing or misbehaving.
+        $this->assertEquals("'x'", ValueFormatter::format('x', 'int|float'));
+    }
+
 }

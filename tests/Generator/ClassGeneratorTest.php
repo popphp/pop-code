@@ -17,6 +17,26 @@ class ClassGeneratorTest extends TestCase
         $this->assertTrue($class->hasInterfaces());
     }
 
+    public function testAliasedTraitUseRendersValidPhpWithTheAliasIgnored()
+    {
+        // A trait-use inside a class body has no whole-trait aliasing syntax -- `use SomeTrait as
+        // Alias;` is not valid PHP (only per-method conflict resolution exists). addUse() used to
+        // render the alias unconditionally, producing invalid output whenever it was called with
+        // a non-null $as -- e.g. ClassReflection re-parsing a real class's `use` lines.
+        $class = new Generator\ClassGenerator('Foo');
+        $class->addUse('SomeTrait', 'Alias');
+        $render = (string) $class;
+
+        $this->assertStringContainsString('use SomeTrait;', $render);
+        $this->assertStringNotContainsString('as Alias', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-aliased-use-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\n" . $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
     public function testIndent()
     {
         $class = new Generator\ClassGenerator('Foo');

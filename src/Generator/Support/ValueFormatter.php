@@ -75,6 +75,25 @@ class ValueFormatter
 
         $effectiveType = $type ?? strtolower(gettype($value));
 
+        // A union type string (e.g. 'int|string') doesn't match any of the single-type checks
+        // below, so it fell through to the catch-all string-quoting branch regardless of the
+        // value's actual type -- silently coercing e.g. an int|string default that's really an
+        // int into a quoted string literal. Pick the union member matching the value's actual
+        // PHP type, if present, so formatting proceeds as if that were the declared type.
+        if (str_contains($effectiveType, '|')) {
+            $actualType = strtolower(gettype($value));
+            $actualType = match ($actualType) {
+                'integer' => 'int',
+                'double'  => 'float',
+                'boolean' => 'bool',
+                default   => $actualType,
+            };
+            $members = explode('|', $effectiveType);
+            if (in_array($actualType, $members, true)) {
+                $effectiveType = $actualType;
+            }
+        }
+
         if ($effectiveType === 'array') {
             if (count($value) === 0) {
                 return '[]';

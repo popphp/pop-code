@@ -47,7 +47,12 @@ class FunctionReflection extends AbstractReflection
         $reflection       = new \ReflectionFunction($code);
         $reflectionName   = $reflection->getName();
         $reflectionParams = $reflection->getParameters();
-        $isClosure        = ($reflectionName == '{closure}');
+        // PHP 8.4 renamed closures from the bare '{closure}' to '{closure:file:line}' (or
+        // '{closure:Class::method():line}' for one declared inside a method) -- match the prefix
+        // rather than the exact old name, or isClosure is never true on this library's own
+        // minimum supported PHP version, and the mangled name gets used as a literal function
+        // name in the rendered output instead of being detected as a closure at all.
+        $isClosure        = str_starts_with($reflectionName, '{closure');
 
         if (($name === null) && !($isClosure)) {
             $name = $reflectionName;

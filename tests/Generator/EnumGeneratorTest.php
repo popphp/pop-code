@@ -71,6 +71,24 @@ class EnumGeneratorTest extends TestCase
         $this->assertStringContainsString('function label', $render);
     }
 
+    public function testAliasedTraitUseRendersValidPhpWithTheAliasIgnored()
+    {
+        // Same defect as ClassGenerator/TraitGenerator: whole-trait aliasing (`use SomeTrait as
+        // Alias;`) isn't valid PHP inside an enum body either -- the alias must be dropped.
+        $enum = new Generator\EnumGenerator('Baz');
+        $enum->addUse('EnumHelper', 'Alias');
+        $render = (string) $enum;
+
+        $this->assertStringContainsString('use EnumHelper;', $render);
+        $this->assertStringNotContainsString('as Alias', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-aliased-use-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\n" . $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
     public function testAddMethodRejectsConstructor()
     {
         $this->expectException('Pop\Code\Generator\Exception');

@@ -195,6 +195,26 @@ class DocblockGenerator extends AbstractGenerator
     }
 
     /**
+     * Find a param tag by its variable name (e.g. '$foo'), not by index -- returns the first
+     * match's full ['type' => ..., 'var' => ..., 'desc' => ...] array, or null if none matches.
+     * Used to look up (and preserve) an existing param's description before removeParam()
+     * discards it, e.g. when re-syncing a param entry that already carries a hand-written
+     * description from a reflected docblock.
+     *
+     * @param  string $var
+     * @return array|null
+     */
+    public function findParam(string $var): array|null
+    {
+        foreach ($this->tags['param'] as $param) {
+            if (($param['var'] ?? null) === $var) {
+                return $param;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Remove a param tag by its variable name (e.g. '$foo'), not by index -- removes the first
      * match, if any, and re-indexes the remaining params. A no-op if no param has that variable
      * name. Used to replace a stale @param entry when a caller re-adds a parameter of the same
@@ -342,7 +362,7 @@ class DocblockGenerator extends AbstractGenerator
             if (!empty($param['var'])) {
                 $tags .= ' ' . $param['var'];
             }
-            $tags .= ($param['desc'] !== null) ? $param['desc'] . PHP_EOL : PHP_EOL;
+            $tags .= ($param['desc'] !== null) ? ' ' . $param['desc'] . PHP_EOL : PHP_EOL;
         }
 
         // Format throw tag

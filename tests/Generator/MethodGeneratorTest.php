@@ -111,4 +111,20 @@ class MethodGeneratorTest extends TestCase
         $this->assertStringContainsString('function __construct(#[Autowire] private LoggerInterface $logger)', (string) $method);
     }
 
+    public function testAddReturnTypePreservesAnExistingReturnDescription()
+    {
+        // setReturn() always resets the description to null when not given one explicitly --
+        // addReturnType() previously called it with only the type, silently discarding any
+        // description a docblock had already set (e.g. one parsed from a real source docblock
+        // before addReturnType() runs, as MethodReflection/FunctionReflection do).
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->setReturn('string', 'The greeting');
+
+        $method = new Generator\MethodGenerator('foo');
+        $method->setDocblock($docblock);
+        $method->addReturnType('string');
+
+        $this->assertStringContainsString('@return string The greeting', (string) $method);
+    }
+
 }

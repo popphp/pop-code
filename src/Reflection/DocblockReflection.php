@@ -89,7 +89,16 @@ class DocblockReflection extends AbstractReflection
                     if (str_contains($paramTag, ' ')) {
                         $varName = trim(substr($paramTag, strpos($paramTag, ' ')));
                         if (str_contains($varName, ' ')) {
-                            $paramDesc = trim(substr($varName, strpos($varName, ' ')));
+                            // $varName previously kept the trailing description text attached
+                            // (only $paramDesc was extracted, never trimmed back off of
+                            // $varName itself) -- e.g. "@param string $name The name to use"
+                            // stored 'var' as "$name The name to use" instead of just "$name",
+                            // duplicating the description once concatenated at render time, and
+                            // also breaking the stale-@param-on-re-add dedup, which matches on
+                            // the variable name exactly.
+                            $spacePos  = strpos($varName, ' ');
+                            $paramDesc = trim(substr($varName, $spacePos));
+                            $varName   = trim(substr($varName, 0, $spacePos));
                         }
                     } else if (str_starts_with($paramTag, '$')) {
                         // A bare "@param $var" with no type at all -- $paramTag is the variable

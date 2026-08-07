@@ -102,4 +102,31 @@ class PropertyGeneratorTest extends TestCase
         $this->assertStringContainsString('public string $baz = self::FOO;', (string) $property);
     }
 
+    public function testIntersectionTypedPropertyWithNoValueWrapsInParensBeforeNull()
+    {
+        // Previously an intersection type got `|null` appended directly (`Countable&Traversable|null`),
+        // which is invalid PHP -- DNF syntax requires parens around the intersection part
+        // (`(Countable&Traversable)|null`) when combined with a union member.
+        $property = new Generator\PropertyGenerator('inter', 'Countable&Traversable');
+        $render   = (string) $property;
+
+        $this->assertStringContainsString('(Countable&Traversable)|null $inter = null;', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-intersection-prop-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\nclass Tmp {\n" . $render . "\n}\n");
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
+    public function testUnionTypedPropertyDefaultPreservesTheActualValueType()
+    {
+        // Previously ValueFormatter didn't understand union type strings, so an int|string
+        // property defaulting to an actual int got its default silently coerced to a quoted
+        // string literal.
+        $property = new Generator\PropertyGenerator('uni', 'int|string', 1);
+        $this->assertStringContainsString('$uni = 1;', (string) $property);
+        $this->assertStringNotContainsString("'1'", (string) $property);
+    }
+
 }

@@ -73,4 +73,24 @@ DOC;
         $this->assertNull($docblock->getParam(0)['type']);
     }
 
+    public function testTypedParamWithDescriptionParsesVarAndDescSeparately()
+    {
+        // Previously $varName was never truncated after the description was extracted from it,
+        // so a typed param with a description (e.g. "@param string $name The name to use" --
+        // the shape most real docblocks actually use) stored 'var' as "$name The name to use"
+        // instead of just "$name", duplicating the description once rendered.
+        $doc = <<<DOC
+/**
+ * @param string \$name The name to use
+ */
+DOC;
+
+        $docblock = Reflection\DocblockReflection::parse($doc);
+        $param    = $docblock->getParam(0);
+
+        $this->assertEquals('string', $param['type']);
+        $this->assertEquals('$name', $param['var']);
+        $this->assertEquals('The name to use', $param['desc']);
+    }
+
 }

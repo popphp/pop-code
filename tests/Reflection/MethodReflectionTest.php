@@ -105,4 +105,22 @@ class MethodReflectionTest extends TestCase
         $this->assertStringContainsString("#[TagAttribute('param')] string \$name", $render);
     }
 
+    public function testTypedParamDescriptionsSurviveTheDocblockAndArgumentSync()
+    {
+        // Three defects in one scenario, all previously broken: (1) DocblockReflection didn't
+        // truncate the variable name after extracting the description, corrupting 'var' and
+        // defeating the stale-@param dedup; (2) DocblockGenerator's render had no space before
+        // the description; (3) even once (1) was fixed, addArgument()'s remove+re-add of the
+        // param entry (needed for the dedup fix) had no way to preserve the description that
+        // MethodReflection had already parsed from the real source docblock, silently dropping it.
+        $class  = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $method = $class->getMethod('documentedGreeting');
+        $render = (string) $method;
+
+        $this->assertEquals(2, substr_count($render, '@param'));
+        $this->assertStringContainsString('$name The name to use', $render);
+        $this->assertStringContainsString('$qty How many', $render);
+        $this->assertStringContainsString('@return string The greeting', $render);
+    }
+
 }

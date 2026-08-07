@@ -15,6 +15,8 @@ class ModernTestClass
     protected int $count = 0;
     protected string $label = 'hello';
     public ?string $noDefault;
+    public int|string $unionProp = 1;
+    public \Countable&\Traversable $intersectionProp;
 
     public function greet(string $name = 'world', bool $loud = false, ?string $suffix = null, string $fallback = self::LEGACY): string
     {
@@ -48,6 +50,16 @@ class ModernTestClass
     public function intersectionTyped(\Countable&\Traversable $x): \Countable&\Traversable
     {
         return $x;
+    }
+
+    /**
+     * @param string $name The name to use
+     * @param int $qty How many
+     * @return string The greeting
+     */
+    public function documentedGreeting(string $name, int $qty): string
+    {
+        return str_repeat($name, $qty);
     }
 
 }

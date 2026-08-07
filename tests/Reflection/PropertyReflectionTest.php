@@ -25,6 +25,37 @@ class PropertyReflectionTest extends TestCase
         $this->assertStringContainsString('string|null $noDefault = null;', (string)$class->getProperty('noDefault'));
     }
 
+    public function testUnionTypedPropertyDefaultPreservesTheActualValueType()
+    {
+        // Previously ValueFormatter didn't understand union type strings and coerced this int
+        // default to a quoted string literal ('1' instead of 1).
+        $class    = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $property = $class->getProperty('unionProp');
+        $render   = (string) $property;
+
+        $this->assertStringContainsString('$unionProp = 1;', $render);
+        $this->assertStringNotContainsString("'1'", $render);
+    }
+
+    public function testIntersectionTypedPropertyRegeneratesAsValidPhp()
+    {
+        // Previously PropertyReflection's type resolution (via the shared
+        // TypeNormalizer::resolveReflectionType()) correctly detected the intersection type, but
+        // PropertyGenerator's own |null-widening for a no-default property didn't know about `&`
+        // types and produced invalid PHP (Countable&Traversable|null with no parens).
+        $class    = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $property = $class->getProperty('intersectionProp');
+        $render   = (string) $property;
+
+        $this->assertStringContainsString('(Countable&Traversable)|null', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-intersection-prop-refl-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\nclass Tmp {\n" . $render . "\n}\n");
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
     public function testPromotedConstructorPropertyIsNotDuplicatedAsAProperty()
     {
         $class = Reflection::createClass('Pop\Code\Test\TestAssets\PromotedPropertyTestClass');

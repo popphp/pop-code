@@ -56,12 +56,12 @@ class TraitGenerator extends AbstractClassGenerator
         if ($this->hasUses()) {
             $this->output .= PHP_EOL;
             foreach ($this->uses as $ns => $as) {
-                $this->output .= $this->printIndent() . 'use ';
-                $this->output .= $ns;
-                if ($as !== null) {
-                    $this->output .= ' as ' . $as;
-                }
-                $this->output .= ';' . PHP_EOL;
+                // Unlike a namespace-level `use Foo\Bar as Baz;` import, a trait-use inside a
+                // class-like body has no whole-trait aliasing syntax -- `use SomeTrait as Alias;`
+                // here is not valid PHP (only per-method conflict resolution, `use A, B { A::m as
+                // n; }`, exists, and this simple $ns => $as map has no way to represent that). Any
+                // alias is therefore intentionally ignored when rendering a trait-use.
+                $this->output .= $this->printIndent() . 'use ' . $ns . ';' . PHP_EOL;
             }
         }
 

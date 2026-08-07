@@ -53,6 +53,24 @@ class TraitGeneratorTest extends TestCase
         $this->assertStringContainsString('abstract public function bar();', $render);
     }
 
+    public function testAliasedTraitUseRendersValidPhpWithTheAliasIgnored()
+    {
+        // Same defect as ClassGenerator: whole-trait aliasing (`use SomeTrait as Alias;`) isn't
+        // valid PHP inside a trait body either -- the alias must be dropped, not rendered.
+        $trait = new Generator\TraitGenerator('Bar');
+        $trait->addUse('OtherTrait', 'Alias');
+        $render = (string) $trait;
+
+        $this->assertStringContainsString('use OtherTrait;', $render);
+        $this->assertStringNotContainsString('as Alias', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-aliased-use-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\n" . $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
     public function testAttributesRenderBeforeTraitKeywordWithNoIndent()
     {
         $trait = new Generator\TraitGenerator('Foo');

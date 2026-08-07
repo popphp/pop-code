@@ -80,13 +80,20 @@ trait FunctionTrait
         if (!empty($docType) && !str_starts_with($docType, '?') && ($docType !== 'mixed') && ($value === null)
             && !in_array('null', explode('|', $docType), true)
         ) {
-            $docType .= '|null';
+            $docType = str_contains($docType, '&') ? '(' . $docType . ')|null' : $docType . '|null';
         }
         // A caller re-adding an argument for a name that already exists (e.g. to change its
         // type) leaves a stale @param entry behind otherwise -- $this->arguments is name-keyed
-        // and correctly overwrites, but the docblock's params are append-only.
+        // and correctly overwrites, but the docblock's params are append-only. This also covers
+        // MethodReflection/FunctionReflection's own flow: they set a fully-parsed docblock
+        // (which may carry a hand-written per-param description from the real source) *before*
+        // calling addArgument() for each parameter -- preserve that description across the
+        // remove+re-add rather than silently dropping it, since addArgument() itself has no way
+        // to be told a description directly.
+        $existingParam = $this->docblock->findParam($docName);
+        $docDesc       = $existingParam['desc'] ?? null;
         $this->docblock->removeParam($docName);
-        $this->docblock->addParam($docType, $docName);
+        $this->docblock->addParam($docType, $docName, $docDesc);
 
         return $this;
     }
@@ -246,7 +253,13 @@ trait FunctionTrait
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
 
-        $this->docblock->setReturn(implode('|', $this->returnTypes));
+        // Preserve an existing @return description (e.g. one already parsed from a real source
+        // docblock by MethodReflection/FunctionReflection before this is called) -- setReturn()
+        // always resets the description to null when not given one explicitly, which silently
+        // discarded it otherwise.
+        $existingReturn = $this->docblock->getReturn();
+        $returnDesc     = $existingReturn['desc'] ?? null;
+        $this->docblock->setReturn(implode('|', $this->returnTypes), $returnDesc);
 
         return $this;
     }
@@ -327,7 +340,9 @@ trait FunctionTrait
                 if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] === null)
                     && !in_array('null', explode('|', $type), true)
                 ) {
-                    $type .= '|null';
+                    // An intersection type (`Countable&Traversable`) needs parens before
+                    // combining with `|null` -- PHP requires DNF syntax `(A&B)|null`.
+                    $type = str_contains($type, '&') ? '(' . $type . ')|null' : $type . '|null';
                 }
                 $args .= $promoted . $type . ' ';
             } else {

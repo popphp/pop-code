@@ -16,6 +16,21 @@ class FunctionGeneratorTest extends TestCase
         $this->assertStringContainsString('};', $function->render());
     }
 
+    public function testUnnamedClosureRendersAsABareAnonymousFunctionExpression()
+    {
+        // Closure mode previously always required a name (rendering `$name = function(...) {}`)
+        // -- but a genuinely anonymous closure (e.g. one reflected with no name override) has no
+        // name to assign to at all, and render() unconditionally threw for a null name regardless
+        // of closure status.
+        $function = new Generator\FunctionGenerator(null, true);
+        $function->setBody("echo 'Hello World!';");
+        $render = $function->render();
+
+        $this->assertStringContainsString('function()', $render);
+        $this->assertStringNotContainsString('= function', $render);
+        $this->assertStringEndsWith(';', rtrim($render));
+    }
+
     public function testRenderException()
     {
         $this->expectException('Pop\Code\Generator\Exception');
@@ -167,6 +182,25 @@ class FunctionGeneratorTest extends TestCase
         $this->assertEquals(1, substr_count($render, '@param'));
         $this->assertStringContainsString('int|null  $foo', $render);
         $this->assertStringNotContainsString('string', $render);
+    }
+
+    public function testIntersectionTypedParameterWithNoDefaultWrapsInParensBeforeNull()
+    {
+        // Same DNF-syntax gap as PropertyGenerator: an intersection type combined with a null
+        // default needs parens (`(A&B)|null`), not a bare `A&B|null`, which is invalid PHP.
+        $function = new Generator\FunctionGenerator('f');
+        $function->addArgument('x', null, 'Countable&Traversable');
+        $function->setBody('return $x;');
+        $render = (string) $function;
+
+        $this->assertStringContainsString('(Countable&Traversable)|null $x = null', $render);
+        $this->assertStringContainsString('@param (Countable&Traversable)|null', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-intersection-param-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\n" . $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
     }
 
 }
