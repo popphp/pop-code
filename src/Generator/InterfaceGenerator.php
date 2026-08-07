@@ -87,6 +87,7 @@ class InterfaceGenerator extends AbstractClassGenerator
     {
         $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
         $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
+        $this->output .= $this->hasAttributes() ? $this->formatAttributes(false) : null;
         $this->output .= 'interface ' . $this->name;
 
         if ($this->parent !== null) {

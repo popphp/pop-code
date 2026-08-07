@@ -53,4 +53,13 @@ class TraitGeneratorTest extends TestCase
         $this->assertStringContainsString('abstract public function bar();', $render);
     }
 
+    public function testAttributesRenderBeforeTraitKeywordWithNoIndent()
+    {
+        $trait = new Generator\TraitGenerator('Foo');
+        $trait->addAttribute(new Generator\AttributeGenerator('Mixin'));
+        $render = (string) $trait;
+
+        $this->assertStringContainsString("#[Mixin]\ntrait Foo", $render);
+    }
+
 }

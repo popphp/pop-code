@@ -94,4 +94,13 @@ class EnumGeneratorTest extends TestCase
         $enum->render();
     }
 
+    public function testAttributesRenderBeforeEnumKeywordWithNoIndent()
+    {
+        $enum = new Generator\EnumGenerator('Status', 'string');
+        $enum->addAttribute(new Generator\AttributeGenerator('Labeled'));
+        $render = (string) $enum;
+
+        $this->assertStringContainsString("#[Labeled]\nenum Status: string", $render);
+    }
+
 }

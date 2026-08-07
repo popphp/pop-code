@@ -38,4 +38,13 @@ class InterfaceGeneratorTest extends TestCase
         $this->assertStringContainsString('public function bar();', $render);
     }
 
+    public function testAttributesRenderBeforeInterfaceKeywordWithNoIndent()
+    {
+        $interface = new Generator\InterfaceGenerator('Foo');
+        $interface->addAttribute(new Generator\AttributeGenerator('Contract'));
+        $render = (string) $interface;
+
+        $this->assertStringContainsString("#[Contract]\ninterface Foo", $render);
+    }
+
 }
