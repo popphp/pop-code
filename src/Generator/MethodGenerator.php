@@ -52,6 +52,37 @@ class MethodGenerator extends AbstractClassElementGenerator
     }
 
     /**
+     * Add a promoted constructor argument
+     *
+     * @param  string  $name
+     * @param  string  $visibility
+     * @param  mixed   $value
+     * @param  ?string $type
+     * @param  bool    $readonly
+     * @throws Exception
+     * @return MethodGenerator
+     */
+    public function addPromotedArgument(
+        string $name, string $visibility, mixed $value = new NoValue(), ?string $type = null, bool $readonly = false
+    ): MethodGenerator
+    {
+        if ($this->name !== '__construct') {
+            throw new Exception('Error: Promoted arguments are only valid on a constructor.');
+        }
+
+        $visibility = strtolower($visibility);
+        if (!in_array($visibility, self::VALID_VISIBILITIES)) {
+            throw new Exception("Error: The visibility '" . $visibility . "' is not allowed.");
+        }
+
+        $this->addArgument($name, $value, $type);
+        $this->arguments[$name]['promotedVisibility'] = $visibility;
+        $this->arguments[$name]['promotedReadonly']   = $readonly;
+
+        return $this;
+    }
+
+    /**
      * Render method
      *
      * @return string

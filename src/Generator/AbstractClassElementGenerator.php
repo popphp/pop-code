@@ -41,6 +41,12 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     protected bool $static = false;
 
     /**
+     * Valid visibility values
+     * @var array
+     */
+    protected const VALID_VISIBILITIES = ['public', 'protected', 'private'];
+
+    /**
      * Set the visibility
      *
      * @param  string $visibility
@@ -51,7 +57,7 @@ abstract class AbstractClassElementGenerator extends AbstractGenerator
     {
         $visibility = strtolower($visibility);
 
-        if (!in_array($visibility, ['public', 'protected', 'private'])) {
+        if (!in_array($visibility, self::VALID_VISIBILITIES)) {
             throw new Exception("Error: The visibility '" . $visibility . "' is not allowed.");
         }
 

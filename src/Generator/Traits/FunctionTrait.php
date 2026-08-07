@@ -279,13 +279,22 @@ trait FunctionTrait
         $i = 0;
         foreach ($this->arguments as $name => $arg) {
             $i++;
+
+            $promoted = null;
+            if (!empty($arg['promotedVisibility'])) {
+                $promoted = $arg['promotedVisibility'] . ' ' . (!empty($arg['promotedReadonly']) ? 'readonly ' : '');
+            }
+
             if ($arg['type'] !== null) {
                 $type = $arg['type'];
                 if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] === null)) {
                     $type .= '|null';
                 }
-                $args .= $type . ' ';
+                $args .= $promoted . $type . ' ';
+            } else {
+                $args .= $promoted;
             }
+
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
 
             if (!($arg['value'] instanceof NoValue)) {

@@ -61,4 +61,29 @@ class MethodGeneratorTest extends TestCase
         $method->setVisibility('bad');
     }
 
+    public function testAddPromotedArgumentRenders()
+    {
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('x', 'protected', 1, 'int');
+        $method->addPromotedArgument('y', 'private', new Generator\NoValue(), 'string', true);
+        $render = (string) $method;
+
+        $this->assertStringContainsString('protected int $x = 1', $render);
+        $this->assertStringContainsString('private readonly string $y', $render);
+    }
+
+    public function testAddPromotedArgumentValidatesVisibility()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('x', 'bad');
+    }
+
+    public function testAddPromotedArgumentRequiresConstructor()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $method = new Generator\MethodGenerator('notConstructor');
+        $method->addPromotedArgument('x', 'private');
+    }
+
 }
