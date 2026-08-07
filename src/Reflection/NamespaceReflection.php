@@ -57,8 +57,11 @@ class NamespaceReflection extends AbstractReflection
 
         if (isset($matches[1]) && isset($matches[1][0])) {
             foreach ($matches[1] as $match) {
+                $match = trim($match);
                 if (str_contains($match, ' as ')) {
                     [$use, $as] = explode(' as ', $match);
+                    $use = trim($use);
+                    $as  = trim($as);
                 } else {
                     $use = $match;
                     $as  = null;

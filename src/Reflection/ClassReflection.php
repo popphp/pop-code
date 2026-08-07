@@ -15,6 +15,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
+use Pop\Code\Reflection\Support\AttributeCollector;
 use ReflectionException;
 
 /**
@@ -67,6 +68,17 @@ class ClassReflection extends AbstractReflection
         // Detect and set namespace
         if (($reflection->inNamespace()) && ($fileContents !== null)) {
             $class->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
+        }
+
+        // Detect attributes
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            if (str_contains($reflectionAttribute->getName(), '\\')) {
+                if (!$class->hasNamespace()) {
+                    $class->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $class->getNamespace()->addUse($reflectionAttribute->getName());
+            }
+            $class->addAttribute(AttributeCollector::build($reflectionAttribute));
         }
 
         // Detect and set the class doc block

@@ -68,4 +68,22 @@ class ClassReflectionTest extends TestCase
         $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $render);
     }
 
+    public function testClassLevelAttributesAreDetectedIncludingRepeated()
+    {
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\AttributedTestClass');
+
+        $this->assertTrue($class->hasAttribute('TagAttribute'));
+        $this->assertEquals(2, count($class->getAttributesByName('TagAttribute')));
+    }
+
+    public function testForeignNamespaceClassAttributeGetsAUseImport()
+    {
+        $class  = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\AttributedTestClass');
+        $render = (string) $class;
+
+        $this->assertTrue($class->hasNamespace());
+        $this->assertTrue($class->getNamespace()->hasUse('Pop\Code\Test\TestAssets\Attrs\ForeignTagAttribute'));
+        $this->assertStringContainsString('#[ForeignTagAttribute(', $render);
+    }
+
 }

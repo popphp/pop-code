@@ -15,6 +15,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
+use Pop\Code\Reflection\Support\AttributeCollector;
 use ReflectionException;
 
 /**
@@ -62,6 +63,17 @@ class TraitReflection extends AbstractReflection
         // Detect and set namespace
         if (($reflection->inNamespace()) && ($fileContents !== null)) {
             $trait->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
+        }
+
+        // Detect attributes
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            if (str_contains($reflectionAttribute->getName(), '\\')) {
+                if (!$trait->hasNamespace()) {
+                    $trait->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $trait->getNamespace()->addUse($reflectionAttribute->getName());
+            }
+            $trait->addAttribute(AttributeCollector::build($reflectionAttribute));
         }
 
         // Detect and set the class doc block

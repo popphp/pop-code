@@ -14,6 +14,7 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Reflection\Support\AttributeCollector;
 use ReflectionException;
 
 /**
@@ -58,6 +59,17 @@ class InterfaceReflection extends AbstractReflection
             if (!empty($file) && file_exists($file)) {
                 $interface->setNamespace(NamespaceReflection::parse(file_get_contents($file), $reflection->getNamespaceName()));
             }
+        }
+
+        // Detect attributes
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            if (str_contains($reflectionAttribute->getName(), '\\')) {
+                if (!$interface->hasNamespace()) {
+                    $interface->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $interface->getNamespace()->addUse($reflectionAttribute->getName());
+            }
+            $interface->addAttribute(AttributeCollector::build($reflectionAttribute));
         }
 
         // Detect and set the class doc block
