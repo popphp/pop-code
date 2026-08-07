@@ -50,11 +50,20 @@ trait FunctionTrait
      * @param  string  $name
      * @param  mixed   $value
      * @param  ?string $type
+     * @param  bool    $variadic
+     * @param  bool    $byRef
+     * @throws Exception
      * @return static
      */
-    public function addArgument(string $name, mixed $value = new NoValue(), ?string $type = null): static
+    public function addArgument(
+        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false
+    ): static
     {
-        $this->arguments[$name] = ['value' => $value, 'type' => $type];
+        if ($variadic && !($value instanceof NoValue)) {
+            throw new Exception('Error: A variadic argument cannot have a default value.');
+        }
+
+        $this->arguments[$name] = ['value' => $value, 'type' => $type, 'variadic' => $variadic, 'byRef' => $byRef];
 
         if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
@@ -86,9 +95,11 @@ trait FunctionTrait
             if (!isset($arg['name'])) {
                 throw new Exception("Error: The 'name' key was not set.");
             }
-            $value = array_key_exists('value', $arg) ? $arg['value'] : new NoValue();
-            $type  = $arg['type'] ?? null;
-            $this->addArgument($arg['name'], $value, $type);
+            $value    = array_key_exists('value', $arg) ? $arg['value'] : new NoValue();
+            $type     = $arg['type'] ?? null;
+            $variadic = $arg['variadic'] ?? false;
+            $byRef    = $arg['byRef'] ?? false;
+            $this->addArgument($arg['name'], $value, $type, $variadic, $byRef);
         }
         return $this;
     }
@@ -141,11 +152,16 @@ trait FunctionTrait
      * @param  string  $name
      * @param  mixed   $value
      * @param  ?string $type
+     * @param  bool    $variadic
+     * @param  bool    $byRef
+     * @throws Exception
      * @return static
      */
-    public function addParameter(string $name, mixed $value = new NoValue(), ?string $type = null): static
+    public function addParameter(
+        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false
+    ): static
     {
-        $this->addArgument($name, $value, $type);
+        $this->addArgument($name, $value, $type, $variadic, $byRef);
         return $this;
     }
 
@@ -295,6 +311,7 @@ trait FunctionTrait
                 $args .= $promoted;
             }
 
+            $args .= (!empty($arg['byRef']) ? '&' : '') . (!empty($arg['variadic']) ? '...' : '');
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
 
             if (!($arg['value'] instanceof NoValue)) {

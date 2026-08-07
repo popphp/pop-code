@@ -72,4 +72,32 @@ class FunctionGeneratorTest extends TestCase
         $this->assertStringContainsString("): string|null", (string)$function);
     }
 
+    public function testVariadicArgument()
+    {
+        $function = new Generator\FunctionGenerator('sum');
+        $function->addArgument('numbers', new Generator\NoValue(), 'int', true);
+        $this->assertStringContainsString('function sum(int ...$numbers)', (string) $function);
+    }
+
+    public function testByRefArgument()
+    {
+        $function = new Generator\FunctionGenerator('increment');
+        $function->addArgument('counter', new Generator\NoValue(), 'int', false, true);
+        $this->assertStringContainsString('function increment(int &$counter)', (string) $function);
+    }
+
+    public function testVariadicAndByRefCombined()
+    {
+        $function = new Generator\FunctionGenerator('collect');
+        $function->addArgument('items', new Generator\NoValue(), null, true, true);
+        $this->assertStringContainsString('function collect(&...$items)', (string) $function);
+    }
+
+    public function testVariadicWithDefaultValueThrowsException()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $function = new Generator\FunctionGenerator('bad');
+        $function->addArgument('numbers', [1, 2, 3], 'int', true);
+    }
+
 }
