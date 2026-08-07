@@ -49,25 +49,50 @@ class SourceBodyExtractor
         $lines     = file($file);
         $startLine = $reflection->getStartLine() - 1;
         $endLine   = $reflection->getEndLine() - 1;
-        $length    = $endLine - $startLine;
 
-        if (($length <= 0) || !isset($lines[$startLine]) || !isset($lines[$endLine])) {
+        if (!isset($lines[$startLine]) || !isset($lines[$endLine])) {
+            return null;
+        }
+
+        // Locate the line containing the function/method body's opening brace by tracking
+        // parenthesis depth. It is not necessarily the line immediately after the declaration:
+        // a parameter list (e.g. constructor property promotion) may span multiple lines.
+        $parenDepth = 0;
+        $seenParen  = false;
+        $braceLine  = null;
+
+        for ($i = $startLine; $i <= $endLine; $i++) {
+            $lineLength = strlen($lines[$i]);
+            for ($j = 0; $j < $lineLength; $j++) {
+                $char = $lines[$i][$j];
+                if ($char === '(') {
+                    $parenDepth++;
+                    $seenParen = true;
+                } else if ($char === ')') {
+                    $parenDepth--;
+                } else if (($char === '{') && $seenParen && ($parenDepth === 0)) {
+                    $braceLine = $i;
+                    break 2;
+                }
+            }
+        }
+
+        $length = ($braceLine !== null) ? ($endLine - $braceLine) : 0;
+
+        if (($braceLine === null) || ($length <= 0)) {
             return null;
         }
 
         if ($stripBraces) {
-            $lines = array_slice($lines, $startLine + 1, $length);
+            $lines = array_slice($lines, $braceLine + 1, $length);
 
             if (preg_match('/[ ]+\}/', $lines[count($lines) - 1])) {
                 unset($lines[count($lines) - 1]);
             }
-            if (isset($lines[0]) && preg_match('/[ ]+\{/', $lines[0])) {
-                unset($lines[0]);
-            }
 
             $lines = array_values($lines);
         } else {
-            $lines = array_slice($lines, $startLine + 1, $length - 1);
+            $lines = array_slice($lines, $braceLine + 1, $length - 1);
         }
 
         if (isset($lines[0]) && str_starts_with($lines[0], ' ')) {

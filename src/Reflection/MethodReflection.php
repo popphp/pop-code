@@ -67,6 +67,7 @@ class MethodReflection extends AbstractReflection
         }
 
         $reflectionParams = $code->getParameters();
+        $declaringClass   = $code->getDeclaringClass();
 
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
@@ -82,13 +83,26 @@ class MethodReflection extends AbstractReflection
                 $paramValue = $reflectionParam->getDefaultValue();
             }
 
-            $method->addArgument($paramName, $paramValue, $paramType);
+            if ($reflectionParam->isPromoted()) {
+                $promotedProperty = $declaringClass->getProperty($paramName);
+                if ($promotedProperty->isProtected()) {
+                    $promotedVisibility = 'protected';
+                } else if ($promotedProperty->isPrivate()) {
+                    $promotedVisibility = 'private';
+                } else {
+                    $promotedVisibility = 'public';
+                }
+                $method->addPromotedArgument($paramName, $promotedVisibility, $paramValue, $paramType, $promotedProperty->isReadOnly());
+            } else {
+                $method->addArgument($paramName, $paramValue, $paramType);
+            }
         }
 
-        // Parse the body if available
+        // Parse the body if available. Concrete methods always get an explicit body (even if
+        // empty) so they render with braces rather than as a bodyless abstract/interface stub.
         $body = SourceBodyExtractor::extract($code, true);
-        if ($body !== null) {
-            $method->setBody($body);
+        if (!$code->isAbstract()) {
+            $method->setBody($body ?? '');
         }
 
         // Get return type(s)

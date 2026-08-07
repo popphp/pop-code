@@ -9,8 +9,11 @@ class PromotedPropertyTestClass
 
     public string $noDefault;
 
-    public function __construct(protected int $x = 1)
-    {
+    public function __construct(
+        protected int $x = 1,
+        private readonly string $y = 'a',
+        public bool $flag = false
+    ) {
     }
 
 }

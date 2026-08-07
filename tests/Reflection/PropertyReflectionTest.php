@@ -44,4 +44,14 @@ class PropertyReflectionTest extends TestCase
         $this->assertFalse($mutable->isReadonly());
     }
 
+    public function testPromotedPropertiesOfAllVisibilitiesAreExcludedFromPropertyList()
+    {
+        $class = Reflection::createClass('Pop\Code\Test\TestAssets\PromotedPropertyTestClass');
+
+        $this->assertFalse($class->hasProperty('x'));
+        $this->assertFalse($class->hasProperty('y'));
+        $this->assertFalse($class->hasProperty('flag'));
+        $this->assertTrue($class->hasProperty('noDefault'));
+    }
+
 }
