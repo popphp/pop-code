@@ -43,6 +43,12 @@ class PropertyGenerator extends AbstractClassElementGenerator
     protected mixed $value = null;
 
     /**
+     * Readonly flag
+     * @var bool
+     */
+    protected bool $readonly = false;
+
+    /**
      * Constructor
      *
      * Instantiate the property generator object
@@ -134,12 +140,57 @@ class PropertyGenerator extends AbstractClassElementGenerator
     }
 
     /**
+     * Set the readonly flag
+     *
+     * @param  bool $readonly
+     * @return PropertyGenerator
+     */
+    public function setAsReadonly(bool $readonly = true): PropertyGenerator
+    {
+        $this->readonly = $readonly;
+        if ($this->readonly) {
+            $this->setAsStatic(false);
+        }
+        return $this;
+    }
+
+    /**
+     * Get the readonly flag
+     *
+     * @return bool
+     */
+    public function isReadonly(): bool
+    {
+        return $this->readonly;
+    }
+
+    /**
+     * Set the static flag (overridden to enforce mutual exclusion with readonly)
+     *
+     * @param  bool $static
+     * @return PropertyGenerator
+     */
+    public function setAsStatic(bool $static = true): PropertyGenerator
+    {
+        parent::setAsStatic($static);
+        if ($static) {
+            $this->readonly = false;
+        }
+        return $this;
+    }
+
+    /**
      * Render property
      *
+     * @throws Exception
      * @return string
      */
     public function render(): string
     {
+        if ($this->readonly && ($this->type === null)) {
+            throw new Exception('Error: A readonly property must have a type.');
+        }
+
         if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
@@ -148,15 +199,21 @@ class PropertyGenerator extends AbstractClassElementGenerator
         $type = null;
         if ($this->type !== null) {
             $type = $this->type;
-            if (($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')
+            if (!$this->readonly && ($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')
                 && !in_array('null', explode('|', $type), true)) {
                 $type .= '|null';
             }
             $type .= ' ';
         }
         $this->output  = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' ' . $type . '$' . $this->name;
-        $this->output .= ' = ' . ValueFormatter::format($this->value, $this->type, $this->printIndent()) . ';';
+        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '')
+            . ($this->readonly ? ' readonly' : '') . ' ' . $type . '$' . $this->name;
+
+        if ($this->readonly) {
+            $this->output .= ';';
+        } else {
+            $this->output .= ' = ' . ValueFormatter::format($this->value, $this->type, $this->printIndent()) . ';';
+        }
 
         return $this->output;
     }

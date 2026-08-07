@@ -53,4 +53,36 @@ class PropertyGeneratorTest extends TestCase
         $this->assertStringContainsString("];", (string)$property);
     }
 
+    public function testReadonlyRendersWithoutDefaultValue()
+    {
+        $property = new Generator\PropertyGenerator('foo', 'string');
+        $property->setAsReadonly(true);
+        $render = (string) $property;
+
+        $this->assertTrue($property->isReadonly());
+        $this->assertStringContainsString('public readonly string $foo;', $render);
+        $this->assertStringNotContainsString('= null', $render);
+    }
+
+    public function testReadonlyIsMutuallyExclusiveWithStatic()
+    {
+        $property = new Generator\PropertyGenerator('foo', 'string');
+        $property->setAsStatic(true);
+        $property->setAsReadonly(true);
+        $this->assertFalse($property->isStatic());
+        $this->assertTrue($property->isReadonly());
+
+        $property->setAsStatic(true);
+        $this->assertFalse($property->isReadonly());
+        $this->assertTrue($property->isStatic());
+    }
+
+    public function testReadonlyWithoutTypeThrowsException()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $property = new Generator\PropertyGenerator('foo');
+        $property->setAsReadonly(true);
+        $property->render();
+    }
+
 }
