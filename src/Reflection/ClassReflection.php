@@ -123,6 +123,9 @@ class ClassReflection extends AbstractReflection
 
         // Detect properties
         foreach ($reflection->getProperties() as $property) {
+            if ($property->isPromoted()) {
+                continue;
+            }
             $value = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
             $class->addProperty(PropertyReflection::parse($property, $property->getName(), $value));
         }

@@ -21,4 +21,9 @@ class ModernTestClass
         return $loud ? strtoupper($name) : $name;
     }
 
+    public function untypedFloatDefault($noType = 1.5)
+    {
+        return $noType;
+    }
+
 }

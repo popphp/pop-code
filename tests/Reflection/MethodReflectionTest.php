@@ -20,4 +20,14 @@ class MethodReflectionTest extends TestCase
         $this->assertStringContainsString('string $fallback = self::LEGACY', $render);
     }
 
+    public function testUntypedFloatDefaultRoundTripsAsBareNumericLiteral()
+    {
+        $class  = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $method = $class->getMethod('untypedFloatDefault');
+        $render = (string) $method;
+
+        $this->assertStringContainsString('$noType = 1.5', $render);
+        $this->assertStringNotContainsString('$noType = \'1.5\'', $render);
+    }
+
 }

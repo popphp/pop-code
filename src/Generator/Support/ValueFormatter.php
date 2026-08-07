@@ -13,6 +13,8 @@
  */
 namespace Pop\Code\Generator\Support;
 
+use Pop\Code\Generator\Exception;
+
 /**
  * Value formatter class
  *
@@ -44,13 +46,17 @@ class ValueFormatter
             return 'null';
         }
 
+        if (is_object($value) && !method_exists($value, '__toString')) {
+            throw new Exception('Error: Cannot format an object value of type ' . get_class($value) . '.');
+        }
+
         $effectiveType = $type ?? strtolower(gettype($value));
 
         if ($effectiveType === 'array') {
             return (count($value) === 0) ? '[]' : self::formatArray($value, $indent);
         }
 
-        if (in_array($effectiveType, ['int', 'integer', 'float'], true)) {
+        if (in_array($effectiveType, ['int', 'integer', 'float', 'double'], true)) {
             return (string) $value;
         }
 
@@ -58,7 +64,7 @@ class ValueFormatter
             return $value ? 'true' : 'false';
         }
 
-        return "'" . $value . "'";
+        return "'" . addcslashes((string) $value, "'\\") . "'";
     }
 
     /**

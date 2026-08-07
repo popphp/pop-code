@@ -2,6 +2,7 @@
 
 namespace Pop\Code\Test\Generator\Support;
 
+use Pop\Code\Generator\Exception;
 use Pop\Code\Generator\Support\ValueFormatter;
 use PHPUnit\Framework\TestCase;
 
@@ -41,6 +42,23 @@ class ValueFormatterTest extends TestCase
         $this->assertEquals('true', ValueFormatter::format(true));
         $this->assertEquals("'hello'", ValueFormatter::format('hello'));
         $this->assertEquals('[]', ValueFormatter::format([]));
+    }
+
+    public function testInfersDoubleTypeAsBareNumericLiteral()
+    {
+        $this->assertEquals('1.5', ValueFormatter::format(1.5));
+    }
+
+    public function testEscapesSingleQuotesAndBackslashesInStrings()
+    {
+        $this->assertEquals("'it\\'s here'", ValueFormatter::format("it's here", 'string'));
+        $this->assertEquals("'back\\\\slash'", ValueFormatter::format('back\\slash', 'string'));
+    }
+
+    public function testThrowsCatchableExceptionForUnstringableObject()
+    {
+        $this->expectException(Exception::class);
+        ValueFormatter::format(new \stdClass());
     }
 
 }

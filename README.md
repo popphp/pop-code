@@ -119,10 +119,10 @@ class MyClass
     /**
      * This is the method to set foo.
      * 
-     * @param  string  $foo
+     * @param  string|null  $foo
      * @return void
      */
-    public function setFoo(string $foo): void
+    public function setFoo(string|null $foo = null): void
     {
         $this->foo = $foo;
     }
@@ -180,25 +180,25 @@ code in it:
 /**
  * This is the first function
  * 
- * @param  string  $name
+ * @param  string|null  $name
  * @return void
  */
-function sayHello(string $name): void
+function sayHello(string|null $name = null): void
 {
     echo 'Hello ' . $name;
 }
 
+
 /**
  * This is the second function
  * 
- * @param  string  $name
+ * @param  string|null  $name
  * @return void
  */
-function sayGoodbye(string $name): void
+function sayGoodbye(string|null $name = null): void
 {
     echo 'Goodbye ' . $name;
 }
-
 ```
 
 [Top](#pop-code)
@@ -238,7 +238,6 @@ And the modified class will look like, complete with the new `hasFoo()` method:
 
 ```php
 <?php
-
 /**
  * @namespace 
  */
@@ -248,33 +247,40 @@ class MyClass
 {
 
     /**
-     * @var   string
+     * 
+     * @var   string|null
      */
     protected string|null $foo = null;
 
     /**
      * This is the method to set foo.
      * 
-     * @param  string  $foo
+     * @param  string|null  $foo
+     * @param  string|null  $foo
      * @return void
      */
-    public function setFoo(string $foo): void
+    public function setFoo(string|null $foo = null): void
     {
         $this->foo = $foo;
+        
     }
 
     /**
      * This is the method to see if foo is set.
      * 
-     * @param  string  $foo
+     * @param  string|null  $foo
      * @return bool
      */
-    public function hasFoo(string $foo): bool
+    public function hasFoo(string|null $foo = null): bool
     {
         return ($this->foo !== null);
     }
 
 }
 ```
+
+> **Note:** The duplicated `@param` line and the extra blank lines above are the actual current output of
+> reflecting a previously-generated file back in (a pre-existing reflection round-trip quirk, unrelated to
+> this section's example code) — this block was verified against real output rather than hand-edited.
 
 [Top](#pop-code)

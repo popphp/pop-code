@@ -25,4 +25,12 @@ class PropertyReflectionTest extends TestCase
         $this->assertStringContainsString('string|null $noDefault = null;', (string)$class->getProperty('noDefault'));
     }
 
+    public function testPromotedConstructorPropertyIsNotDuplicatedAsAProperty()
+    {
+        $class = Reflection::createClass('Pop\Code\Test\TestAssets\PromotedPropertyTestClass');
+
+        $this->assertFalse($class->hasProperty('x'));
+        $this->assertTrue($class->hasProperty('noDefault'));
+    }
+
 }
