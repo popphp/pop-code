@@ -99,7 +99,7 @@ class FunctionGenerator extends AbstractGenerator
         $args = $this->formatArguments();
 
         $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
-        $this->output .= $this->hasAttributes() ? $this->formatAttributes() : null;
+        $this->output .= $this->formatAttributes();
         if ($this->closure) {
             $this->output .= $this->printIndent() . '$' . $this->name .' = function(' . $args . ')';
         } else {

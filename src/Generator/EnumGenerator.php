@@ -303,7 +303,7 @@ class EnumGenerator extends AbstractClassGenerator
 
         $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
         $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
-        $this->output .= $this->hasAttributes() ? $this->formatAttributes(false) : null;
+        $this->output .= $this->formatAttributes(false);
         $this->output .= 'enum ' . $this->name;
 
         if ($this->backingType !== null) {

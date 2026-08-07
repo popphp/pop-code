@@ -67,4 +67,29 @@ class ValueFormatterTest extends TestCase
         ValueFormatter::format(new \stdClass());
     }
 
+    public function testCompactModeRendersArraysOnASingleLine()
+    {
+        $formatted = ValueFormatter::format(['a', 'b', 'c'], 'array', '', true);
+        $this->assertEquals("['a', 'b', 'c']", $formatted);
+        $this->assertStringNotContainsString(PHP_EOL, $formatted);
+    }
+
+    public function testCompactModeRendersAssociativeArraysWithArrowSyntax()
+    {
+        $formatted = ValueFormatter::format(['name' => 'a', 'priority' => 5], 'array', '', true);
+        $this->assertEquals("['name' => 'a', 'priority' => 5]", $formatted);
+    }
+
+    public function testCompactModeRendersNestedArraysOnASingleLine()
+    {
+        $formatted = ValueFormatter::format(['a', ['b', 'c']], 'array', '', true);
+        $this->assertEquals("['a', ['b', 'c']]", $formatted);
+        $this->assertStringNotContainsString(PHP_EOL, $formatted);
+    }
+
+    public function testCompactModeStillRendersEmptyArrayAsBareBrackets()
+    {
+        $this->assertEquals('[]', ValueFormatter::format([], 'array', '', true));
+    }
+
 }

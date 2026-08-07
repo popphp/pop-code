@@ -54,4 +54,17 @@ class AttributeGeneratorTest extends TestCase
         $this->assertEquals('#[Route]', $attribute->render());
     }
 
+    public function testArrayArgumentRendersOnASingleLine()
+    {
+        // Attribute arguments always render inline -- even a top-level #[...] is
+        // conventionally one physical line, and an array value would otherwise force a
+        // multi-line bracket literal into the middle of it (or worse, into a parameter list).
+        $attribute = new Generator\AttributeGenerator('Route');
+        $attribute->addArgument(['GET', 'POST'], 'methods');
+        $render = (string) $attribute;
+
+        $this->assertEquals("#[Route(methods: ['GET', 'POST'])]", $render);
+        $this->assertStringNotContainsString(PHP_EOL, $render);
+    }
+
 }

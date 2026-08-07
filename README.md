@@ -10,6 +10,8 @@ pop-code
 * [Install](#install)
 * [Quickstart](#quickstart)
 * [Generate Code](#generate-code)
+* [Enums](#enums)
+* [Attributes](#attributes)
 * [Parse Code](#parse-code)
 
 Overview
@@ -141,12 +143,14 @@ various types of code blocks. Code generators are available for the following ty
 - Classes
 - Interfaces
 - Traits
+- Enums
 - Methods
 - Functions
 - Constants
 - Properties
 - Namespaces
 - Docblocks
+- Attributes
 - Bodies (general blocks of code)
 
 ### Create a file with some functions
@@ -200,6 +204,126 @@ function sayGoodbye(string|null $name = null): void
     echo 'Goodbye ' . $name;
 }
 ```
+
+[Top](#pop-code)
+
+Enums
+-----
+
+Enums are generated much like classes, with cases added individually. A case's value must match the
+enum's backing type — set no value at all for a pure (non-backed) enum.
+
+```php
+use Pop\Code\Generator;
+
+$enum = new Generator\EnumGenerator('Status', 'string');
+$enum->addCase(new Generator\EnumCaseGenerator('Active', 'active'));
+$enum->addCase(new Generator\EnumCaseGenerator('Inactive', 'inactive'));
+
+echo $enum;
+```
+
+```php
+enum Status: string
+{
+
+    case Active = 'active';
+
+    case Inactive = 'inactive';
+
+}
+```
+
+An existing enum can be reflected the same way a class can, via `Reflection::createEnum()`:
+
+```php
+use Pop\Code\Reflection;
+
+$enum = Reflection::createEnum('MyApp\Status');
+```
+
+[Top](#pop-code)
+
+Attributes
+----------
+
+Attributes can be added to a class, interface, trait, enum, enum case, property, constant, method,
+function, or an individual parameter. A class-level attribute renders on its own line with no indent;
+a member-level one indents to match the member; a parameter-level one renders inline, before the
+parameter's type.
+
+```php
+use Pop\Code\Generator;
+
+$class = new Generator\ClassGenerator('Product');
+$class->addAttribute(new Generator\AttributeGenerator('Entity'));
+
+$table = new Generator\AttributeGenerator('Table');
+$table->addArgument('products', 'name');
+$class->addAttribute($table);
+
+$prop = new Generator\PropertyGenerator('id', 'int');
+$prop->addAttribute(new Generator\AttributeGenerator('Id'));
+$class->addProperty($prop);
+
+echo $class;
+```
+
+```php
+#[Entity]
+#[Table(name: 'products')]
+class Product
+{
+
+    /**
+     * @var   int
+     */
+    #[Id]
+    public int|null $id = null;
+
+}
+```
+
+`AttributeGenerator::addArgument(mixed $value, ?string $name = null)` takes the argument value first and
+an optional name second — a positional argument is a single-argument call, and a named argument passes
+its name as the second argument.
+
+A parameter-level attribute is passed as the last argument to `addArgument()` on a
+`FunctionGenerator`/`MethodGenerator`, as an array of one or more `AttributeGenerator` objects:
+
+```php
+use Pop\Code\Generator;
+
+$function = new Generator\FunctionGenerator('handle');
+$function->addArgument('request', new Generator\NoValue(), 'Request', false, false, [
+    new Generator\AttributeGenerator('Autowire'),
+]);
+$function->setBody('return $request;');
+$function->addReturnType('Request');
+
+echo $function;
+```
+
+```php
+/**
+ * @param  Request|null  $request
+ * @return Request
+ */
+function handle(#[Autowire] Request $request): Request
+{
+    return $request;
+}
+```
+
+Reflecting existing code that carries attributes detects and reproduces them automatically — no extra
+steps are needed beyond the usual `Reflection::createClass()` (or `createEnum()`, `createInterface()`,
+etc.) call.
+
+> **Note:** When an attribute class is referenced from a different namespace than the construct being
+> reflected, a `use` import is only auto-generated for class-, interface-, trait-, and enum-level (and
+> enum case-level) attributes — not for property, constant, method, function, or parameter attributes,
+> since those reflectors have no access to the enclosing namespace. In that case the attribute renders
+> with its short class name, which the consuming code is responsible for importing itself.
 
 [Top](#pop-code)
 

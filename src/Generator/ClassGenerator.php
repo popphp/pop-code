@@ -229,7 +229,7 @@ class ClassGenerator extends AbstractClassGenerator
 
         $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
         $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
-        $this->output .= $this->hasAttributes() ? $this->formatAttributes(false) : null;
+        $this->output .= $this->formatAttributes(false);
         $this->output .= $classKeyword . 'class ' . $this->name;
 
         if ($this->parent !== null) {

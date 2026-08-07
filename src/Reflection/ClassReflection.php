@@ -72,11 +72,14 @@ class ClassReflection extends AbstractReflection
 
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            if (str_contains($reflectionAttribute->getName(), '\\')) {
+            $attributeName = $reflectionAttribute->getName();
+            if (str_contains($attributeName, '\\')
+                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
+            ) {
                 if (!$class->hasNamespace()) {
                     $class->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $class->getNamespace()->addUse($reflectionAttribute->getName());
+                $class->getNamespace()->addUse($attributeName);
             }
             $class->addAttribute(AttributeCollector::build($reflectionAttribute));
         }

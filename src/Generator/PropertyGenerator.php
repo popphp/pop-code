@@ -227,7 +227,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
             $type .= ' ';
         }
         $this->output  = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->hasAttributes() ? $this->formatAttributes() : null;
+        $this->output .= $this->formatAttributes();
         $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '')
             . (($this->readonly && !$this->suppressReadonlyKeyword) ? ' readonly' : '') . ' ' . $type . '$' . $this->name;
 

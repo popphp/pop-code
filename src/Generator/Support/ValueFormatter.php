@@ -38,9 +38,14 @@ class ValueFormatter
      * @param  mixed   $value
      * @param  ?string $type
      * @param  string  $indent
+     * @param  bool    $compact  render an array value on a single line instead of the default
+     *                           multi-line bracket-literal form -- used for attribute arguments,
+     *                           which always render inline (even a top-level `#[...]` is
+     *                           conventionally one physical line) and would otherwise force a
+     *                           multi-line array literal into the middle of a parameter list
      * @return string
      */
-    public static function format(mixed $value, ?string $type = null, string $indent = ''): string
+    public static function format(mixed $value, ?string $type = null, string $indent = '', bool $compact = false): string
     {
         if ($value === null) {
             return 'null';
@@ -62,7 +67,10 @@ class ValueFormatter
         $effectiveType = $type ?? strtolower(gettype($value));
 
         if ($effectiveType === 'array') {
-            return (count($value) === 0) ? '[]' : self::formatArray($value, $indent);
+            if (count($value) === 0) {
+                return '[]';
+            }
+            return $compact ? self::formatArrayCompact($value) : self::formatArray($value, $indent);
         }
 
         if (in_array($effectiveType, ['int', 'integer', 'float', 'double'], true)) {
@@ -106,6 +114,32 @@ class ValueFormatter
         }
 
         return $ary;
+    }
+
+    /**
+     * Format a non-empty array value as a single-line PHP bracket-literal source
+     *
+     * @param  array $value
+     * @return string
+     */
+    protected static function formatArrayCompact(array $value): string
+    {
+        $keys    = array_keys($value);
+        $isAssoc = false;
+
+        for ($i = 0; $i < count($keys); $i++) {
+            if ($keys[$i] != $i) {
+                $isAssoc = true;
+            }
+        }
+
+        $parts = [];
+        foreach ($value as $key => $item) {
+            $formattedItem = self::format($item, null, '', true);
+            $parts[]       = $isAssoc ? var_export($key, true) . ' => ' . $formattedItem : $formattedItem;
+        }
+
+        return '[' . implode(', ', $parts) . ']';
     }
 
 }

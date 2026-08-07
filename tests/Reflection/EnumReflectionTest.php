@@ -8,6 +8,8 @@ use PHPUnit\Framework\TestCase;
 class EnumReflectionTest extends TestCase
 {
 
+    use RoundTripExecutionTrait;
+
     public function testBackedEnumRoundTripsCorrectly()
     {
         $enum   = Reflection::createEnum('Pop\Code\Test\TestAssets\StatusEnum');
@@ -151,26 +153,23 @@ class EnumReflectionTest extends TestCase
         $this->assertFalse($inactive->hasAttribute('TagAttribute'));
     }
 
+    public function testSameNamespaceAttributeDoesNotGetARedundantUseImport()
+    {
+        // TagAttribute lives in the same namespace as AttributedEnum itself
+        // (Pop\Code\Test\TestAssets) at both the enum level and the case level -- it resolves
+        // correctly by its bare short name with no import, so EnumReflection must not add one.
+        $enum = Reflection::createEnum('Pop\Code\Test\TestAssets\AttributedEnum');
+
+        $this->assertTrue($enum->hasNamespace());
+        $this->assertFalse($enum->getNamespace()->hasUse('Pop\Code\Test\TestAssets\TagAttribute'));
+    }
+
     public function testAttributedEnumRegeneratesAsValidPhpThatLoads()
     {
         $enum   = Reflection::createEnum('Pop\Code\Test\TestAssets\AttributedEnum');
         $render = (string) $enum;
 
-        // The rendered fragment leads with a namespace declaration, and PHP requires `namespace` to be
-        // the very first statement in a file (only `declare()` may precede it) -- so the autoload
-        // require must be inserted *after* the namespace line, not prepended before it.
-        $autoload         = dirname(__DIR__, 2) . '/vendor/autoload.php';
-        $requireStatement = 'require ' . var_export($autoload, true) . ';' . PHP_EOL;
-        if (preg_match('/^(.*?namespace\s+[^;]+;\s*\n)/s', $render, $matches)) {
-            $content = '<?php' . PHP_EOL . $matches[1] . $requireStatement . substr($render, strlen($matches[1]));
-        } else {
-            $content = '<?php' . PHP_EOL . $requireStatement . $render;
-        }
-
-        $tmpFile = sys_get_temp_dir() . '/pop-code-attributed-enum-' . uniqid() . '.php';
-        file_put_contents($tmpFile, $content);
-        exec('php ' . escapeshellarg($tmpFile) . ' 2>&1', $output, $exitCode);
-        unlink($tmpFile);
+        [$exitCode, $output, $content] = $this->executeRenderedFragment($render);
         $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $content);
     }
 

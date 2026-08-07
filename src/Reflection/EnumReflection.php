@@ -65,11 +65,14 @@ class EnumReflection extends AbstractReflection
 
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            if (str_contains($reflectionAttribute->getName(), '\\')) {
+            $attributeName = $reflectionAttribute->getName();
+            if (str_contains($attributeName, '\\')
+                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
+            ) {
                 if (!$enum->hasNamespace()) {
                     $enum->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $enum->getNamespace()->addUse($reflectionAttribute->getName());
+                $enum->getNamespace()->addUse($attributeName);
             }
             $enum->addAttribute(AttributeCollector::build($reflectionAttribute));
         }
@@ -122,11 +125,14 @@ class EnumReflection extends AbstractReflection
             }
 
             foreach ($case->getAttributes() as $reflectionAttribute) {
-                if (str_contains($reflectionAttribute->getName(), '\\')) {
+                $attributeName = $reflectionAttribute->getName();
+                if (str_contains($attributeName, '\\')
+                    && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
+                ) {
                     if (!$enum->hasNamespace()) {
                         $enum->setNamespace(new Generator\NamespaceGenerator());
                     }
-                    $enum->getNamespace()->addUse($reflectionAttribute->getName());
+                    $enum->getNamespace()->addUse($attributeName);
                 }
                 $enumCase->addAttribute(AttributeCollector::build($reflectionAttribute));
             }

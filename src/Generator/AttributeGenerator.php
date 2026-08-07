@@ -56,6 +56,11 @@ class AttributeGenerator extends AbstractGenerator
     /**
      * Add an argument
      *
+     * Parameter order is (value, name), not (name, value) like Traits\FunctionTrait::addArgument()
+     * elsewhere in this library — deliberate, since it mirrors ReflectionAttribute::getArguments()'s
+     * own shape (numeric keys positional, string keys named) and makes the common positional case a
+     * single-argument call: addArgument('value') rather than addArgument(null, 'value').
+     *
      * @param  mixed   $value
      * @param  ?string $name
      * @return AttributeGenerator
@@ -100,7 +105,7 @@ class AttributeGenerator extends AbstractGenerator
             foreach ($this->arguments as $argument) {
                 $value = ($argument['value'] instanceof Literal)
                     ? $argument['value']->getValue()
-                    : ValueFormatter::format($argument['value']);
+                    : ValueFormatter::format($argument['value'], null, '', true);
                 $formatted[] = ($argument['name'] !== null) ? $argument['name'] . ': ' . $value : $value;
             }
             $this->output .= '(' . implode(', ', $formatted) . ')';

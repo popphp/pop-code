@@ -92,7 +92,7 @@ class EnumCaseGenerator extends AbstractGenerator
     public function render(): string
     {
         $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
-        $this->output .= $this->hasAttributes() ? $this->formatAttributes() : null;
+        $this->output .= $this->formatAttributes();
         $this->output .= $this->printIndent() . 'case ' . $this->name;
 
         if ($this->value !== null) {

@@ -67,11 +67,14 @@ class TraitReflection extends AbstractReflection
 
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            if (str_contains($reflectionAttribute->getName(), '\\')) {
+            $attributeName = $reflectionAttribute->getName();
+            if (str_contains($attributeName, '\\')
+                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
+            ) {
                 if (!$trait->hasNamespace()) {
                     $trait->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $trait->getNamespace()->addUse($reflectionAttribute->getName());
+                $trait->getNamespace()->addUse($attributeName);
             }
             $trait->addAttribute(AttributeCollector::build($reflectionAttribute));
         }

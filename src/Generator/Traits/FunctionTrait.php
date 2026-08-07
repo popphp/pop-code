@@ -52,6 +52,7 @@ trait FunctionTrait
      * @param  ?string $type
      * @param  bool    $variadic
      * @param  bool    $byRef
+     * @param  array   $attributes
      * @throws Exception
      * @return static
      */
@@ -88,7 +89,8 @@ trait FunctionTrait
     /**
      * Add arguments
      *
-     * @param  array $args
+     * @param  array $args  each element shaped ['name' => string, 'value' => mixed, 'type' => ?string,
+     *                       'variadic' => bool, 'byRef' => bool, 'attributes' => array]
      * @throws Exception
      * @return static
      */
@@ -158,6 +160,7 @@ trait FunctionTrait
      * @param  ?string $type
      * @param  bool    $variadic
      * @param  bool    $byRef
+     * @param  array   $attributes
      * @throws Exception
      * @return static
      */

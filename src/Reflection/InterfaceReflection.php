@@ -63,11 +63,14 @@ class InterfaceReflection extends AbstractReflection
 
         // Detect attributes
         foreach ($reflection->getAttributes() as $reflectionAttribute) {
-            if (str_contains($reflectionAttribute->getName(), '\\')) {
+            $attributeName = $reflectionAttribute->getName();
+            if (str_contains($attributeName, '\\')
+                && (substr($attributeName, 0, strrpos($attributeName, '\\')) !== $reflection->getNamespaceName())
+            ) {
                 if (!$interface->hasNamespace()) {
                     $interface->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $interface->getNamespace()->addUse($reflectionAttribute->getName());
+                $interface->getNamespace()->addUse($attributeName);
             }
             $interface->addAttribute(AttributeCollector::build($reflectionAttribute));
         }

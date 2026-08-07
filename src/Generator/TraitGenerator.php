@@ -48,7 +48,7 @@ class TraitGenerator extends AbstractClassGenerator
     {
         $this->output = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
         $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
-        $this->output .= $this->hasAttributes() ? $this->formatAttributes(false) : null;
+        $this->output .= $this->formatAttributes(false);
         $this->output .= 'trait ' . $this->name;
 
         $this->output .= PHP_EOL . '{';
@@ -86,7 +86,7 @@ class TraitGenerator extends AbstractClassGenerator
      */
     protected function formatConstants(): string
     {
-        $constants = null;
+        $constants = '';
 
         foreach ($this->constants as $constant) {
             $constants .= PHP_EOL . $constant->render();
@@ -102,7 +102,7 @@ class TraitGenerator extends AbstractClassGenerator
      */
     protected function formatProperties(): string
     {
-        $props = null;
+        $props = '';
 
         foreach ($this->properties as $prop) {
             $props .= PHP_EOL . $prop->render();
@@ -118,7 +118,7 @@ class TraitGenerator extends AbstractClassGenerator
      */
     protected function formatMethods(): string
     {
-        $methods = null;
+        $methods = '';
 
         foreach ($this->methods as $method) {
             $methods .= PHP_EOL . $method->render();
