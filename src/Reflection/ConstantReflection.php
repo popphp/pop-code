@@ -15,6 +15,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\TypeNormalizer;
+use Pop\Code\Reflection\Support\AttributeCollector;
 
 /**
  * Constant reflection code class
@@ -52,6 +53,10 @@ class ConstantReflection extends AbstractReflection
         $constant = new Generator\ConstantGenerator($name ?? $code->getName(), $type, $code->getValue());
         $constant->setVisibility($visibility);
         $constant->setTyped($isTyped);
+
+        foreach ($code->getAttributes() as $reflectionAttribute) {
+            $constant->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
 
         return $constant;
     }

@@ -54,4 +54,35 @@ class PropertyReflectionTest extends TestCase
         $this->assertTrue($class->hasProperty('noDefault'));
     }
 
+    public function testPropertyAttributesAreDetected()
+    {
+        $class    = Reflection::createClass('Pop\Code\Test\TestAssets\AttributedTestClass');
+        $property = $class->getProperty('label');
+
+        $this->assertTrue($property->hasAttribute('TagAttribute'));
+        $this->assertStringContainsString("#[TagAttribute('prop')]", (string) $property);
+    }
+
+    public function testForeignNamespaceMemberAttributeHasNoUseImport()
+    {
+        // Documented limitation: member-level attributes render a bare short name with no
+        // auto-generated use import, since PropertyReflection has no access to the enclosing
+        // class's namespace object. This test pins that as intentional, not silently wrong.
+        // Reuses Task 7's AttributedTestClass/ForeignTagAttribute fixtures.
+        $class    = Reflection::createClass('Pop\Code\Test\TestAssets\AttributedTestClass');
+        $property = $class->getProperty('label');
+        $render   = (string) $property;
+
+        $this->assertStringContainsString('#[ForeignTagAttribute(', $render);
+        // The class-level use IS present (from the class-level attribute) -- confirm the
+        // member-level attribute did not additionally trigger anything beyond that single import.
+        $useCount = 0;
+        foreach ($class->getNamespace()->getUses() as $use => $as) {
+            if ($use === 'Pop\Code\Test\TestAssets\Attrs\ForeignTagAttribute') {
+                $useCount++;
+            }
+        }
+        $this->assertEquals(1, $useCount);
+    }
+
 }

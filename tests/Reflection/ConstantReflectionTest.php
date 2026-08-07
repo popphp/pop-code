@@ -36,4 +36,13 @@ class ConstantReflectionTest extends TestCase
         $this->assertEquals('public', $constant->getVisibility());
     }
 
+    public function testConstantAttributesAreDetected()
+    {
+        $class    = Reflection::createClass('Pop\Code\Test\TestAssets\AttributedTestClass');
+        $constant = $class->getConstant('LIMIT');
+
+        $this->assertTrue($constant->hasAttribute('TagAttribute'));
+        $this->assertStringContainsString("#[TagAttribute('const')]", (string) $constant);
+    }
+
 }

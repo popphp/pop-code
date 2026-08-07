@@ -15,6 +15,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\TypeNormalizer;
+use Pop\Code\Reflection\Support\AttributeCollector;
 
 /**
  * Property reflection code class
@@ -77,6 +78,10 @@ class PropertyReflection extends AbstractReflection
             $property->setDocblock($docblock);
         }
         $property->setDesc($desc);
+
+        foreach ($code->getAttributes() as $reflectionAttribute) {
+            $property->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
 
         return $property;
     }
