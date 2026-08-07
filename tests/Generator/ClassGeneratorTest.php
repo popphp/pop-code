@@ -120,4 +120,41 @@ class ClassGeneratorTest extends TestCase
         $this->assertStringContainsString('abstract readonly class Foo', $class->render());
     }
 
+    public function testAttributes()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $tag1  = new Generator\AttributeGenerator('Entity');
+        $tag2  = new Generator\AttributeGenerator('Table');
+        $tag2->addArgument('users', 'name');
+
+        $class->addAttributes([$tag1, $tag2]);
+
+        $this->assertTrue($class->hasAttributes());
+        $this->assertTrue($class->hasAttribute('Entity'));
+        $this->assertEquals(2, count($class->getAttributes()));
+
+        $class->removeAttribute($tag1);
+        $this->assertFalse($class->hasAttribute('Entity'));
+        $this->assertTrue($class->hasAttribute('Table'));
+    }
+
+    public function testRepeatedAttributesAreNotCollapsed()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->addAttribute(new Generator\AttributeGenerator('Tag'));
+        $class->addAttribute(new Generator\AttributeGenerator('Tag'));
+
+        $this->assertEquals(2, count($class->getAttributes()));
+        $this->assertEquals(2, count($class->getAttributesByName('Tag')));
+    }
+
+    public function testAttributesRenderBeforeClassKeywordWithNoIndent()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->addAttribute(new Generator\AttributeGenerator('Entity'));
+        $render = (string) $class;
+
+        $this->assertStringContainsString("#[Entity]\nclass Foo", $render);
+    }
+
 }

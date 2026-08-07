@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 abstract class AbstractClassGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\NamespaceTrait, Traits\DocblockTrait;
+    use Traits\NameTrait, Traits\NamespaceTrait, Traits\DocblockTrait, Traits\AttributesTrait;
 
     /**
      * Array of constant generator objects
