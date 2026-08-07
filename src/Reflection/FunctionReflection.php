@@ -66,7 +66,9 @@ class FunctionReflection extends AbstractReflection
                 $paramValue = $reflectionParam->getDefaultValue();
             }
 
-            $function->addArgument($paramName, $paramValue, $paramType);
+            $function->addArgument(
+                $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference()
+            );
         }
 
         // Parse the body if available

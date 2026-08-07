@@ -26,4 +26,18 @@ class ModernTestClass
         return $noType;
     }
 
+    public function sum(int ...$numbers): int
+    {
+        return array_sum($numbers);
+    }
+
+    public function increment(int &$counter): void
+    {
+        $counter++;
+    }
+
+    public function collectByRef(&...$items): void
+    {
+    }
+
 }

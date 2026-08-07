@@ -94,7 +94,9 @@ class MethodReflection extends AbstractReflection
                 }
                 $method->addPromotedArgument($paramName, $promotedVisibility, $paramValue, $paramType, $promotedProperty->isReadOnly());
             } else {
-                $method->addArgument($paramName, $paramValue, $paramType);
+                $method->addArgument(
+                    $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference()
+                );
             }
         }
 

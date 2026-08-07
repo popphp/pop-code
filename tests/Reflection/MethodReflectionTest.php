@@ -47,4 +47,25 @@ class MethodReflectionTest extends TestCase
         $this->assertEquals(0, $exitCode, implode("\n", $output));
     }
 
+    public function testVariadicParameterRoundTripsCorrectly()
+    {
+        $class  = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $method = $class->getMethod('sum');
+        $this->assertStringContainsString('function sum(int ...$numbers)', (string) $method);
+    }
+
+    public function testByRefParameterRoundTripsCorrectly()
+    {
+        $class  = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $method = $class->getMethod('increment');
+        $this->assertStringContainsString('function increment(int &$counter)', (string) $method);
+    }
+
+    public function testVariadicAndByRefCombinedRoundTripCorrectly()
+    {
+        $class  = Reflection::createClass('Pop\Code\Test\TestAssets\ModernTestClass');
+        $method = $class->getMethod('collectByRef');
+        $this->assertStringContainsString('function collectByRef(&...$items)', (string) $method);
+    }
+
 }

@@ -68,6 +68,10 @@ CODE;
         $function2 = Reflection::createFunction($code2);
         $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function1);
         $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function2);
+
+        $code3     = function(int ...$nums) { return array_sum($nums); };
+        $function3 = Reflection::createFunction($code3);
+        $this->assertStringContainsString('...$nums', (string) $function3);
     }
 
     public function testCreateMethod()
