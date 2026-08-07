@@ -82,6 +82,10 @@ trait FunctionTrait
         ) {
             $docType .= '|null';
         }
+        // A caller re-adding an argument for a name that already exists (e.g. to change its
+        // type) leaves a stale @param entry behind otherwise -- $this->arguments is name-keyed
+        // and correctly overwrites, but the docblock's params are append-only.
+        $this->docblock->removeParam($docName);
         $this->docblock->addParam($docType, $docName);
 
         return $this;

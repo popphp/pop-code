@@ -91,6 +91,15 @@ class DocblockReflection extends AbstractReflection
                         if (str_contains($varName, ' ')) {
                             $paramDesc = trim(substr($varName, strpos($varName, ' ')));
                         }
+                    } else if (str_starts_with($paramTag, '$')) {
+                        // A bare "@param $var" with no type at all -- $paramTag is the variable
+                        // name, not a type. Without this check it fell into the branch below and
+                        // was stored as the type instead, leaving 'var' unset -- which meant a
+                        // later addArgument() call for the same parameter (which correctly
+                        // computes the real variable name) couldn't recognize this as the same
+                        // param to replace, and appended a second @param line instead.
+                        $paramType = null;
+                        $varName   = $paramTag;
                     } else {
                         $paramType = $paramTag;
                     }

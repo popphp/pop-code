@@ -112,11 +112,31 @@ class ClassReflection extends AbstractReflection
             $class->setParent($parent->getShortName());
         }
 
-        // Detect implemented interfaces
+        // Detect implemented interfaces -- getInterfaces() returns the full transitive closure
+        // (every interface reachable via this class, its parent chain, and any interface's own
+        // extends), not just what this class itself directly declares in `implements`. A
+        // candidate is kept only if it isn't already provided by the parent class (inherited, not
+        // re-declared) and isn't reachable via another candidate already in this class's own set
+        // (implied by that candidate's own extends, not itself a distinct direct implements).
         $interfaces = $reflection->getInterfaces();
         if ($interfaces !== false) {
-            $interfacesAry = [];
-            foreach ($interfaces as $interface) {
+            $parentInterfaceNames = ($parent !== false) ? $parent->getInterfaceNames() : [];
+            $interfacesAry        = [];
+            foreach ($interfaces as $candidateName => $interface) {
+                if (in_array($candidateName, $parentInterfaceNames, true)) {
+                    continue;
+                }
+                $isTransitive = false;
+                foreach ($interfaces as $otherName => $other) {
+                    if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
+                        $isTransitive = true;
+                        break;
+                    }
+                }
+                if ($isTransitive) {
+                    continue;
+                }
+
                 if ($interface->inNamespace() && ($interface->getNamespaceName() !== $reflection->getNamespaceName())) {
                     if (!$class->hasNamespace()) {
                         $class->setNamespace(new Generator\NamespaceGenerator());
@@ -135,15 +155,22 @@ class ClassReflection extends AbstractReflection
             }
         }
 
-        // Detect constants
+        // Detect constants -- getReflectionConstants() includes inherited constants; keep only
+        // ones actually declared on this class (a trait-provided constant still reports its
+        // declaring class as this one, since PHP flattens trait members into the using class, so
+        // this filter only excludes constants inherited from a parent class, not trait ones).
         foreach ($reflection->getReflectionConstants() as $constant) {
+            if ($constant->getDeclaringClass()->getName() !== $reflection->getName()) {
+                continue;
+            }
             $class->addConstant(ConstantReflection::parse($constant));
         }
 
-        // Detect properties
+        // Detect properties -- getProperties() includes inherited properties; same declaring-class
+        // filter as constants above, with the same trait-member caveat.
         $classIsReadonly = $reflection->isReadOnly();
         foreach ($reflection->getProperties() as $property) {
-            if ($property->isPromoted()) {
+            if ($property->isPromoted() || ($property->getDeclaringClass()->getName() !== $reflection->getName())) {
                 continue;
             }
             $value             = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
@@ -161,10 +188,16 @@ class ClassReflection extends AbstractReflection
             $class->addProperty($propertyGenerator);
         }
 
-        // Detect methods
+        // Detect methods -- getMethods() includes inherited methods; same declaring-class filter,
+        // same trait-member caveat. An overridden method (e.g. implementing an abstract parent
+        // method) still reports its declaring class as this one, since the override itself is a
+        // real declaration here.
         $methods = $reflection->getMethods();
         if (count($methods) > 0) {
             foreach ($methods as $method) {
+                if ($method->getDeclaringClass()->getName() !== $reflection->getName()) {
+                    continue;
+                }
                 $class->addMethod(MethodReflection::parse($method, $method->name));
             }
         }

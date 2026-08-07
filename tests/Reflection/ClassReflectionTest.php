@@ -103,6 +103,46 @@ class ClassReflectionTest extends TestCase
         }
     }
 
+    public function testInheritedInterfaceIsNotHoistedOntoTheChildClass()
+    {
+        // TestClass extends AbstractTestClass, which implements TestInterface (which itself
+        // extends ParentInterface). TestClass does not declare `implements` itself -- previously
+        // getInterfaces()'s full transitive closure was rendered onto TestClass directly, as if
+        // it had declared `implements ParentInterface, TestInterface` when it declared neither.
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestClass');
+
+        $this->assertFalse($class->hasInterfaces());
+        $this->assertStringNotContainsString('implements', (string) $class);
+    }
+
+    public function testInheritedMethodsAndPropertiesAreNotHoistedOntoTheChildClass()
+    {
+        // AbstractTestClass declares abstract bar()/printSomething(), both overridden (redeclared)
+        // by TestClass -- those two should still appear, since the override is a real declaration
+        // on TestClass. Trait-provided members (traitProp/baz(), via `use TestTrait;`) should also
+        // still appear -- PHP reports a trait member's declaring class as the class that uses the
+        // trait, so declaring-class filtering correctly leaves those alone; it only excludes what's
+        // purely inherited from the parent CLASS chain.
+        $class = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestClass');
+
+        $this->assertTrue($class->hasMethod('bar'));
+        $this->assertTrue($class->hasMethod('printSomething'));
+        $this->assertTrue($class->hasMethod('baz'));
+        $this->assertTrue($class->hasProperty('traitProp'));
+        $this->assertTrue($class->hasProperty('myProp'));
+    }
+
+    public function testMethodDocblockDoesNotDuplicateParamFromSourceAndReflection()
+    {
+        // TestClass::bar($baz)'s source docblock is a bare "@param $baz" with no type -- combined
+        // with MethodReflection's own addArgument() call for the same parameter, this used to
+        // render two separate "@param $baz" lines for one parameter.
+        $class  = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\TestClass');
+        $render = (string) $class->getMethod('bar');
+
+        $this->assertEquals(1, substr_count($render, '@param'));
+    }
+
     public function testSameNamespaceAttributeDoesNotGetARedundantUseImport()
     {
         // TagAttribute lives in the same namespace as AttributedTestClass itself

@@ -54,4 +54,23 @@ DOC;
         $this->assertEquals('array', $docblock->getReturn()['type']);
     }
 
+    public function testBareParamWithNoTypeIsParsedAsTheVariableNotTheType()
+    {
+        // Previously a bare "@param $baz" (no type at all) was mis-parsed with the variable name
+        // landing in the 'type' slot and 'var' left null -- which meant a later addArgument()
+        // call for the same real parameter (which correctly computes the var name) couldn't
+        // recognize this as the same param to replace, producing two @param lines for one
+        // parameter once rendered.
+        $doc = <<<DOC
+/**
+ * @param \$baz
+ */
+DOC;
+
+        $docblock = Reflection\DocblockReflection::parse($doc);
+        $this->assertTrue($docblock->hasParam(0));
+        $this->assertEquals('$baz', $docblock->getParam(0)['var']);
+        $this->assertNull($docblock->getParam(0)['type']);
+    }
+
 }

@@ -371,7 +371,6 @@ class MyClass
 {
 
     /**
-     * 
      * @var   string|null
      */
     protected string|null $foo = null;
@@ -379,7 +378,6 @@ class MyClass
     /**
      * This is the method to set foo.
      * 
-     * @param  string|null  $foo
      * @param  string|null  $foo
      * @return void
      */
@@ -402,9 +400,5 @@ class MyClass
 
 }
 ```
-
-> **Note:** The duplicated `@param` line and the extra blank lines above are the actual current output of
-> reflecting a previously-generated file back in (a pre-existing reflection round-trip quirk, unrelated to
-> this section's example code) — this block was verified against real output rather than hand-edited.
 
 [Top](#pop-code)

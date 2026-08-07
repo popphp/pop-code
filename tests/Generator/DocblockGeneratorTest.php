@@ -63,4 +63,27 @@ class DocblockGeneratorTest extends TestCase
         $this->assertStringContainsString('     */', $render);
     }
 
+    public function testRemoveParamRemovesTheFirstMatchByVarName()
+    {
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->addParam('string', '$foo');
+        $docblock->addParam('int', '$bar');
+
+        $docblock->removeParam('$foo');
+
+        $this->assertEquals('int', $docblock->getParam(0)['type']);
+        $this->assertEquals('$bar', $docblock->getParam(0)['var']);
+        $this->assertNull($docblock->getParam(1));
+    }
+
+    public function testRemoveParamIsANoOpWhenNoMatchExists()
+    {
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->addParam('string', '$foo');
+
+        $docblock->removeParam('$doesNotExist');
+
+        $this->assertEquals('$foo', $docblock->getParam(0)['var']);
+    }
+
 }

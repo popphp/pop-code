@@ -83,19 +83,31 @@ class InterfaceReflection extends AbstractReflection
 
         // Detect parent interface(s) -- for an interface, getParentClass() always returns false
         // (that API is for class `extends`); the interfaces it extends are reported via
-        // getInterfaces() instead. InterfaceGenerator only supports a single parent today, so
-        // only the first is used if the interface extends more than one -- a pre-existing
-        // generator-side limitation, not something introduced by this fix.
-        $parents = $reflection->getInterfaces();
-        if (!empty($parents)) {
-            $parent = reset($parents);
-            if ($parent->inNamespace() && ($parent->getNamespaceName() !== $reflection->getNamespaceName())) {
+        // getInterfaces() instead. That API returns the full transitive closure though (e.g. for
+        // `interface C extends B` where `B extends A`, reflecting C reports both A and B) -- so a
+        // candidate is kept as a *direct* parent only if no other candidate in the same set
+        // already reports it as one of its own interfaces (i.e. it isn't reachable through
+        // another candidate already in the list).
+        $allParents = $reflection->getInterfaces();
+        foreach ($allParents as $candidateName => $candidate) {
+            $isTransitive = false;
+            foreach ($allParents as $otherName => $other) {
+                if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
+                    $isTransitive = true;
+                    break;
+                }
+            }
+            if ($isTransitive) {
+                continue;
+            }
+
+            if ($candidate->inNamespace() && ($candidate->getNamespaceName() !== $reflection->getNamespaceName())) {
                 if (!$interface->hasNamespace()) {
                     $interface->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $interface->getNamespace()->addUse($parent->getNamespaceName() . '\\' . $parent->getShortName());
+                $interface->getNamespace()->addUse($candidate->getNamespaceName() . '\\' . $candidate->getShortName());
             }
-            $interface->setParent($parent->getShortName());
+            $interface->addParent($candidate->getShortName());
         }
 
         // Detect constants

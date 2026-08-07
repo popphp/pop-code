@@ -27,55 +27,110 @@ class InterfaceGenerator extends AbstractClassGenerator
 {
 
     /**
-     * Parent interfaces that are extended
-     * @var ?string
+     * Parent interfaces that are extended -- a PHP interface can extend more than one interface
+     * at once (`interface Foo extends A, B`), unlike a class, which can only extend one
+     * @var array
      */
-    protected ?string $parent = null;
+    protected array $parents = [];
 
     /**
      * Constructor
      *
      * Instantiate the interface generator object
      *
-     * @param  string  $name
-     * @param  ?string $parent
+     * @param  string $name
+     * @param  mixed  $parent
      */
-    public function __construct(string $name, ?string $parent = null)
+    public function __construct(string $name, mixed $parent = null)
     {
         $this->setName($name);
-        $this->setParent($parent);
+
+        if ($parent !== null) {
+            if (is_array($parent)) {
+                $this->addParents($parent);
+            } else if (str_contains($parent, ',')) {
+                $this->addParents(array_map('trim', explode(',', $parent)));
+            } else {
+                $this->addParent($parent);
+            }
+        }
     }
 
     /**
-     * Set the interface parent
+     * Add a parent interface
      *
-     * @param  ?string $parent
+     * @param  string $parent
      * @return InterfaceGenerator
      */
-    public function setParent(?string $parent = null): InterfaceGenerator
+    public function addParent(string $parent): InterfaceGenerator
     {
-        $this->parent = $parent;
+        if (!in_array($parent, $this->parents)) {
+            $this->parents[] = $parent;
+        }
+
         return $this;
     }
 
     /**
-     * Get the interface parent
+     * Add parent interfaces
      *
-     * @return string|null
+     * @param  array $parents
+     * @return InterfaceGenerator
      */
-    public function getParent(): string|null
+    public function addParents(array $parents): InterfaceGenerator
     {
-        return $this->parent;
+        foreach ($parents as $parent) {
+            $this->addParent($parent);
+        }
+
+        return $this;
     }
 
     /**
-     * Has parent
+     * Get the parent interfaces
+     *
+     * @return array
+     */
+    public function getParents(): array
+    {
+        return $this->parents;
+    }
+
+    /**
+     * Has parent interfaces
      *
      * @return bool
      */
-    public function hasParent(): bool
+    public function hasParents(): bool
     {
-        return ($this->parent !== null);
+        return (!empty($this->parents));
+    }
+
+    /**
+     * Has a specific parent interface
+     *
+     * @param  string $parent
+     * @return bool
+     */
+    public function hasParent(string $parent): bool
+    {
+        return (in_array($parent, $this->parents));
+    }
+
+    /**
+     * Remove a parent interface
+     *
+     * @param  string $parent
+     * @return InterfaceGenerator
+     */
+    public function removeParent(string $parent): InterfaceGenerator
+    {
+        if (in_array($parent, $this->parents)) {
+            $key = array_search($parent, $this->parents);
+            unset($this->parents[$key]);
+        }
+
+        return $this;
     }
 
     /**
@@ -90,8 +145,8 @@ class InterfaceGenerator extends AbstractClassGenerator
         $this->output .= $this->formatAttributes(false);
         $this->output .= 'interface ' . $this->name;
 
-        if ($this->parent !== null) {
-            $this->output .= ' extends ' . $this->parent;
+        if ($this->hasParents()) {
+            $this->output .= ' extends ' . implode(', ', $this->parents);
         }
 
         $this->output .= PHP_EOL . '{' . PHP_EOL;

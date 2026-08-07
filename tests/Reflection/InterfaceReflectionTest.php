@@ -34,8 +34,30 @@ class InterfaceReflectionTest extends TestCase
         // every interface's `extends` clause.
         $interface = Reflection\InterfaceReflection::parse('Pop\Code\Test\TestAssets\TestInterface');
 
-        $this->assertEquals('ParentInterface', $interface->getParent());
+        $this->assertEquals(['ParentInterface'], $interface->getParents());
         $this->assertStringContainsString('extends ParentInterface', (string) $interface);
+    }
+
+    public function testMultipleDirectExtendsAreAllDetected()
+    {
+        $interface = Reflection\InterfaceReflection::parse('Pop\Code\Test\TestAssets\MultiExtendsInterface');
+
+        $this->assertTrue($interface->hasParent('TestInterface'));
+        $this->assertTrue($interface->hasParent('ParentInterface2'));
+        $this->assertEquals(2, count($interface->getParents()));
+    }
+
+    public function testTransitivelyInheritedExtendsIsNotDuplicated()
+    {
+        // MultiExtendsInterface extends TestInterface (which itself extends ParentInterface) and
+        // ParentInterface2 directly. getInterfaces() reports the full transitive closure, so
+        // without filtering, ParentInterface (reachable only through TestInterface) would
+        // incorrectly appear as if MultiExtendsInterface declared it directly too.
+        $interface = Reflection\InterfaceReflection::parse('Pop\Code\Test\TestAssets\MultiExtendsInterface');
+
+        $this->assertFalse($interface->hasParent('ParentInterface'));
+        $this->assertStringNotContainsString('ParentInterface,', (string) $interface);
+        $this->assertStringContainsString('extends TestInterface, ParentInterface2', (string) $interface);
     }
 
     public function testInterfaceMethodsDoNotRenderAbstractKeyword()

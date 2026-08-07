@@ -154,4 +154,19 @@ class FunctionGeneratorTest extends TestCase
         $this->assertStringNotContainsString('string|null|null', $render);
     }
 
+    public function testReAddingAnArgumentReplacesTheStaleParamDocblockEntry()
+    {
+        // $this->arguments is name-keyed and correctly overwrites on re-add, but the docblock's
+        // params used to be append-only -- re-adding 'foo' with a different type left the old
+        // @param entry behind alongside the new one.
+        $function = new Generator\FunctionGenerator('test');
+        $function->addArgument('foo', null, 'string');
+        $function->addArgument('foo', null, 'int');
+        $render = (string) $function;
+
+        $this->assertEquals(1, substr_count($render, '@param'));
+        $this->assertStringContainsString('int|null  $foo', $render);
+        $this->assertStringNotContainsString('string', $render);
+    }
+
 }

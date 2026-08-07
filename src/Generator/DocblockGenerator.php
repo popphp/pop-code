@@ -195,6 +195,27 @@ class DocblockGenerator extends AbstractGenerator
     }
 
     /**
+     * Remove a param tag by its variable name (e.g. '$foo'), not by index -- removes the first
+     * match, if any, and re-indexes the remaining params. A no-op if no param has that variable
+     * name. Used to replace a stale @param entry when a caller re-adds a parameter of the same
+     * name with a different type (params are otherwise append-only via addParam()/addParams()).
+     *
+     * @param  string $var
+     * @return DocblockGenerator
+     */
+    public function removeParam(string $var): DocblockGenerator
+    {
+        foreach ($this->tags['param'] as $key => $param) {
+            if (($param['var'] ?? null) === $var) {
+                unset($this->tags['param'][$key]);
+                $this->tags['param'] = array_values($this->tags['param']);
+                break;
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Add a return tag
      *
      * @param  string  $type
