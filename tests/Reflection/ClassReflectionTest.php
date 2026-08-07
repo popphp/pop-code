@@ -56,4 +56,16 @@ class ClassReflectionTest extends TestCase
         $this->assertEquals(0, $exitCode, implode("\n", $output));
     }
 
+    public function testCompositeModifiersRoundTripAsValidPhp()
+    {
+        $class  = Reflection\ClassReflection::parse('Pop\Code\Test\TestAssets\PromotedPropertyTestClass');
+        $render = (string) $class;
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-composite-' . uniqid() . '.php';
+        file_put_contents($tmpFile, $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output) . "\n\n" . $render);
+    }
+
 }
