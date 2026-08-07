@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 abstract class AbstractClassElementGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait;
+    use Traits\NameTrait, Traits\DocblockTrait, Traits\AttributesTrait;
 
     /**
      * Visibility

@@ -41,4 +41,13 @@ class EnumCaseGeneratorTest extends TestCase
         $this->assertStringContainsString("case Active = 'active';", $render);
     }
 
+    public function testAttributesRenderIndentedBeforeCase()
+    {
+        $case = new Generator\EnumCaseGenerator('Active', 'active');
+        $case->addAttribute(new Generator\AttributeGenerator('Label'));
+        $render = (string) $case;
+
+        $this->assertStringContainsString("    #[Label]\n    case Active", $render);
+    }
+
 }

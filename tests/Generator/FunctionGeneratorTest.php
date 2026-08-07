@@ -100,4 +100,13 @@ class FunctionGeneratorTest extends TestCase
         $function->addArgument('numbers', [1, 2, 3], 'int', true);
     }
 
+    public function testAttributesRenderBeforeFunctionWithNoIndent()
+    {
+        $function = new Generator\FunctionGenerator('foo');
+        $function->addAttribute(new Generator\AttributeGenerator('Pure'));
+        $render = (string) $function;
+
+        $this->assertStringContainsString("#[Pure]\nfunction foo", $render);
+    }
+
 }

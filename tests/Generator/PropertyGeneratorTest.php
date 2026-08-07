@@ -85,4 +85,13 @@ class PropertyGeneratorTest extends TestCase
         $property->render();
     }
 
+    public function testAttributesRenderIndentedBeforeProperty()
+    {
+        $property = new Generator\PropertyGenerator('foo', 'string');
+        $property->addAttribute(new Generator\AttributeGenerator('Column'));
+        $render = (string) $property;
+
+        $this->assertStringContainsString("    #[Column]\n    public string", $render);
+    }
+
 }

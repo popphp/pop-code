@@ -72,4 +72,13 @@ class ConstantGeneratorTest extends TestCase
         $this->assertStringContainsString('const int FOO', (string)$constant);
     }
 
+    public function testAttributesRenderIndentedBeforeConstant()
+    {
+        $constant = new Generator\ConstantGenerator('FOO', 'string', 'bar');
+        $constant->addAttribute(new Generator\AttributeGenerator('Deprecated'));
+        $render = (string) $constant;
+
+        $this->assertStringContainsString("    #[Deprecated]\n    public const", $render);
+    }
+
 }

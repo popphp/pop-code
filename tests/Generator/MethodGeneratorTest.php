@@ -93,4 +93,13 @@ class MethodGeneratorTest extends TestCase
         $method->addPromotedArgument('y', 'private', new Generator\NoValue(), null, true);
     }
 
+    public function testAttributesRenderIndentedBeforeMethod()
+    {
+        $method = new Generator\MethodGenerator('foo');
+        $method->addAttribute(new Generator\AttributeGenerator('Route'));
+        $render = (string) $method;
+
+        $this->assertStringContainsString("    #[Route]\n    public function foo", $render);
+    }
+
 }

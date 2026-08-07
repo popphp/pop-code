@@ -28,7 +28,7 @@ use Pop\Code\Generator\Support\ValueFormatter;
 class EnumCaseGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait;
+    use Traits\NameTrait, Traits\DocblockTrait, Traits\AttributesTrait;
 
     /**
      * Case value (backed enums only)
@@ -92,6 +92,7 @@ class EnumCaseGenerator extends AbstractGenerator
     public function render(): string
     {
         $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
+        $this->output .= $this->hasAttributes() ? $this->formatAttributes() : null;
         $this->output .= $this->printIndent() . 'case ' . $this->name;
 
         if ($this->value !== null) {

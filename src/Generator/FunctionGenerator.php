@@ -26,7 +26,7 @@ namespace Pop\Code\Generator;
 class FunctionGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait, Traits\FunctionTrait, Traits\BodyTrait;
+    use Traits\NameTrait, Traits\DocblockTrait, Traits\FunctionTrait, Traits\BodyTrait, Traits\AttributesTrait;
 
     /**
      * Function interface flag
@@ -99,6 +99,7 @@ class FunctionGenerator extends AbstractGenerator
         $args = $this->formatArguments();
 
         $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
+        $this->output .= $this->hasAttributes() ? $this->formatAttributes() : null;
         if ($this->closure) {
             $this->output .= $this->printIndent() . '$' . $this->name .' = function(' . $args . ')';
         } else {
