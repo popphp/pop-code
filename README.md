@@ -33,7 +33,7 @@ Install `pop-code` using Composer.
 Or, require it in your composer.json file
 
     "require": {
-        "popphp/pop-view" : "^6.0.0"
+        "popphp/pop-code" : "^6.0.0"
     }
 
 [Top](#pop-code)
@@ -97,7 +97,7 @@ $class->addMethod($method);
 
 // Save the class to a file
 $code = new Generator($class);
-$code->writeToFile('MuClass.php');
+$code->writeToFile('MyClass.php');
 ```
 
 The contents of the file will be:
