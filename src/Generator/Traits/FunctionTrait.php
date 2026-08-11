@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -14,7 +14,9 @@
 namespace Pop\Code\Generator\Traits;
 
 use Pop\Code\Generator\DocblockGenerator;
-use InvalidArgumentException;
+use Pop\Code\Generator\Exception;
+use Pop\Code\Generator\NoValue;
+use Pop\Code\Generator\Support\ValueFormatter;
 
 /**
  * Function trait
@@ -22,9 +24,9 @@ use InvalidArgumentException;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 trait FunctionTrait
 {
@@ -47,25 +49,51 @@ trait FunctionTrait
      * @param  string  $name
      * @param  mixed   $value
      * @param  ?string $type
+     * @param  bool    $variadic
+     * @param  bool    $byRef
+     * @param  array   $attributes
+     * @throws Exception
      * @return static
      */
-    public function addArgument(string $name, mixed $value = null, ?string $type = null): static
+    public function addArgument(
+        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false,
+        array $attributes = []
+    ): static
     {
-        $typeHintsNotAllowed = ['integer'];
-        $argType = (!in_array($type, $typeHintsNotAllowed)) ? $type : null;
-        $this->arguments[$name] = ['value' => $value, 'type' => $argType];
+        if ($variadic && !($value instanceof NoValue)) {
+            throw new Exception('Error: A variadic argument cannot have a default value.');
+        }
+
+        $this->arguments[$name] = [
+            'value' => $value, 'type' => $type, 'variadic' => $variadic, 'byRef' => $byRef, 'attributes' => $attributes
+        ];
 
         if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
 
-        if (!str_starts_with($name, '$')) {
-            $name = '$' . $name;
+        $docName = $name;
+        if (!str_starts_with($docName, '$')) {
+            $docName = '$' . $docName;
         }
-        if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed')) {
-            $type .= '|null';
+        $docType = $type;
+        if (!empty($docType) && !str_starts_with($docType, '?') && ($docType !== 'mixed') && ($value === null)
+            && !in_array('null', explode('|', $docType), true)
+        ) {
+            $docType = str_contains($docType, '&') ? '(' . $docType . ')|null' : $docType . '|null';
         }
-        $this->docblock->addParam($type, $name);
+        // A caller re-adding an argument for a name that already exists (e.g. to change its
+        // type) leaves a stale @param entry behind otherwise -- $this->arguments is name-keyed
+        // and correctly overwrites, but the docblock's params are append-only. This also covers
+        // MethodReflection/FunctionReflection's own flow: they set a fully-parsed docblock
+        // (which may carry a hand-written per-param description from the real source) *before*
+        // calling addArgument() for each parameter -- preserve that description across the
+        // remove+re-add rather than silently dropping it, since addArgument() itself has no way
+        // to be told a description directly.
+        $existingParam = $this->docblock->findParam($docName);
+        $docDesc       = $existingParam['desc'] ?? null;
+        $this->docblock->removeParam($docName);
+        $this->docblock->addParam($docType, $docName, $docDesc);
 
         return $this;
     }
@@ -73,19 +101,23 @@ trait FunctionTrait
     /**
      * Add arguments
      *
-     * @param  array $args
-     * @throws InvalidArgumentException
+     * @param  array $args  each element shaped ['name' => string, 'value' => mixed, 'type' => ?string,
+     *                       'variadic' => bool, 'byRef' => bool, 'attributes' => array]
+     * @throws Exception
      * @return static
      */
     public function addArguments(array $args): static
     {
         foreach ($args as $arg) {
             if (!isset($arg['name'])) {
-                throw new InvalidArgumentException("Error: The 'name' key was not set.");
+                throw new Exception("Error: The 'name' key was not set.");
             }
-            $value = (isset($arg['value'])) ? $arg['value'] : null;
-            $type  = (isset($arg['type'])) ? $arg['type'] : null;
-            $this->addArgument($arg['name'], $value, $type);
+            $value      = array_key_exists('value', $arg) ? $arg['value'] : new NoValue();
+            $type       = $arg['type'] ?? null;
+            $variadic   = $arg['variadic'] ?? false;
+            $byRef      = $arg['byRef'] ?? false;
+            $attributes = $arg['attributes'] ?? [];
+            $this->addArgument($arg['name'], $value, $type, $variadic, $byRef, $attributes);
         }
         return $this;
     }
@@ -138,11 +170,18 @@ trait FunctionTrait
      * @param  string  $name
      * @param  mixed   $value
      * @param  ?string $type
+     * @param  bool    $variadic
+     * @param  bool    $byRef
+     * @param  array   $attributes
+     * @throws Exception
      * @return static
      */
-    public function addParameter(string $name, mixed $value = null, ?string $type = null): static
+    public function addParameter(
+        string $name, mixed $value = new NoValue(), ?string $type = null, bool $variadic = false, bool $byRef = false,
+        array $attributes = []
+    ): static
     {
-        $this->addArgument($name, $value, $type);
+        $this->addArgument($name, $value, $type, $variadic, $byRef, $attributes);
         return $this;
     }
 
@@ -208,16 +247,19 @@ trait FunctionTrait
      */
     public function addReturnType(string $type): static
     {
-        $typeHintsNotAllowed = ['integer'];
-        if (!in_array($type, $typeHintsNotAllowed)) {
-            $this->returnTypes[] = $type;
+        $this->returnTypes[] = $type;
 
-            if ($this->docblock === null) {
-                $this->docblock = new DocblockGenerator(null, $this->indent);
-            }
-
-            $this->docblock->setReturn(implode('|', $this->returnTypes));
+        if ($this->docblock === null) {
+            $this->docblock = new DocblockGenerator(null, $this->indent);
         }
+
+        // Preserve an existing @return description (e.g. one already parsed from a real source
+        // docblock by MethodReflection/FunctionReflection before this is called) -- setReturn()
+        // always resets the description to null when not given one explicitly, which silently
+        // discarded it otherwise.
+        $existingReturn = $this->docblock->getReturn();
+        $returnDesc     = $existingReturn['desc'] ?? null;
+        $this->docblock->setReturn(implode('|', $this->returnTypes), $returnDesc);
 
         return $this;
     }
@@ -279,15 +321,41 @@ trait FunctionTrait
         $i = 0;
         foreach ($this->arguments as $name => $arg) {
             $i++;
+
+            if (!empty($arg['attributes'])) {
+                $attrs = [];
+                foreach ($arg['attributes'] as $attribute) {
+                    $attrs[] = $attribute->render();
+                }
+                $args .= implode(' ', $attrs) . ' ';
+            }
+
+            $promoted = null;
+            if (!empty($arg['promotedVisibility'])) {
+                $promoted = $arg['promotedVisibility'] . ' ' . (!empty($arg['promotedReadonly']) ? 'readonly ' : '');
+            }
+
             if ($arg['type'] !== null) {
                 $type = $arg['type'];
-                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] == 'null')) {
-                    $type .= '|null';
+                if (!empty($type) && !str_starts_with($type, '?') && ($type !== 'mixed') && ($arg['value'] === null)
+                    && !in_array('null', explode('|', $type), true)
+                ) {
+                    // An intersection type (`Countable&Traversable`) needs parens before
+                    // combining with `|null` -- PHP requires DNF syntax `(A&B)|null`.
+                    $type = str_contains($type, '&') ? '(' . $type . ')|null' : $type . '|null';
                 }
-                $args .= $type . ' ';
+                $args .= $promoted . $type . ' ';
+            } else {
+                $args .= $promoted;
             }
+
+            $args .= (!empty($arg['byRef']) ? '&' : '') . (!empty($arg['variadic']) ? '...' : '');
             $args .= (substr($name, 0, 1) != '$') ? "\$" . $name : $name;
-            $args .= ($arg['value'] !== null) ? " = " . $arg['value'] : null;
+
+            if (!($arg['value'] instanceof NoValue)) {
+                $args .= ' = ' . ValueFormatter::format($arg['value'], $arg['type']);
+            }
+
             if ($i < count($this->arguments)) {
                 $args .= ', ';
             }

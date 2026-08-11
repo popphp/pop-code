@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class ClassGenerator extends AbstractClassGenerator
 {
@@ -39,6 +39,12 @@ class ClassGenerator extends AbstractClassGenerator
      * @var array
      */
     protected array $interfaces = [];
+
+    /**
+     * Readonly flag
+     * @var bool
+     */
+    protected bool $readonly = false;
 
     /**
      * Constructor
@@ -181,6 +187,28 @@ class ClassGenerator extends AbstractClassGenerator
     }
 
     /**
+     * Set the readonly flag
+     *
+     * @param  bool $readonly
+     * @return ClassGenerator
+     */
+    public function setAsReadonly(bool $readonly = true): ClassGenerator
+    {
+        $this->readonly = $readonly;
+        return $this;
+    }
+
+    /**
+     * Get the readonly flag
+     *
+     * @return bool
+     */
+    public function isReadonly(): bool
+    {
+        return $this->readonly;
+    }
+
+    /**
      * Render class
      *
      * @return string
@@ -195,8 +223,13 @@ class ClassGenerator extends AbstractClassGenerator
             $classKeyword = 'final ';
         }
 
+        if ($this->readonly) {
+            $classKeyword .= 'readonly ';
+        }
+
         $this->output  = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
         $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
+        $this->output .= $this->formatAttributes(false);
         $this->output .= $classKeyword . 'class ' . $this->name;
 
         if ($this->parent !== null) {
@@ -211,12 +244,12 @@ class ClassGenerator extends AbstractClassGenerator
         if ($this->hasUses()) {
             $this->output .= PHP_EOL;
             foreach ($this->uses as $ns => $as) {
-                $this->output .= $this->printIndent() . 'use ';
-                $this->output .= $ns;
-                if ($as !== null) {
-                    $this->output .= ' as ' . $as;
-                }
-                $this->output .= ';' . PHP_EOL;
+                // Unlike a namespace-level `use Foo\Bar as Baz;` import, a trait-use inside a
+                // class body has no whole-trait aliasing syntax -- `use SomeTrait as Alias;` here
+                // is not valid PHP (only per-method conflict resolution, `use A, B { A::m as n; }`,
+                // exists, and this simple $ns => $as map has no way to represent that). Any alias
+                // is therefore intentionally ignored when rendering a trait-use.
+                $this->output .= $this->printIndent() . 'use ' . $ns . ';' . PHP_EOL;
             }
         }
 

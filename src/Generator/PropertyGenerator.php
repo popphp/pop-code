@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -13,20 +13,20 @@
  */
 namespace Pop\Code\Generator;
 
+use Pop\Code\Generator\Support\ValueFormatter;
+
 /**
  * Property generator class
  *
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class PropertyGenerator extends AbstractClassElementGenerator
 {
-
-    use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
      * Property type
@@ -39,6 +39,19 @@ class PropertyGenerator extends AbstractClassElementGenerator
      * @var mixed
      */
     protected mixed $value = null;
+
+    /**
+     * Readonly flag
+     * @var bool
+     */
+    protected bool $readonly = false;
+
+    /**
+     * Flag to suppress printing the redundant 'readonly' keyword when the enclosing
+     * class is itself declared readonly (the property remains readonly regardless)
+     * @var bool
+     */
+    protected bool $suppressReadonlyKeyword = false;
 
     /**
      * Constructor
@@ -132,12 +145,71 @@ class PropertyGenerator extends AbstractClassElementGenerator
     }
 
     /**
+     * Set the readonly flag
+     *
+     * @param  bool $readonly
+     * @return PropertyGenerator
+     */
+    public function setAsReadonly(bool $readonly = true): PropertyGenerator
+    {
+        $this->readonly = $readonly;
+        if ($this->readonly) {
+            $this->setAsStatic(false);
+        }
+        return $this;
+    }
+
+    /**
+     * Get the readonly flag
+     *
+     * @return bool
+     */
+    public function isReadonly(): bool
+    {
+        return $this->readonly;
+    }
+
+    /**
+     * Suppress printing the 'readonly' keyword on this property, e.g. because the enclosing
+     * class is itself declared readonly, making a per-property 'readonly' keyword redundant.
+     * The property is still treated as readonly for type/value rendering purposes.
+     *
+     * @param  bool $suppress
+     * @return PropertyGenerator
+     */
+    public function suppressReadonlyKeyword(bool $suppress = true): PropertyGenerator
+    {
+        $this->suppressReadonlyKeyword = $suppress;
+        return $this;
+    }
+
+    /**
+     * Set the static flag (overridden to enforce mutual exclusion with readonly)
+     *
+     * @param  bool $static
+     * @return PropertyGenerator
+     */
+    public function setAsStatic(bool $static = true): PropertyGenerator
+    {
+        parent::setAsStatic($static);
+        if ($static) {
+            $this->readonly = false;
+        }
+        return $this;
+    }
+
+    /**
      * Render property
      *
+     * @throws Exception
      * @return string
      */
     public function render(): string
     {
+        if ($this->readonly && ($this->type === null)) {
+            throw new Exception('Error: A readonly property must have a type.');
+        }
+
         if ($this->docblock === null) {
             $this->docblock = new DocblockGenerator(null, $this->indent);
         }
@@ -146,64 +218,26 @@ class PropertyGenerator extends AbstractClassElementGenerator
         $type = null;
         if ($this->type !== null) {
             $type = $this->type;
-            if (($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')) {
-                $type .= '|null';
+            if (!$this->readonly && ($this->value === null) && !str_starts_with($type, '?') && ($type !== 'mixed')
+                && !in_array('null', explode('|', $type), true)) {
+                // An intersection type (`Countable&Traversable`) needs parens before combining
+                // with `|null` -- PHP requires DNF syntax `(A&B)|null`, not the bare `A&B|null`.
+                $type = str_contains($type, '&') ? '(' . $type . ')|null' : $type . '|null';
             }
             $type .= ' ';
         }
-        $this->output = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '') . ' '  . $type . '$' . $this->name;
+        $this->output  = PHP_EOL . $this->docblock->render();
+        $this->output .= $this->formatAttributes();
+        $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '')
+            . (($this->readonly && !$this->suppressReadonlyKeyword) ? ' readonly' : '') . ' ' . $type . '$' . $this->name;
 
-        if ($this->value !== null) {
-            if ($this->type == 'array') {
-                $val = (count($this->value) == 0) ? '[]' : $this->formatArrayValues();
-                $this->output .= ' = ' . $val . PHP_EOL;
-            } else if (($this->type == 'integer') || ($this->type == 'int') || ($this->type == 'float')) {
-                $this->output .= ' = ' . $this->value . ';';
-            } else if ($this->type == 'bool') {
-                $val = ($this->value) ? 'true' : 'false';
-                $this->output .= " = " . $val . ";";
-            } else {
-                $this->output .= " = '" . $this->value . "';";
-            }
+        if ($this->readonly) {
+            $this->output .= ';';
         } else {
-            $val = 'null';
-            $this->output .= ' = ' . $val . ';';
+            $this->output .= ' = ' . ValueFormatter::format($this->value, $this->type, $this->printIndent()) . ';';
         }
 
         return $this->output;
-    }
-
-    /**
-     * Format array value
-     *
-     * @return string
-     */
-    protected function formatArrayValues(): string
-    {
-        $ary = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '  ', var_export($this->value, true));
-        $ary .= ';';
-        $ary = str_replace('array (', '[', $ary);
-        $ary = str_replace('  );', '];', $ary);
-        $ary = str_replace('NULL', 'null', $ary);
-
-        $keys = array_keys($this->value);
-
-        $isAssoc = false;
-
-        for ($i = 0; $i < count($keys); $i++) {
-            if ($keys[$i] != $i) {
-                $isAssoc = true;
-            }
-        }
-
-        if (!$isAssoc) {
-            for ($i = 0; $i < count($keys); $i++) {
-                $ary = str_replace($i . ' => ', '', $ary);
-            }
-        }
-
-        return $ary;
     }
 
     /**

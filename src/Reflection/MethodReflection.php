@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,11 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Generator\Literal;
+use Pop\Code\Generator\NoValue;
+use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\SourceBodyExtractor;
+use Pop\Code\Reflection\Support\TypeNormalizer;
 
 /**
  * Method reflection code class
@@ -21,9 +26,9 @@ use Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class MethodReflection extends AbstractReflection
 {
@@ -53,96 +58,73 @@ class MethodReflection extends AbstractReflection
         }
 
         $method = new Generator\MethodGenerator($code->getName(), $visibility, $code->isStatic());
+        foreach ($code->getAttributes() as $reflectionAttribute) {
+            $method->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
         if ($docblock !== null) {
             $method->setDocblock($docblock);
         }
 
-        if ($code->isAbstract()) {
+        $reflectionParams = $code->getParameters();
+        $declaringClass   = $code->getDeclaringClass();
+
+        // An interface method is always reported abstract by native reflection, but the
+        // `abstract` keyword is implicit -- and syntactically forbidden -- inside an interface
+        // body. Only apply the flag for a real abstract method on a class.
+        if ($code->isAbstract() && !$declaringClass->isInterface()) {
             $method->setAsAbstract(true);
         } else if ($code->isFinal()) {
             $method->setAsFinal(true);
         }
 
-        $reflectionParams = $code->getParameters();
-
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
-            $paramType  = $reflectionParam->getType();
-            $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType) &&
-                method_exists($paramType, 'getName')) ? $paramType->getName() : null;
+            $paramType  = TypeNormalizer::resolveReflectionType($reflectionParam->getType());
 
-            try {
+            if (!$reflectionParam->isDefaultValueAvailable()) {
+                $paramValue = new NoValue();
+            } else if (($constantName = $reflectionParam->getDefaultValueConstantName()) !== null) {
+                $paramValue = new Literal($constantName);
+            } else {
                 $paramValue = $reflectionParam->getDefaultValue();
-            } catch (\ReflectionException $e) {
-                $paramValue = null;
             }
 
-            $method->addArgument($paramName, $paramValue, $paramType);
+            $paramAttributes = [];
+            foreach ($reflectionParam->getAttributes() as $reflectionAttribute) {
+                $paramAttributes[] = AttributeCollector::build($reflectionAttribute);
+            }
+
+            if ($reflectionParam->isPromoted()) {
+                $promotedProperty = $declaringClass->getProperty($paramName);
+                if ($promotedProperty->isProtected()) {
+                    $promotedVisibility = 'protected';
+                } else if ($promotedProperty->isPrivate()) {
+                    $promotedVisibility = 'private';
+                } else {
+                    $promotedVisibility = 'public';
+                }
+                $method->addPromotedArgument(
+                    $paramName, $promotedVisibility, $paramValue, $paramType, $promotedProperty->isReadOnly(), $paramAttributes
+                );
+            } else {
+                $method->addArgument(
+                    $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference(),
+                    $paramAttributes
+                );
+            }
         }
 
-        // Parse the body if available
-        $file = $code->getFileName();
-
-        if (!empty($file) && file_exists($file)) {
-            $lines     = file($file);
-            $startLine = $code->getStartLine() - 1;
-            $endLine   = $code->getEndLine() - 1;
-            $length    = $endLine - $startLine;
-            $body      = null;
-
-            if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
-                $lines = array_slice($lines, ($startLine + 1), $length);
-
-                if (preg_match('/[ ]+\}/', $lines[(count($lines) - 1)])) {
-                    unset($lines[(count($lines) - 1)]);
-                }
-                if (isset($lines[0]) && preg_match('/[ ]+\{/', $lines[0])) {
-                    unset($lines[0]);
-                }
-
-                $lines = array_values($lines);
-
-                if (isset($lines[0]) && (str_starts_with($lines[0], ' '))) {
-                    $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));
-                    if ($spaces > 0) {
-                        $lines = array_map(function($value) use ($spaces) {
-                            if (substr($value, 0, $spaces) == str_repeat(' ', $spaces)) {
-                                $value = substr($value, $spaces);
-                            }
-                            return $value;
-                        }, $lines);
-                    }
-                }
-
-                $body = implode('', $lines);
-            }
-
-            if (!empty($body)) {
-                $method->setBody($body);
-            }
+        // Parse the body if available. Concrete methods always get an explicit body (even if
+        // empty) so they render with braces rather than as a bodyless abstract/interface stub.
+        $body = SourceBodyExtractor::extract($code, true);
+        if (!$code->isAbstract()) {
+            $method->setBody($body ?? '');
         }
 
         // Get return type(s)
-        if ($code->hasReturnType()) {
-            $namedTypes  = [];
-            $returnTypes = $code->getReturnType();
-            if ($returnTypes instanceof \ReflectionUnionType) {
-                $types = $returnTypes->getTypes();
-                foreach ($types as $type) {
-                    $namedTypes[] = $type->getName();
-                }
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            } else if ($returnTypes instanceof \ReflectionNamedType) {
-                $namedTypes[] = $returnTypes->getName();
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            }
-            if (!empty($namedTypes)) {
-                $method->addReturnTypes($namedTypes);
-            }
+        $returnType = TypeNormalizer::resolveReflectionType($code->getReturnType());
+        if ($returnType !== null) {
+            $method->addReturnType($returnType);
         }
 
         return $method;

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator\NamespaceGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class NamespaceReflection extends AbstractReflection
 {
@@ -57,8 +57,11 @@ class NamespaceReflection extends AbstractReflection
 
         if (isset($matches[1]) && isset($matches[1][0])) {
             foreach ($matches[1] as $match) {
+                $match = trim($match);
                 if (str_contains($match, ' as ')) {
                     [$use, $as] = explode(' as ', $match);
+                    $use = trim($use);
+                    $as  = trim($as);
                 } else {
                     $use = $match;
                     $as  = null;

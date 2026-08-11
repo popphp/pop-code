@@ -17,6 +17,26 @@ class ClassGeneratorTest extends TestCase
         $this->assertTrue($class->hasInterfaces());
     }
 
+    public function testAliasedTraitUseRendersValidPhpWithTheAliasIgnored()
+    {
+        // A trait-use inside a class body has no whole-trait aliasing syntax -- `use SomeTrait as
+        // Alias;` is not valid PHP (only per-method conflict resolution exists). addUse() used to
+        // render the alias unconditionally, producing invalid output whenever it was called with
+        // a non-null $as -- e.g. ClassReflection re-parsing a real class's `use` lines.
+        $class = new Generator\ClassGenerator('Foo');
+        $class->addUse('SomeTrait', 'Alias');
+        $render = (string) $class;
+
+        $this->assertStringContainsString('use SomeTrait;', $render);
+        $this->assertStringNotContainsString('as Alias', $render);
+
+        $tmpFile = sys_get_temp_dir() . '/pop-code-aliased-use-' . uniqid() . '.php';
+        file_put_contents($tmpFile, "<?php\n" . $render);
+        exec('php -l ' . escapeshellarg($tmpFile), $output, $exitCode);
+        unlink($tmpFile);
+        $this->assertEquals(0, $exitCode, implode("\n", $output));
+    }
+
     public function testIndent()
     {
         $class = new Generator\ClassGenerator('Foo');
@@ -102,6 +122,59 @@ class ClassGeneratorTest extends TestCase
         $class = new Generator\ClassGenerator('Foo');
         $class->setAsFinal(true);
         $this->assertStringContainsString('final class Foo', $class->render());
+    }
+
+    public function testReadonly()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->setAsReadonly(true);
+        $this->assertTrue($class->isReadonly());
+        $this->assertStringContainsString('readonly class Foo', $class->render());
+    }
+
+    public function testReadonlyWithAbstract()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->setAsAbstract(true);
+        $class->setAsReadonly(true);
+        $this->assertStringContainsString('abstract readonly class Foo', $class->render());
+    }
+
+    public function testAttributes()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $tag1  = new Generator\AttributeGenerator('Entity');
+        $tag2  = new Generator\AttributeGenerator('Table');
+        $tag2->addArgument('users', 'name');
+
+        $class->addAttributes([$tag1, $tag2]);
+
+        $this->assertTrue($class->hasAttributes());
+        $this->assertTrue($class->hasAttribute('Entity'));
+        $this->assertEquals(2, count($class->getAttributes()));
+
+        $class->removeAttribute($tag1);
+        $this->assertFalse($class->hasAttribute('Entity'));
+        $this->assertTrue($class->hasAttribute('Table'));
+    }
+
+    public function testRepeatedAttributesAreNotCollapsed()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->addAttribute(new Generator\AttributeGenerator('Tag'));
+        $class->addAttribute(new Generator\AttributeGenerator('Tag'));
+
+        $this->assertEquals(2, count($class->getAttributes()));
+        $this->assertEquals(2, count($class->getAttributesByName('Tag')));
+    }
+
+    public function testAttributesRenderBeforeClassKeywordWithNoIndent()
+    {
+        $class = new Generator\ClassGenerator('Foo');
+        $class->addAttribute(new Generator\AttributeGenerator('Entity'));
+        $render = (string) $class;
+
+        $this->assertStringContainsString("#[Entity]\nclass Foo", $render);
     }
 
 }

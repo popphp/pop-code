@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,11 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator\FunctionGenerator;
+use Pop\Code\Generator\Literal;
+use Pop\Code\Generator\NoValue;
+use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\SourceBodyExtractor;
+use Pop\Code\Reflection\Support\TypeNormalizer;
 use ReflectionException;
 
 /**
@@ -22,9 +27,9 @@ use ReflectionException;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class FunctionReflection extends AbstractReflection
 {
@@ -42,80 +47,55 @@ class FunctionReflection extends AbstractReflection
         $reflection       = new \ReflectionFunction($code);
         $reflectionName   = $reflection->getName();
         $reflectionParams = $reflection->getParameters();
-        $isClosure        = ($reflectionName == '{closure}');
+        // PHP 8.4 renamed closures from the bare '{closure}' to '{closure:file:line}' (or
+        // '{closure:Class::method():line}' for one declared inside a method) -- match the prefix
+        // rather than the exact old name, or isClosure is never true on this library's own
+        // minimum supported PHP version, and the mangled name gets used as a literal function
+        // name in the rendered output instead of being detected as a closure at all.
+        $isClosure        = str_starts_with($reflectionName, '{closure');
 
         if (($name === null) && !($isClosure)) {
             $name = $reflectionName;
         }
 
         $function = new FunctionGenerator($name, $isClosure);
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            $function->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
 
         foreach ($reflectionParams as $key => $reflectionParam) {
             $paramName  = $reflectionParam->getName();
-            $paramType  = $reflectionParam->getType();
-            $paramType  = (!empty($paramType) && ($paramType instanceof \ReflectionType)) ? $paramType->getName() : null;
+            $paramType  = TypeNormalizer::resolveReflectionType($reflectionParam->getType());
 
-            try {
+            if (!$reflectionParam->isDefaultValueAvailable()) {
+                $paramValue = new NoValue();
+            } else if (($constantName = $reflectionParam->getDefaultValueConstantName()) !== null) {
+                $paramValue = new Literal($constantName);
+            } else {
                 $paramValue = $reflectionParam->getDefaultValue();
-            } catch (\ReflectionException $e) {
-                $paramValue = null;
             }
 
-            $function->addArgument($paramName, $paramValue, $paramType);
+            $paramAttributes = [];
+            foreach ($reflectionParam->getAttributes() as $reflectionAttribute) {
+                $paramAttributes[] = AttributeCollector::build($reflectionAttribute);
+            }
+
+            $function->addArgument(
+                $paramName, $paramValue, $paramType, $reflectionParam->isVariadic(), $reflectionParam->isPassedByReference(),
+                $paramAttributes
+            );
         }
 
         // Parse the body if available
-        $file = $reflection->getFileName();
-
-        if (!empty($file) && file_exists($file)) {
-            $lines     = file($file);
-            $startLine = $reflection->getStartLine() - 1;
-            $endLine   = $reflection->getEndLine() - 1;
-            $length    = $endLine - $startLine;
-            $body      = null;
-
-            if (($length > 0) && isset($lines[$startLine]) && isset($lines[$endLine])) {
-                $lines = array_slice($lines, ($startLine + 1), ($length - 1));
-                if (isset($lines[0]) && (str_starts_with($lines[0], ' '))) {
-                    $spaces = strlen($lines[0]) - strlen(ltrim($lines[0]));
-                    if ($spaces > 0) {
-                        $lines = array_map(function($value) use ($spaces) {
-                            if (substr($value, 0, $spaces) == str_repeat(' ', $spaces)) {
-                                $value = substr($value, $spaces);
-                            }
-                            return $value;
-                        }, $lines);
-                    }
-                }
-                $body = implode('', $lines);
-            }
-
-            if (!empty($body)) {
-                $function->setBody($body, false);
-            }
+        $body = SourceBodyExtractor::extract($reflection, false);
+        if ($body !== null) {
+            $function->setBody($body, 0);
         }
 
         // Get return type(s)
-        if ($reflection->hasReturnType()) {
-            $namedTypes  = [];
-            $returnTypes = $reflection->getReturnType();
-            if ($returnTypes instanceof \ReflectionUnionType) {
-                $types = $returnTypes->getTypes();
-                foreach ($types as $type) {
-                    $namedTypes[] = $type->getName();
-                }
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            } else if ($returnTypes instanceof \ReflectionNamedType) {
-                $namedTypes[] = $returnTypes->getName();
-                if (($returnTypes->allowsNull()) && !in_array('null', $namedTypes)) {
-                    $namedTypes[] = 'null';
-                }
-            }
-            if (!empty($namedTypes)) {
-                $function->addReturnTypes($namedTypes);
-            }
+        $returnType = TypeNormalizer::resolveReflectionType($reflection->getReturnType());
+        if ($returnType !== null) {
+            $function->addReturnType($returnType);
         }
 
         return $function;

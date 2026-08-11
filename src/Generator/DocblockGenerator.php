@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class DocblockGenerator extends AbstractGenerator
 {
@@ -195,6 +195,47 @@ class DocblockGenerator extends AbstractGenerator
     }
 
     /**
+     * Find a param tag by its variable name (e.g. '$foo'), not by index -- returns the first
+     * match's full ['type' => ..., 'var' => ..., 'desc' => ...] array, or null if none matches.
+     * Used to look up (and preserve) an existing param's description before removeParam()
+     * discards it, e.g. when re-syncing a param entry that already carries a hand-written
+     * description from a reflected docblock.
+     *
+     * @param  string $var
+     * @return array|null
+     */
+    public function findParam(string $var): array|null
+    {
+        foreach ($this->tags['param'] as $param) {
+            if (($param['var'] ?? null) === $var) {
+                return $param;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Remove a param tag by its variable name (e.g. '$foo'), not by index -- removes the first
+     * match, if any, and re-indexes the remaining params. A no-op if no param has that variable
+     * name. Used to replace a stale @param entry when a caller re-adds a parameter of the same
+     * name with a different type (params are otherwise append-only via addParam()/addParams()).
+     *
+     * @param  string $var
+     * @return DocblockGenerator
+     */
+    public function removeParam(string $var): DocblockGenerator
+    {
+        foreach ($this->tags['param'] as $key => $param) {
+            if (($param['var'] ?? null) === $var) {
+                unset($this->tags['param'][$key]);
+                $this->tags['param'] = array_values($this->tags['param']);
+                break;
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Add a return tag
      *
      * @param  string  $type
@@ -321,7 +362,7 @@ class DocblockGenerator extends AbstractGenerator
             if (!empty($param['var'])) {
                 $tags .= ' ' . $param['var'];
             }
-            $tags .= ($param['desc'] !== null) ? $param['desc'] . PHP_EOL : PHP_EOL;
+            $tags .= ($param['desc'] !== null) ? ' ' . $param['desc'] . PHP_EOL : PHP_EOL;
         }
 
         // Format throw tag

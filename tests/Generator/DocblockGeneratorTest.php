@@ -57,10 +57,52 @@ class DocblockGeneratorTest extends TestCase
         $this->assertStringContainsString('     * description. This is a long description. This is a long description.', $render);
         $this->assertStringContainsString('     * This is a long description.', $render);
         $this->assertStringContainsString('     * ', $render);
-        $this->assertStringContainsString('     * @param  string  fooFoo var', $render);
+        $this->assertStringContainsString('     * @param  string  foo Foo var', $render);
         $this->assertStringContainsString('     * @throws Exception Error occurred', $render);
         $this->assertStringContainsString('     * @return array', $render);
         $this->assertStringContainsString('     */', $render);
+    }
+
+    public function testRemoveParamRemovesTheFirstMatchByVarName()
+    {
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->addParam('string', '$foo');
+        $docblock->addParam('int', '$bar');
+
+        $docblock->removeParam('$foo');
+
+        $this->assertEquals('int', $docblock->getParam(0)['type']);
+        $this->assertEquals('$bar', $docblock->getParam(0)['var']);
+        $this->assertNull($docblock->getParam(1));
+    }
+
+    public function testRemoveParamIsANoOpWhenNoMatchExists()
+    {
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->addParam('string', '$foo');
+
+        $docblock->removeParam('$doesNotExist');
+
+        $this->assertEquals('$foo', $docblock->getParam(0)['var']);
+    }
+
+    public function testFindParamReturnsTheFirstMatchByVarName()
+    {
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->addParam('string', '$foo', 'The foo value');
+        $docblock->addParam('int', '$bar');
+
+        $found = $docblock->findParam('$foo');
+        $this->assertEquals('string', $found['type']);
+        $this->assertEquals('The foo value', $found['desc']);
+    }
+
+    public function testFindParamReturnsNullWhenNoMatchExists()
+    {
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->addParam('string', '$foo');
+
+        $this->assertNull($docblock->findParam('$doesNotExist'));
     }
 
 }

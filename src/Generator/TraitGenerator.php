@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class TraitGenerator extends AbstractClassGenerator
 {
@@ -48,6 +48,7 @@ class TraitGenerator extends AbstractClassGenerator
     {
         $this->output = ($this->namespace !== null) ? $this->namespace->render() . PHP_EOL : null;
         $this->output .= ($this->docblock !== null) ? $this->docblock->render() : null;
+        $this->output .= $this->formatAttributes(false);
         $this->output .= 'trait ' . $this->name;
 
         $this->output .= PHP_EOL . '{';
@@ -55,18 +56,24 @@ class TraitGenerator extends AbstractClassGenerator
         if ($this->hasUses()) {
             $this->output .= PHP_EOL;
             foreach ($this->uses as $ns => $as) {
-                $this->output .= $this->printIndent() . 'use ';
-                $this->output .= $ns;
-                if ($as !== null) {
-                    $this->output .= ' as ' . $as;
-                }
-                $this->output .= ';' . PHP_EOL;
+                // Unlike a namespace-level `use Foo\Bar as Baz;` import, a trait-use inside a
+                // class-like body has no whole-trait aliasing syntax -- `use SomeTrait as Alias;`
+                // here is not valid PHP (only per-method conflict resolution, `use A, B { A::m as
+                // n; }`, exists, and this simple $ns => $as map has no way to represent that). Any
+                // alias is therefore intentionally ignored when rendering a trait-use.
+                $this->output .= $this->printIndent() . 'use ' . $ns . ';' . PHP_EOL;
             }
         }
 
-        $this->output .= $this->formatConstants() . PHP_EOL;
-        $this->output .= $this->formatProperties() . PHP_EOL;
-        $this->output .= $this->formatMethods() . PHP_EOL;
+        if ($this->hasConstants()) {
+            $this->output .= $this->formatConstants() . PHP_EOL;
+        }
+        if ($this->hasProperties()) {
+            $this->output .= $this->formatProperties() . PHP_EOL;
+        }
+        if ($this->hasMethods()) {
+            $this->output .= $this->formatMethods() . PHP_EOL;
+        }
         $this->output .= '}' . PHP_EOL;
 
         return $this->output;
@@ -79,7 +86,7 @@ class TraitGenerator extends AbstractClassGenerator
      */
     protected function formatConstants(): string
     {
-        $constants = null;
+        $constants = '';
 
         foreach ($this->constants as $constant) {
             $constants .= PHP_EOL . $constant->render();
@@ -95,7 +102,7 @@ class TraitGenerator extends AbstractClassGenerator
      */
     protected function formatProperties(): string
     {
-        $props = null;
+        $props = '';
 
         foreach ($this->properties as $prop) {
             $props .= PHP_EOL . $prop->render();
@@ -111,7 +118,7 @@ class TraitGenerator extends AbstractClassGenerator
      */
     protected function formatMethods(): string
     {
-        $methods = null;
+        $methods = '';
 
         foreach ($this->methods as $method) {
             $methods .= PHP_EOL . $method->render();

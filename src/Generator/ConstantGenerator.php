@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -13,20 +13,20 @@
  */
 namespace Pop\Code\Generator;
 
+use Pop\Code\Generator\Support\ValueFormatter;
+
 /**
  * Constant generator class
  *
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class ConstantGenerator extends AbstractClassElementGenerator
 {
-
-    use Traits\NameTrait, Traits\DocblockTrait;
 
     /**
      * Constant type
@@ -39,6 +39,12 @@ class ConstantGenerator extends AbstractClassElementGenerator
      * @var mixed
      */
     protected mixed $value = null;
+
+    /**
+     * Typed-signature flag: when true and a type is set, render() emits the type in the signature
+     * @var bool
+     */
+    protected bool $typed = false;
 
     /**
      * Constructor
@@ -113,6 +119,28 @@ class ConstantGenerator extends AbstractClassElementGenerator
     }
 
     /**
+     * Set whether the declared type is rendered in the signature (PHP 8.3+ typed constants)
+     *
+     * @param  bool $typed
+     * @return ConstantGenerator
+     */
+    public function setTyped(bool $typed = true): ConstantGenerator
+    {
+        $this->typed = $typed;
+        return $this;
+    }
+
+    /**
+     * Determine if the declared type is rendered in the signature
+     *
+     * @return bool
+     */
+    public function isTyped(): bool
+    {
+        return $this->typed;
+    }
+
+    /**
      * Render constant
      *
      * @return string
@@ -124,59 +152,24 @@ class ConstantGenerator extends AbstractClassElementGenerator
         }
 
         $this->docblock->addTag('var', $this->type);
-        $this->output = PHP_EOL . $this->docblock->render();
-        $this->output .= $this->printIndent() . 'const ' . $this->name;
+        $this->output  = PHP_EOL . $this->docblock->render();
+        $this->output .= $this->formatAttributes();
+        $this->output .= $this->printIndent() . $this->visibility . ' const';
 
-        if ($this->value !== null) {
-            if ($this->type == 'array') {
-                $val = (count($this->value) == 0) ? '[]' : $this->formatArrayValues();
-                $this->output .= ' = ' . $val . PHP_EOL;
-            } else if (($this->type == 'integer') || ($this->type == 'int') || ($this->type == 'float')) {
-                $this->output .= ' = ' . $this->value . ';';
-            } else if ($this->type == 'bool') {
-                $val = ($this->value) ? 'true' : 'false';
-                $this->output .= " = " . $val . ";";
-            } else {
-                $this->output .= " = '" . $this->value . "';";
-            }
-        } else {
-            $val = ($this->type == 'array') ? '[]' : 'null';
-            $this->output .= ' = ' . $val . ';';
+        if ($this->typed && ($this->type !== null)) {
+            $this->output .= ' ' . $this->type;
         }
+
+        $this->output .= ' ' . $this->name;
+
+        if (($this->value === null) && ($this->type === 'array')) {
+            $val = '[]';
+        } else {
+            $val = ValueFormatter::format($this->value, $this->type, $this->printIndent());
+        }
+        $this->output .= ' = ' . $val . ';';
 
         return $this->output;
-    }
-
-    /**
-     * Format array value
-     *
-     * @return string
-     */
-    protected function formatArrayValues(): string
-    {
-        $ary = str_replace(PHP_EOL, PHP_EOL . $this->printIndent() . '  ', var_export($this->value, true));
-        $ary .= ';';
-        $ary = str_replace('array (', '[', $ary);
-        $ary = str_replace('  );', '];', $ary);
-        $ary = str_replace('NULL', 'null', $ary);
-
-        $keys = array_keys($this->value);
-
-        $isAssoc = false;
-
-        for ($i = 0; $i < count($keys); $i++) {
-            if ($keys[$i] != $i) {
-                $isAssoc = true;
-            }
-        }
-
-        if (!$isAssoc) {
-            for ($i = 0; $i < count($keys); $i++) {
-                $ary = str_replace($i . ' => ', '', $ary);
-            }
-        }
-
-        return $ary;
     }
 
     /**

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -19,14 +19,14 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class FunctionGenerator extends AbstractGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait, Traits\FunctionTrait, Traits\BodyTrait;
+    use Traits\NameTrait, Traits\DocblockTrait, Traits\FunctionTrait, Traits\BodyTrait, Traits\AttributesTrait;
 
     /**
      * Function interface flag
@@ -92,15 +92,21 @@ class FunctionGenerator extends AbstractGenerator
      */
     public function render(): string
     {
-        if ($this->name === null) {
+        // A closure need not be named -- it's only assigned to a $name variable when one was
+        // given (e.g. reflecting a real anonymous closure with no name override supplies none).
+        // A regular (non-closure) function always needs one, since `function (...) {}` alone
+        // isn't valid as a statement the way `function foo(...) {}` is.
+        if (($this->name === null) && !$this->closure) {
             throw new Exception('Error: The function name has not been set.');
         }
 
         $args = $this->formatArguments();
 
         $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
+        $this->output .= $this->formatAttributes();
         if ($this->closure) {
-            $this->output .= $this->printIndent() . '$' . $this->name .' = function(' . $args . ')';
+            $prefix = ($this->name !== null) ? '$' . $this->name . ' = ' : '';
+            $this->output .= $this->printIndent() . $prefix . 'function(' . $args . ')';
         } else {
             $this->output .= $this->printIndent() . 'function ' . $this->name . '(' . $args . ')';
         }

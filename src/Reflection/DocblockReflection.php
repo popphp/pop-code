@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -21,9 +21,9 @@ use Pop\Code\Generator\DocblockGenerator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class DocblockReflection extends AbstractReflection
 {
@@ -47,21 +47,24 @@ class DocblockReflection extends AbstractReflection
         $indent        = null;
         $tags          = null;
 
-        // Parse the description, if any
-        if (str_contains($code, '@')) {
-            $desc    = substr($code, 0, strpos($code, '@'));
-            $desc    = str_replace('/*', '', $desc);
-            $desc    = str_replace('*/', '', $desc);
-            $desc    = str_replace(PHP_EOL . ' * ', ' ', $desc);
-            $desc    = trim(str_replace('*', '', $desc));
-            $descAry = explode("\n", $desc);
+        // Parse the description, if any. A docblock with no @-tags at all (just a summary line,
+        // as is common on enum cases) still has a description to extract, so this must not be
+        // gated on the presence of '@' — only the *extent* of the description text depends on it.
+        $desc    = str_contains($code, '@') ? substr($code, 0, strpos($code, '@')) : $code;
+        $desc    = str_replace('/*', '', $desc);
+        $desc    = str_replace('*/', '', $desc);
+        $desc    = str_replace(PHP_EOL . ' * ', ' ', $desc);
+        $desc    = trim(str_replace('*', '', $desc));
+        $descAry = explode("\n", $desc);
 
+        $formattedDesc = null;
+        foreach ($descAry as $line) {
+            $formattedDesc .= ' ' . trim($line);
+        }
+
+        $formattedDesc = trim($formattedDesc);
+        if ($formattedDesc === '') {
             $formattedDesc = null;
-            foreach ($descAry as $line) {
-                $formattedDesc .= ' ' . trim($line);
-            }
-
-            $formattedDesc = trim($formattedDesc);
         }
 
         // Get the indentation, if any, and create docblock object
@@ -86,8 +89,26 @@ class DocblockReflection extends AbstractReflection
                     if (str_contains($paramTag, ' ')) {
                         $varName = trim(substr($paramTag, strpos($paramTag, ' ')));
                         if (str_contains($varName, ' ')) {
-                            $paramDesc = trim(substr($varName, strpos($varName, ' ')));
+                            // $varName previously kept the trailing description text attached
+                            // (only $paramDesc was extracted, never trimmed back off of
+                            // $varName itself) -- e.g. "@param string $name The name to use"
+                            // stored 'var' as "$name The name to use" instead of just "$name",
+                            // duplicating the description once concatenated at render time, and
+                            // also breaking the stale-@param-on-re-add dedup, which matches on
+                            // the variable name exactly.
+                            $spacePos  = strpos($varName, ' ');
+                            $paramDesc = trim(substr($varName, $spacePos));
+                            $varName   = trim(substr($varName, 0, $spacePos));
                         }
+                    } else if (str_starts_with($paramTag, '$')) {
+                        // A bare "@param $var" with no type at all -- $paramTag is the variable
+                        // name, not a type. Without this check it fell into the branch below and
+                        // was stored as the type instead, leaving 'var' unset -- which meant a
+                        // later addArgument() call for the same parameter (which correctly
+                        // computes the real variable name) couldn't recognize this as the same
+                        // param to replace, and appended a second @param line instead.
+                        $paramType = null;
+                        $varName   = $paramTag;
                     } else {
                         $paramType = $paramTag;
                     }

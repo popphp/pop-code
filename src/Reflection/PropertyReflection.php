@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,8 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Reflection\Support\TypeNormalizer;
+use Pop\Code\Reflection\Support\AttributeCollector;
 
 /**
  * Property reflection code class
@@ -21,9 +23,9 @@ use Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class PropertyReflection extends AbstractReflection
 {
@@ -48,16 +50,20 @@ class PropertyReflection extends AbstractReflection
 
         $docblock = null;
         $desc     = null;
-        $type     = null;
+        $type     = self::resolveType($code);
 
         $doc = $code->getDocComment();
         if (($doc !== null) && (str_contains($doc, '/*'))) {
             $docblock = DocblockReflection::parse($doc);
             $docblock->setIndent(4);
-            $desc     = $docblock->getDesc();
-            $type     = $docblock->getTag('var');
-        } else if ($value !== null) {
-            $type     = strtolower(gettype($value));
+            $desc = $docblock->getDesc();
+            if ($type === null) {
+                $type = $docblock->getTag('var');
+            }
+        }
+
+        if (($type === null) && ($value !== null)) {
+            $type = TypeNormalizer::normalize(strtolower(gettype($value)));
         }
 
         if (is_array($value)) {
@@ -67,12 +73,28 @@ class PropertyReflection extends AbstractReflection
         }
 
         $property = new Generator\PropertyGenerator($code->getName(), $type, $formattedValue, $visibility, $code->isStatic());
+        $property->setAsReadonly($code->isReadOnly());
         if ($docblock !== null) {
             $property->setDocblock($docblock);
         }
         $property->setDesc($desc);
 
+        foreach ($code->getAttributes() as $reflectionAttribute) {
+            $property->addAttribute(AttributeCollector::build($reflectionAttribute));
+        }
+
         return $property;
+    }
+
+    /**
+     * Resolve a property's declared type (if any) into a bare, pipe-joined type-hint string
+     *
+     * @param  \ReflectionProperty $property
+     * @return string|null
+     */
+    protected static function resolveType(\ReflectionProperty $property): string|null
+    {
+        return $property->hasType() ? TypeNormalizer::resolveReflectionType($property->getType()) : null;
     }
 
 }

@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,9 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Reflection\Support\UseStatementParser;
+use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
 /**
@@ -22,9 +25,9 @@ use ReflectionException;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class TraitReflection extends AbstractReflection
 {
@@ -63,6 +66,19 @@ class TraitReflection extends AbstractReflection
             $trait->setNamespace(NamespaceReflection::parse($fileContents, $reflection->getNamespaceName()));
         }
 
+        // Detect attributes
+        $importResolver = new NamespaceImportResolver();
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
+                if (!$trait->hasNamespace()) {
+                    $trait->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $trait->getNamespace()->addUse($reflectionAttribute->getName());
+            }
+            $trait->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
+        }
+
         // Detect and set the class doc block
         $traitDocBlock = $reflection->getDocComment();
         if (!empty($traitDocBlock) && (str_contains($traitDocBlock, '/*'))) {
@@ -71,31 +87,18 @@ class TraitReflection extends AbstractReflection
 
         // Detect used traits
         if ($fileContents !== null) {
-            $uses = [];
-            preg_match_all('/[ ]+use(.*);$/m', $fileContents, $uses);
-
-            if (isset($uses[1])) {
-                foreach ($uses[1] as $u) {
-                    $useAry = array_map('trim', explode(',', trim($u)));
-                    foreach ($useAry as $useValue) {
-                        if (strpos($useValue, ' as ') !== false) {
-                            [$use, $as] = explode(' as ', $useValue);
-                        } else {
-                            $use = $useValue;
-                            $as  = null;
-                        }
-                        $trait->addUse($use, $as);
-                    }
-                }
+            foreach (UseStatementParser::parse($fileContents) as $use => $as) {
+                $trait->addUse($use, $as);
             }
         }
 
         // Detect properties
-        $properties = $reflection->getDefaultProperties();
-        if (count($properties) > 0) {
-            foreach ($properties as $name => $value) {
-                $trait->addProperty(PropertyReflection::parse($reflection->getProperty($name), $name, $value));
+        foreach ($reflection->getProperties() as $property) {
+            if ($property->isPromoted()) {
+                continue;
             }
+            $value = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
+            $trait->addProperty(PropertyReflection::parse($property, $property->getName(), $value));
         }
 
         // Detect methods

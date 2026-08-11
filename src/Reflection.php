@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -22,9 +22,9 @@ use ReflectionException;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class Reflection
 {
@@ -66,6 +66,19 @@ class Reflection
     public static function createInterface(mixed $interface, ?string $name = null): Generator\InterfaceGenerator
     {
         return Reflection\InterfaceReflection::parse($interface, $name);
+    }
+
+    /**
+     * Create enum
+     *
+     * @param  mixed   $enum
+     * @param  ?string $name
+     * @throws Exception
+     * @return Generator\EnumGenerator
+     */
+    public static function createEnum(mixed $enum, ?string $name = null): Generator\EnumGenerator
+    {
+        return Reflection\EnumReflection::parse($enum, $name);
     }
 
     /**
@@ -130,6 +143,18 @@ class Reflection
     public static function createProperty(mixed $property, ?string $name = null, mixed $value = null): Generator\PropertyGenerator
     {
         return Reflection\PropertyReflection::parse($property, $name, $value);
+    }
+
+    /**
+     * Create constant
+     *
+     * @param  mixed   $constant
+     * @param  ?string $name
+     * @return Generator\ConstantGenerator
+     */
+    public static function createConstant(mixed $constant, ?string $name = null): Generator\ConstantGenerator
+    {
+        return Reflection\ConstantReflection::parse($constant, $name);
     }
 
 }

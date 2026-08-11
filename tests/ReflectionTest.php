@@ -68,6 +68,29 @@ CODE;
         $function2 = Reflection::createFunction($code2);
         $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function1);
         $this->assertInstanceOf('Pop\Code\Generator\FunctionGenerator', $function2);
+
+        $code3     = function(int ...$nums) { return array_sum($nums); };
+        $function3 = Reflection::createFunction($code3);
+        $this->assertStringContainsString('...$nums', (string) $function3);
+
+        $code4     = #[\Pop\Code\Test\TestAssets\TagAttribute('closure')] function(string $x) { return $x; };
+        $function4 = Reflection::createFunction($code4);
+        $this->assertStringContainsString("#[TagAttribute('closure')]", (string) $function4);
+    }
+
+    public function testCreateFunctionResolvesUnionAndIntersectionParameterTypes()
+    {
+        // FunctionReflection previously crashed on a union-typed parameter (getName() called
+        // directly on a ReflectionType without checking for ReflectionUnionType), and had no
+        // handling at all for intersection types.
+        $unionCode     = function(int|string $x) { return $x; };
+        $unionFunction = Reflection::createFunction($unionCode);
+        $render        = (string) $unionFunction;
+        $this->assertTrue(str_contains($render, 'int|string') || str_contains($render, 'string|int'));
+
+        $intersectCode     = function(\Countable&\Traversable $x) { return $x; };
+        $intersectFunction = Reflection::createFunction($intersectCode);
+        $this->assertStringContainsString('Countable&Traversable', (string) $intersectFunction);
     }
 
     public function testCreateMethod()
@@ -86,6 +109,21 @@ CODE;
 
         $property = Reflection::createProperty($properties[0]);
         $this->assertInstanceOf('Pop\Code\Generator\PropertyGenerator', $property);
+    }
+
+    public function testCreateEnum()
+    {
+        $enum = Reflection::createEnum('Pop\Code\Test\TestAssets\StatusEnum');
+        $this->assertInstanceOf('Pop\Code\Generator\EnumGenerator', $enum);
+    }
+
+    public function testCreateConstant()
+    {
+        $class     = new \ReflectionClass('Pop\Code\Generator\ConstantGenerator');
+        $constants = $class->getReflectionConstants();
+
+        $constant = Reflection::createConstant($constants[0]);
+        $this->assertInstanceOf('Pop\Code\Generator\ConstantGenerator', $constant);
     }
 
 }

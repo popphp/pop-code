@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -14,6 +14,8 @@
 namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
+use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
 /**
@@ -22,9 +24,9 @@ use ReflectionException;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class InterfaceReflection extends AbstractReflection
 {
@@ -60,30 +62,60 @@ class InterfaceReflection extends AbstractReflection
             }
         }
 
+        // Shared across attributes and parent interfaces below -- see NamespaceImportResolver.
+        $importResolver = new NamespaceImportResolver();
+
+        // Detect attributes
+        foreach ($reflection->getAttributes() as $reflectionAttribute) {
+            [$attributeReference, $needsImport] = $importResolver->resolve($reflectionAttribute->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
+                if (!$interface->hasNamespace()) {
+                    $interface->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $interface->getNamespace()->addUse($reflectionAttribute->getName());
+            }
+            $interface->addAttribute(AttributeCollector::build($reflectionAttribute, $attributeReference));
+        }
+
         // Detect and set the class doc block
         $interfaceDocBlock = $reflection->getDocComment();
         if (!empty($interfaceDocBlock) && (str_contains($interfaceDocBlock, '/*'))) {
             $interface->setDocblock(DocblockReflection::parse($interfaceDocBlock));
         }
 
-        // Detect parent class
-        $parent = $reflection->getParentClass();
-        if ($parent !== false) {
-            if ($parent->inNamespace()) {
+        // Detect parent interface(s) -- for an interface, getParentClass() always returns false
+        // (that API is for class `extends`); the interfaces it extends are reported via
+        // getInterfaces() instead. That API returns the full transitive closure though (e.g. for
+        // `interface C extends B` where `B extends A`, reflecting C reports both A and B) -- so a
+        // candidate is kept as a *direct* parent only if no other candidate in the same set
+        // already reports it as one of its own interfaces (i.e. it isn't reachable through
+        // another candidate already in the list).
+        $allParents = $reflection->getInterfaces();
+        foreach ($allParents as $candidateName => $candidate) {
+            $isTransitive = false;
+            foreach ($allParents as $otherName => $other) {
+                if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
+                    $isTransitive = true;
+                    break;
+                }
+            }
+            if ($isTransitive) {
+                continue;
+            }
+
+            [$parentReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
+            if ($needsImport) {
                 if (!$interface->hasNamespace()) {
                     $interface->setNamespace(new Generator\NamespaceGenerator());
                 }
-                $interface->getNamespace()->addUse($parent->getNamespaceName() . '\\' . $parent->getShortName());
+                $interface->getNamespace()->addUse($candidateName);
             }
-            $interface->setParent($parent->getShortName());
+            $interface->addParent($parentReference);
         }
 
         // Detect constants
-        $constants = $reflection->getConstants();
-        if (count($constants) > 0) {
-            foreach ($constants as $key => $value) {
-                $interface->addConstant(new Generator\ConstantGenerator($key, gettype($value), $value));
-            }
+        foreach ($reflection->getReflectionConstants() as $constant) {
+            $interface->addConstant(ConstantReflection::parse($constant));
         }
 
         // Detect methods

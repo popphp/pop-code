@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -19,14 +19,14 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class MethodGenerator extends AbstractClassElementGenerator
 {
 
-    use Traits\NameTrait, Traits\DocblockTrait, Traits\AbstractFinalTrait, Traits\FunctionTrait, Traits\BodyTrait;
+    use Traits\AbstractFinalTrait, Traits\FunctionTrait, Traits\BodyTrait;
 
     /**
      * Method body
@@ -52,6 +52,43 @@ class MethodGenerator extends AbstractClassElementGenerator
     }
 
     /**
+     * Add a promoted constructor argument
+     *
+     * @param  string  $name
+     * @param  string  $visibility
+     * @param  mixed   $value
+     * @param  ?string $type
+     * @param  bool    $readonly
+     * @param  array   $attributes
+     * @throws Exception
+     * @return MethodGenerator
+     */
+    public function addPromotedArgument(
+        string $name, string $visibility, mixed $value = new NoValue(), ?string $type = null, bool $readonly = false,
+        array $attributes = []
+    ): MethodGenerator
+    {
+        if ($this->name !== '__construct') {
+            throw new Exception('Error: Promoted arguments are only valid on a constructor.');
+        }
+
+        $visibility = strtolower($visibility);
+        if (!in_array($visibility, self::VALID_VISIBILITIES)) {
+            throw new Exception("Error: The visibility '" . $visibility . "' is not allowed.");
+        }
+
+        if ($readonly && ($type === null)) {
+            throw new Exception('Error: A readonly property must have a type.');
+        }
+
+        $this->addArgument($name, $value, $type, false, false, $attributes);
+        $this->arguments[$name]['promotedVisibility'] = $visibility;
+        $this->arguments[$name]['promotedReadonly']   = $readonly;
+
+        return $this;
+    }
+
+    /**
      * Render method
      *
      * @return string
@@ -64,6 +101,7 @@ class MethodGenerator extends AbstractClassElementGenerator
         $args     = $this->formatArguments();
 
         $this->output = PHP_EOL . (($this->docblock !== null) ? $this->docblock->render() : null);
+        $this->output .= $this->formatAttributes();
         $this->output .= $this->printIndent() . $final . $abstract . $this->visibility .
             $static . ' function ' . $this->name . '(' . $args . ')';
 

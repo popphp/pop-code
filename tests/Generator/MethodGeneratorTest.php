@@ -61,4 +61,70 @@ class MethodGeneratorTest extends TestCase
         $method->setVisibility('bad');
     }
 
+    public function testAddPromotedArgumentRenders()
+    {
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('x', 'protected', 1, 'int');
+        $method->addPromotedArgument('y', 'private', new Generator\NoValue(), 'string', true);
+        $render = (string) $method;
+
+        $this->assertStringContainsString('protected int $x = 1', $render);
+        $this->assertStringContainsString('private readonly string $y', $render);
+    }
+
+    public function testAddPromotedArgumentValidatesVisibility()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('x', 'bad');
+    }
+
+    public function testAddPromotedArgumentRequiresConstructor()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $method = new Generator\MethodGenerator('notConstructor');
+        $method->addPromotedArgument('x', 'private');
+    }
+
+    public function testAddPromotedArgumentReadonlyRequiresType()
+    {
+        $this->expectException('Pop\Code\Generator\Exception');
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('y', 'private', new Generator\NoValue(), null, true);
+    }
+
+    public function testAttributesRenderIndentedBeforeMethod()
+    {
+        $method = new Generator\MethodGenerator('foo');
+        $method->addAttribute(new Generator\AttributeGenerator('Route'));
+        $render = (string) $method;
+
+        $this->assertStringContainsString("    #[Route]\n    public function foo", $render);
+    }
+
+    public function testPromotedParameterAttributeRendersInline()
+    {
+        $method = new Generator\MethodGenerator('__construct');
+        $method->addPromotedArgument('logger', 'private', new Generator\NoValue(), 'LoggerInterface', false, [
+            new Generator\AttributeGenerator('Autowire'),
+        ]);
+        $this->assertStringContainsString('function __construct(#[Autowire] private LoggerInterface $logger)', (string) $method);
+    }
+
+    public function testAddReturnTypePreservesAnExistingReturnDescription()
+    {
+        // setReturn() always resets the description to null when not given one explicitly --
+        // addReturnType() previously called it with only the type, silently discarding any
+        // description a docblock had already set (e.g. one parsed from a real source docblock
+        // before addReturnType() runs, as MethodReflection/FunctionReflection do).
+        $docblock = new Generator\DocblockGenerator();
+        $docblock->setReturn('string', 'The greeting');
+
+        $method = new Generator\MethodGenerator('foo');
+        $method->setDocblock($docblock);
+        $method->addReturnType('string');
+
+        $this->assertStringContainsString('@return string The greeting', (string) $method);
+    }
+
 }

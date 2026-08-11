@@ -4,7 +4,7 @@
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -19,9 +19,9 @@ namespace Pop\Code\Generator;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <dev@noladev.com>
- * @copyright  Copyright (c) 2009-2026 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
  * @license    https://www.popphp.org/license     New BSD License
- * @version    5.0.5
+ * @version    6.0.0
  */
 class NamespaceGenerator extends AbstractGenerator
 {
@@ -51,8 +51,16 @@ class NamespaceGenerator extends AbstractGenerator
      */
     public function render(): string
     {
-        $this->docblock = new DocblockGenerator(null, $this->indent);
-        $this->docblock->addTag('namespace');
+        // Only create a fresh docblock if one hasn't already been set -- render() used to
+        // unconditionally overwrite $this->docblock, silently discarding any docblock a caller
+        // had set via DocblockTrait's setDocblock()/setDesc(), despite this class mixing that
+        // trait in.
+        if ($this->docblock === null) {
+            $this->docblock = new DocblockGenerator(null, $this->indent);
+        }
+        if (!$this->docblock->hasTag('namespace')) {
+            $this->docblock->addTag('namespace');
+        }
 
         $this->output  = $this->docblock->render();
 
