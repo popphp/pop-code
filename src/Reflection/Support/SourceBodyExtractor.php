@@ -33,6 +33,13 @@ class SourceBodyExtractor
 {
 
     /**
+     * Cache of file() results, keyed by file path -- avoids re-reading and re-splitting the
+     * same source file once per method when a class with many methods is reflected.
+     * @var array<string, array<int, string>>
+     */
+    protected static array $fileCache = [];
+
+    /**
      * Extract a method/function's body as source text
      *
      * @param  \ReflectionFunctionAbstract $reflection
@@ -47,7 +54,10 @@ class SourceBodyExtractor
             return null;
         }
 
-        $lines     = file($file);
+        if (!isset(self::$fileCache[$file])) {
+            self::$fileCache[$file] = file($file);
+        }
+        $lines     = self::$fileCache[$file];
         $startLine = $reflection->getStartLine() - 1;
         $endLine   = $reflection->getEndLine() - 1;
 

@@ -16,6 +16,7 @@ namespace Pop\Code\Reflection;
 
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\InterfaceHierarchyResolver;
 use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
@@ -90,20 +91,9 @@ class InterfaceReflection extends AbstractReflection
         // `interface C extends B` where `B extends A`, reflecting C reports both A and B) -- so a
         // candidate is kept as a *direct* parent only if no other candidate in the same set
         // already reports it as one of its own interfaces (i.e. it isn't reachable through
-        // another candidate already in the list).
+        // another candidate already in the list) -- see InterfaceHierarchyResolver.
         $allParents = $reflection->getInterfaces();
-        foreach ($allParents as $candidateName => $candidate) {
-            $isTransitive = false;
-            foreach ($allParents as $otherName => $other) {
-                if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
-                    $isTransitive = true;
-                    break;
-                }
-            }
-            if ($isTransitive) {
-                continue;
-            }
-
+        foreach (InterfaceHierarchyResolver::direct($allParents) as $candidateName => $candidate) {
             [$parentReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
             if ($needsImport) {
                 if (!$interface->hasNamespace()) {

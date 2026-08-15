@@ -127,19 +127,10 @@ class ValueFormatter
         $ary = str_replace('  )', ']', $ary);
         $ary = str_replace('NULL', 'null', $ary);
 
-        $keys    = array_keys($value);
-        $isAssoc = false;
-
-        for ($i = 0; $i < count($keys); $i++) {
-            if ($keys[$i] != $i) {
-                $isAssoc = true;
-            }
-        }
+        $isAssoc = array_keys($value) !== range(0, count($value) - 1);
 
         if (!$isAssoc) {
-            for ($i = 0; $i < count($keys); $i++) {
-                $ary = str_replace($i . ' => ', '', $ary);
-            }
+            $ary = preg_replace('/^(\s*)\d+ => /m', '$1', $ary);
         }
 
         return $ary;

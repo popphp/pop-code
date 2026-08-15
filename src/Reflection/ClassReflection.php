@@ -17,6 +17,7 @@ namespace Pop\Code\Reflection;
 use Pop\Code\Generator;
 use Pop\Code\Reflection\Support\UseStatementParser;
 use Pop\Code\Reflection\Support\AttributeCollector;
+use Pop\Code\Reflection\Support\InterfaceHierarchyResolver;
 use Pop\Code\Reflection\Support\NamespaceImportResolver;
 use ReflectionException;
 
@@ -125,25 +126,12 @@ class ClassReflection extends AbstractReflection
         // extends), not just what this class itself directly declares in `implements`. A
         // candidate is kept only if it isn't already provided by the parent class (inherited, not
         // re-declared) and isn't reachable via another candidate already in this class's own set
-        // (implied by that candidate's own extends, not itself a distinct direct implements).
-        $interfaces            = $reflection->getInterfaces();
-        $parentInterfaceNames  = ($parent !== false) ? $parent->getInterfaceNames() : [];
-        $interfacesAry         = [];
-        foreach ($interfaces as $candidateName => $interface) {
-            if (in_array($candidateName, $parentInterfaceNames, true)) {
-                continue;
-            }
-            $isTransitive = false;
-            foreach ($interfaces as $otherName => $other) {
-                if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
-                    $isTransitive = true;
-                    break;
-                }
-            }
-            if ($isTransitive) {
-                continue;
-            }
-
+        // (implied by that candidate's own extends, not itself a distinct direct implements) --
+        // see InterfaceHierarchyResolver.
+        $interfaces           = $reflection->getInterfaces();
+        $parentInterfaceNames = ($parent !== false) ? $parent->getInterfaceNames() : [];
+        $interfacesAry        = [];
+        foreach (InterfaceHierarchyResolver::direct($interfaces, $parentInterfaceNames) as $candidateName => $interface) {
             [$interfaceReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
             if ($needsImport) {
                 if (!$class->hasNamespace()) {

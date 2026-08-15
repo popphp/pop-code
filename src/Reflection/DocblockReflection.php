@@ -43,15 +43,12 @@ class DocblockReflection extends AbstractReflection
             throw new Exception('The docblock is not in the correct format.');
         }
 
-        $desc          = null;
-        $formattedDesc = null;
-        $indent        = null;
-        $tags          = null;
+        $atPos = strpos($code, '@');
 
         // Parse the description, if any. A docblock with no @-tags at all (just a summary line,
         // as is common on enum cases) still has a description to extract, so this must not be
         // gated on the presence of '@' — only the *extent* of the description text depends on it.
-        $desc    = str_contains($code, '@') ? substr($code, 0, strpos($code, '@')) : $code;
+        $desc    = ($atPos !== false) ? substr($code, 0, $atPos) : $code;
         $desc    = str_replace('/*', '', $desc);
         $desc    = str_replace('*/', '', $desc);
         $desc    = str_replace(PHP_EOL . ' * ', ' ', $desc);
@@ -69,78 +66,111 @@ class DocblockReflection extends AbstractReflection
         }
 
         // Get the indentation, if any, and create docblock object
-        $indent      = (empty($forceIndent)) ? strlen(substr($code, 0, strpos($code, '/'))) : $forceIndent;
+        $indent   = (empty($forceIndent)) ? strlen(substr($code, 0, strpos($code, '/'))) : $forceIndent;
         $docblock = new DocblockGenerator($formattedDesc, $indent);
 
         // Get the tags, if any
-        if (str_contains($code, '@')) {
-            $tags    = substr($code, strpos($code, '@'));
+        if ($atPos !== false) {
+            $tags    = substr($code, $atPos);
             $tags    = substr($tags, 0, strpos($tags, '*/'));
             $tags    = str_replace('*', '', $tags);
             $tagsAry = explode("\n", $tags);
 
-            foreach ($tagsAry as $key => $value) {
+            foreach ($tagsAry as $value) {
                 $value = trim(str_replace('@', '', $value));
-                // Param tags
                 if (stripos($value, 'param') !== false) {
-                    $paramTag  = trim(str_replace('param', '', $value));
-                    $paramSpacePos = strpos($paramTag, ' ');
-                    $paramType = trim($paramSpacePos !== false ? substr($paramTag, 0, $paramSpacePos) : $paramTag);
-                    $varName   = null;
-                    $paramDesc = null;
-                    if ($paramSpacePos !== false) {
-                        $varName = trim(substr($paramTag, $paramSpacePos));
-                        if (str_contains($varName, ' ')) {
-                            // $varName previously kept the trailing description text attached
-                            // (only $paramDesc was extracted, never trimmed back off of
-                            // $varName itself) -- e.g. "@param string $name The name to use"
-                            // stored 'var' as "$name The name to use" instead of just "$name",
-                            // duplicating the description once concatenated at render time, and
-                            // also breaking the stale-@param-on-re-add dedup, which matches on
-                            // the variable name exactly.
-                            $spacePos  = strpos($varName, ' ');
-                            $paramDesc = trim(substr($varName, $spacePos));
-                            $varName   = trim(substr($varName, 0, $spacePos));
-                        }
-                    } else if (str_starts_with($paramTag, '$')) {
-                        // A bare "@param $var" with no type at all -- $paramTag is the variable
-                        // name, not a type. Without this check it fell into the branch below and
-                        // was stored as the type instead, leaving 'var' unset -- which meant a
-                        // later addArgument() call for the same parameter (which correctly
-                        // computes the real variable name) couldn't recognize this as the same
-                        // param to replace, and appended a second @param line instead.
-                        $paramType = null;
-                        $varName   = $paramTag;
-                    } else {
-                        $paramType = $paramTag;
-                    }
-                    $docblock->addParam($paramType, $varName, $paramDesc);
-                // Else, return tags
+                    self::parseParamTag($docblock, $value);
                 } else if (stripos($value, 'return') !== false) {
-                    $returnTag = trim(str_replace('return', '', $value));
-                    if (str_contains($returnTag, ' ')) {
-                        $returnType = substr($returnTag, 0, strpos($returnTag, ' '));
-                        $returnDesc = trim(str_replace($returnType, '', $returnTag));
-                    } else {
-                        $returnType = $returnTag;
-                        $returnDesc = null;
-                    }
-                    $docblock->setReturn($returnType, $returnDesc);
-                // Else, all other tags
+                    self::parseReturnTag($docblock, $value);
                 } else {
-                    $tagSpacePos = strpos($value, ' ');
-                    $tagName = trim($tagSpacePos !== false ? substr($value, 0, $tagSpacePos) : $value);
-                    $tagDesc = trim(str_replace($tagName, '', $value));
-                    if (!empty($tagName) && !empty($tagDesc)) {
-                        $docblock->addTag($tagName, $tagDesc);
-                    } else {
-                        unset($tagsAry[$key]);
-                    }
+                    self::parseGenericTag($docblock, $value);
                 }
             }
         }
 
         return $docblock;
+    }
+
+    /**
+     * Parse a single "param" tag line and add it to the docblock
+     *
+     * @param  DocblockGenerator $docblock
+     * @param  string            $value
+     * @return void
+     */
+    private static function parseParamTag(DocblockGenerator $docblock, string $value): void
+    {
+        $paramTag      = trim(str_replace('param', '', $value));
+        $paramSpacePos = strpos($paramTag, ' ');
+        $paramType     = trim($paramSpacePos !== false ? substr($paramTag, 0, $paramSpacePos) : $paramTag);
+        $varName       = null;
+        $paramDesc     = null;
+
+        if ($paramSpacePos !== false) {
+            $varName = trim(substr($paramTag, $paramSpacePos));
+            if (str_contains($varName, ' ')) {
+                // $varName previously kept the trailing description text attached (only
+                // $paramDesc was extracted, never trimmed back off of $varName itself) -- e.g.
+                // "@param string $name The name to use" stored 'var' as "$name The name to use"
+                // instead of just "$name", duplicating the description once concatenated at
+                // render time, and also breaking the stale-@param-on-re-add dedup, which matches
+                // on the variable name exactly.
+                $spacePos  = strpos($varName, ' ');
+                $paramDesc = trim(substr($varName, $spacePos));
+                $varName   = trim(substr($varName, 0, $spacePos));
+            }
+        } else if (str_starts_with($paramTag, '$')) {
+            // A bare "@param $var" with no type at all -- $paramTag is the variable name, not a
+            // type. Without this check it fell into the branch below and was stored as the type
+            // instead, leaving 'var' unset -- which meant a later addArgument() call for the same
+            // parameter (which correctly computes the real variable name) couldn't recognize this
+            // as the same param to replace, and appended a second @param line instead.
+            $paramType = null;
+            $varName   = $paramTag;
+        } else {
+            $paramType = $paramTag;
+        }
+
+        $docblock->addParam($paramType, $varName, $paramDesc);
+    }
+
+    /**
+     * Parse a single "return" tag line and set it on the docblock
+     *
+     * @param  DocblockGenerator $docblock
+     * @param  string            $value
+     * @return void
+     */
+    private static function parseReturnTag(DocblockGenerator $docblock, string $value): void
+    {
+        $returnTag = trim(str_replace('return', '', $value));
+        if (str_contains($returnTag, ' ')) {
+            $returnType = substr($returnTag, 0, strpos($returnTag, ' '));
+            $returnDesc = trim(str_replace($returnType, '', $returnTag));
+        } else {
+            $returnType = $returnTag;
+            $returnDesc = null;
+        }
+
+        $docblock->setReturn($returnType, $returnDesc);
+    }
+
+    /**
+     * Parse any other tag line and add it to the docblock
+     *
+     * @param  DocblockGenerator $docblock
+     * @param  string            $value
+     * @return void
+     */
+    private static function parseGenericTag(DocblockGenerator $docblock, string $value): void
+    {
+        $tagSpacePos = strpos($value, ' ');
+        $tagName     = trim($tagSpacePos !== false ? substr($value, 0, $tagSpacePos) : $value);
+        $tagDesc     = trim(str_replace($tagName, '', $value));
+
+        if (!empty($tagName) && !empty($tagDesc)) {
+            $docblock->addTag($tagName, $tagDesc);
+        }
     }
 
 }

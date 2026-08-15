@@ -352,8 +352,8 @@ class DocblockGenerator extends AbstractGenerator
         }
 
         // Format param tags
+        $paramLength = $this->getParamLength();
         foreach ($this->tags['param'] as $param) {
-            $paramLength = $this->getParamLength();
             $tags .= $this->printIndent() . ' * @param';
 
             if (!empty($param['type'])) {
