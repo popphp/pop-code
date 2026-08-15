@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -109,7 +110,9 @@ class TypeNormalizer
     {
         $names = [];
         foreach ($type->getTypes() as $memberType) {
-            $names[] = $memberType->getName();
+            if ($memberType instanceof \ReflectionNamedType) {
+                $names[] = $memberType->getName();
+            }
         }
         return implode('&', $names);
     }

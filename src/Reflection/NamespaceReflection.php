@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -41,7 +42,7 @@ class NamespaceReflection extends AbstractReflection
         if ($name === null) {
             $matches = [];
             preg_match_all('/^namespace(.*);$/m', $code, $matches);
-            if (isset($matches[1]) && isset($matches[1][0])) {
+            if (isset($matches[1][0])) {
                 $name = $matches[1][0];
             }
         }
@@ -55,7 +56,7 @@ class NamespaceReflection extends AbstractReflection
 
         preg_match_all('/^use(.*);$/m', $code, $matches);
 
-        if (isset($matches[1]) && isset($matches[1][0])) {
+        if (isset($matches[1][0])) {
             foreach ($matches[1] as $match) {
                 $match = trim($match);
                 if (str_contains($match, ' as ')) {

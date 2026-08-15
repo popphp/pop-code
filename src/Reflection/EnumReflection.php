@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -87,24 +88,22 @@ class EnumReflection extends AbstractReflection
         }
 
         // Detect implemented interfaces, excluding the implicitly-added UnitEnum/BackedEnum
-        $interfaces = $reflection->getInterfaces();
-        if ($interfaces !== false) {
-            $interfacesAry = [];
-            foreach ($interfaces as $interface) {
-                if (in_array($interface->getName(), ['UnitEnum', 'BackedEnum'], true)) {
-                    continue;
-                }
-                [$interfaceReference, $needsImport] = $importResolver->resolve($interface->getName(), $reflection->getNamespaceName());
-                if ($needsImport) {
-                    if (!$enum->hasNamespace()) {
-                        $enum->setNamespace(new Generator\NamespaceGenerator());
-                    }
-                    $enum->getNamespace()->addUse($interface->getName());
-                }
-                $interfacesAry[] = $interfaceReference;
+        $interfaces    = $reflection->getInterfaces();
+        $interfacesAry = [];
+        foreach ($interfaces as $interface) {
+            if (in_array($interface->getName(), ['UnitEnum', 'BackedEnum'], true)) {
+                continue;
             }
-            $enum->addInterfaces($interfacesAry);
+            [$interfaceReference, $needsImport] = $importResolver->resolve($interface->getName(), $reflection->getNamespaceName());
+            if ($needsImport) {
+                if (!$enum->hasNamespace()) {
+                    $enum->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $enum->getNamespace()->addUse($interface->getName());
+            }
+            $interfacesAry[] = $interfaceReference;
         }
+        $enum->addInterfaces($interfacesAry);
 
         // Detect used traits
         if ($fileContents !== null) {

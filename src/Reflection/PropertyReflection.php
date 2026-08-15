@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -53,7 +54,7 @@ class PropertyReflection extends AbstractReflection
         $type     = self::resolveType($code);
 
         $doc = $code->getDocComment();
-        if (($doc !== null) && (str_contains($doc, '/*'))) {
+        if (($doc !== false) && (str_contains($doc, '/*'))) {
             $docblock = DocblockReflection::parse($doc);
             $docblock->setIndent(4);
             $desc = $docblock->getDesc();

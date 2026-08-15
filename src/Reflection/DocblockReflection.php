@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -83,11 +84,12 @@ class DocblockReflection extends AbstractReflection
                 // Param tags
                 if (stripos($value, 'param') !== false) {
                     $paramTag  = trim(str_replace('param', '', $value));
-                    $paramType = trim(substr($paramTag, 0, strpos($paramTag, ' ')));
+                    $paramSpacePos = strpos($paramTag, ' ');
+                    $paramType = trim($paramSpacePos !== false ? substr($paramTag, 0, $paramSpacePos) : $paramTag);
                     $varName   = null;
                     $paramDesc = null;
-                    if (str_contains($paramTag, ' ')) {
-                        $varName = trim(substr($paramTag, strpos($paramTag, ' ')));
+                    if ($paramSpacePos !== false) {
+                        $varName = trim(substr($paramTag, $paramSpacePos));
                         if (str_contains($varName, ' ')) {
                             // $varName previously kept the trailing description text attached
                             // (only $paramDesc was extracted, never trimmed back off of
@@ -126,7 +128,8 @@ class DocblockReflection extends AbstractReflection
                     $docblock->setReturn($returnType, $returnDesc);
                 // Else, all other tags
                 } else {
-                    $tagName = trim(substr($value, 0, strpos($value, ' ')));
+                    $tagSpacePos = strpos($value, ' ');
+                    $tagName = trim($tagSpacePos !== false ? substr($value, 0, $tagSpacePos) : $value);
                     $tagDesc = trim(str_replace($tagName, '', $value));
                     if (!empty($tagName) && !empty($tagDesc)) {
                         $docblock->addTag($tagName, $tagDesc);

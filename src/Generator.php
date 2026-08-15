@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -277,11 +278,13 @@ class Generator extends Generator\AbstractGenerator
             // original values immediately after rendering -- render() must have no side effects
             // beyond building $this->output, or calling it twice (e.g. `echo $generator;` then
             // `$generator->writeToFile(...)`) would compound the indent further on each call.
-            $usesBodyTrait = in_array('Pop\Code\Generator\Traits\BodyTrait', class_uses($code));
+            $usesBodyTrait          = in_array('Pop\Code\Generator\Traits\BodyTrait', class_uses($code));
+            $hasDocblock            = $code->hasDocblock();
+            $originalDocblockIndent = null;
             if ($currentNamespace !== null) {
                 $originalIndent = $code->getIndent();
                 $code->setIndent($originalIndent + $this->indent);
-                if ($code->hasDocblock()) {
+                if ($hasDocblock) {
                     $originalDocblockIndent = $code->getDocblock()->getIndent();
                     $code->getDocblock()->setIndent($originalDocblockIndent + $this->indent);
                 }
@@ -294,7 +297,7 @@ class Generator extends Generator\AbstractGenerator
 
             if ($currentNamespace !== null) {
                 $code->setIndent($originalIndent);
-                if ($code->hasDocblock()) {
+                if ($hasDocblock && $originalDocblockIndent !== null) {
                     $code->getDocblock()->setIndent($originalDocblockIndent);
                 }
                 if ($usesBodyTrait) {

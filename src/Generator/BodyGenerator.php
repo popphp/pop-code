@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -48,7 +49,7 @@ class BodyGenerator extends AbstractGenerator
 
         $body    = preg_replace("/^([ ]*)(.*)/m", $replacePattern, $body);
         $bodyAry = preg_split("/\r\n|\n|\r/", $body);
-        $bodyAry = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [null, ']$1', ' => ['], $bodyAry);
+        $bodyAry = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], ['', ']$1', ' => ['], $bodyAry);
         $body    = str_replace('NULL', 'null', implode(PHP_EOL, array_filter(["["] + $bodyAry)));
 
         $this->setBody('return ' . $body . ';', 0);

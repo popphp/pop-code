@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -52,7 +53,7 @@ class MethodReflection extends AbstractReflection
 
         $docblock = null;
         $doc      = $code->getDocComment();
-        if (($doc !== null) && (str_contains($doc, '/*'))) {
+        if (($doc !== false) && (str_contains($doc, '/*'))) {
             $docblock = DocblockReflection::parse($doc);
             $docblock->setIndent(4);
         }

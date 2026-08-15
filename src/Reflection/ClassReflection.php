@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -125,36 +126,34 @@ class ClassReflection extends AbstractReflection
         // candidate is kept only if it isn't already provided by the parent class (inherited, not
         // re-declared) and isn't reachable via another candidate already in this class's own set
         // (implied by that candidate's own extends, not itself a distinct direct implements).
-        $interfaces = $reflection->getInterfaces();
-        if ($interfaces !== false) {
-            $parentInterfaceNames = ($parent !== false) ? $parent->getInterfaceNames() : [];
-            $interfacesAry        = [];
-            foreach ($interfaces as $candidateName => $interface) {
-                if (in_array($candidateName, $parentInterfaceNames, true)) {
-                    continue;
-                }
-                $isTransitive = false;
-                foreach ($interfaces as $otherName => $other) {
-                    if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
-                        $isTransitive = true;
-                        break;
-                    }
-                }
-                if ($isTransitive) {
-                    continue;
-                }
-
-                [$interfaceReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
-                if ($needsImport) {
-                    if (!$class->hasNamespace()) {
-                        $class->setNamespace(new Generator\NamespaceGenerator());
-                    }
-                    $class->getNamespace()->addUse($candidateName);
-                }
-                $interfacesAry[] = $interfaceReference;
+        $interfaces            = $reflection->getInterfaces();
+        $parentInterfaceNames  = ($parent !== false) ? $parent->getInterfaceNames() : [];
+        $interfacesAry         = [];
+        foreach ($interfaces as $candidateName => $interface) {
+            if (in_array($candidateName, $parentInterfaceNames, true)) {
+                continue;
             }
-            $class->addInterfaces($interfacesAry);
+            $isTransitive = false;
+            foreach ($interfaces as $otherName => $other) {
+                if (($otherName !== $candidateName) && in_array($candidateName, $other->getInterfaceNames(), true)) {
+                    $isTransitive = true;
+                    break;
+                }
+            }
+            if ($isTransitive) {
+                continue;
+            }
+
+            [$interfaceReference, $needsImport] = $importResolver->resolve($candidateName, $reflection->getNamespaceName());
+            if ($needsImport) {
+                if (!$class->hasNamespace()) {
+                    $class->setNamespace(new Generator\NamespaceGenerator());
+                }
+                $class->getNamespace()->addUse($candidateName);
+            }
+            $interfacesAry[] = $interfaceReference;
         }
+        $class->addInterfaces($interfacesAry);
 
         // Detect used traits
         if ($fileContents !== null) {

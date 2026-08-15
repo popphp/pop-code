@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Pop PHP Framework (https://www.popphp.org/)
  *
@@ -43,18 +44,16 @@ class UseStatementParser
 
         preg_match_all('/[ ]+use(.*);$/m', $sourceCode, $matches);
 
-        if (isset($matches[1])) {
-            foreach ($matches[1] as $u) {
-                $useAry = array_map('trim', explode(',', trim($u)));
-                foreach ($useAry as $useValue) {
-                    if (strpos($useValue, ' as ') !== false) {
-                        [$use, $as] = explode(' as ', $useValue);
-                    } else {
-                        $use = $useValue;
-                        $as  = null;
-                    }
-                    $result[trim($use)] = ($as !== null) ? trim($as) : null;
+        foreach ($matches[1] as $u) {
+            $useAry = array_map('trim', explode(',', trim($u)));
+            foreach ($useAry as $useValue) {
+                if (strpos($useValue, ' as ') !== false) {
+                    [$use, $as] = explode(' as ', $useValue);
+                } else {
+                    $use = $useValue;
+                    $as  = null;
                 }
+                $result[trim($use)] = ($as !== null) ? trim($as) : null;
             }
         }
 
