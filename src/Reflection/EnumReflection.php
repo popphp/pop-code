@@ -5,7 +5,7 @@ declare(strict_types=1);
  *
  * @link       https://github.com/popphp/popphp-framework
  * @author     Nick Sagona, III <nick@popphp.org>
- * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2026 Nick Sagona, III
  * @license    https://www.popphp.org/license     New BSD License
  */
 
@@ -25,7 +25,7 @@ use Pop\Code\Reflection\Support\NamespaceImportResolver;
  * @category   Pop
  * @package    Pop\Code
  * @author     Nick Sagona, III <nick@popphp.org>
- * @copyright  Copyright (c) 2009-2027 NOLA Interactive, LLC.
+ * @copyright  Copyright (c) 2009-2026 Nick Sagona, III
  * @license    https://www.popphp.org/license     New BSD License
  * @version    6.0.0
  */
