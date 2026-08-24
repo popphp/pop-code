@@ -142,7 +142,7 @@ class PropertyGenerator extends AbstractClassElementGenerator
      */
     public function hasValue(): bool
     {
-        return ($this->value !== null);
+        return ($this->value !== null) && !($this->value instanceof NoValue);
     }
 
     /**
@@ -232,7 +232,9 @@ class PropertyGenerator extends AbstractClassElementGenerator
         $this->output .= $this->printIndent() . $this->visibility . (($this->static) ? ' static' : '')
             . (($this->readonly && !$this->suppressReadonlyKeyword) ? ' readonly' : '') . ' ' . $type . '$' . $this->name;
 
-        if ($this->readonly) {
+        if ($this->readonly || ($this->value instanceof NoValue)) {
+            // NoValue means "no default at all" (an uninitialized typed property), distinct from
+            // an explicit null default -- mirrors how FunctionTrait treats a NoValue argument.
             $this->output .= ';';
         } else {
             $this->output .= ' = ' . ValueFormatter::format($this->value, $this->type, $this->printIndent()) . ';';

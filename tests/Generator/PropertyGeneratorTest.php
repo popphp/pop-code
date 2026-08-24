@@ -102,6 +102,19 @@ class PropertyGeneratorTest extends TestCase
         $this->assertStringContainsString('public string $baz = self::FOO;', (string) $property);
     }
 
+    public function testNoValueRendersUninitializedTypedPropertyWithNoDefault()
+    {
+        // Previously threw "Cannot format an object value of type ...NoValue" -- NoValue is the
+        // sentinel FunctionTrait/MethodGenerator use for "no default at all" (distinct from an
+        // explicit null default), but PropertyGenerator had no matching special case for it.
+        $property = new Generator\PropertyGenerator('foo', 'string', new Generator\NoValue());
+        $render   = (string) $property;
+
+        $this->assertStringContainsString('public string $foo;', $render);
+        $this->assertStringNotContainsString('= ', $render);
+        $this->assertFalse($property->hasValue());
+    }
+
     public function testIntersectionTypedPropertyWithNoValueWrapsInParensBeforeNull()
     {
         // Previously an intersection type got `|null` appended directly (`Countable&Traversable|null`),
